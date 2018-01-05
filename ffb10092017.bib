@@ -1,0 +1,735 @@
+@Inproceedings{AlekseenkoJosyula2012,
+ title = {Deterministic solution of the \uppercase{B}oltzmann equation using a discontinuous \uppercase{G}alerkin velocity discretization},
+ author= {Alekseenko, A. and Josyula, E.},
+ pages = {8},
+ booktitle ={28th International Symposium on Rarefied Gas Dynamics, 9-13 July 2012, Zaragoza, Spain},
+ editor = {},
+ publisher ={American Institute of Physics},
+ address ={},
+ year    =   {2012},
+ series  ={AIP Conference Proceedings},
+ number  = {},
+}
+
+@article{Tcher2012,
+year={2012},
+issn={0965-5425},
+journal={Computational Mathematics and Mathematical Physics},
+volume={52},
+number={2},
+doi={10.1134/S0965542512020054},
+title={Method for solving the Boltzmann kinetic equation for polyatomic gases},
+url={http://dx.doi.org/10.1134/S0965542512020054},
+publisher={SP MAIK Nauka/Interperiodica},
+keywords={generalized Boltzmann kinetic equation; polyatomic gases; vibrational and rotational energy levels; rarefied gas; projection method},
+author={Tcheremissine, F.G.},
+pages={252-268},
+language={English}
+}
+
+@article{AlekseenkoNguyenWood2015,
+title = "A Deterministic-Stochastic Method for Computing the Boltzmann Collision Integral in $\mathcal{O}(MN)$ Operations",
+journal = "submitted to Kinetic and Related Models",
+volume = "",
+number = "",
+pages = "30p",
+year = "2015",
+note = "",
+issn = "",
+doi = "",
+url = "",
+author = "A. Alekseenko and T. Nguyen and A. Wood",
+keywords = "Boltzmann collision operator",
+keywords = "Stochastic solution",
+keywords = "Discontinuous Galerkin methods ",
+abstract = "Abstract We developed and implemented a numerical algorithm for evaluating the Boltzmann collision operator
+with $O(MN)$ operations, where $N$ is the number of the discrete velocity points and $M<N$. The algorithm 
+uses nodal-discontinuous Galerkin discretizations of the collision operator on uniform grids and a bilinear 
+convolution form of the Galerkin projection of the collision operator. Efficiency of the algorithms is achieved 
+by applying singular value decomposition compression of the discrete collision kernel and by approximating the kinetic 
+solution by a sum of Maxwellian streams using a stochastic likelihood maximization algorithm. Accuracy of the 
+method is established on solutions to the problem of spatially 
+homogeneous relaxation. "
+}
+
+@article{KlossTcherShuvalov2010,
+year={2010},
+issn={0965-5425},
+journal={Computational Mathematics and Mathematical Physics},
+volume={50},
+number={6},
+doi={10.1134/S096554251006014X},
+title={Solution of the Boltzmann equation for unsteady flows with shock waves in narrow channels},
+url={http://dx.doi.org/10.1134/S096554251006014X},
+publisher={SP MAIK Nauka/Interperiodica},
+keywords={Boltzmann kinetic equation; unsteady flows with shock waves in narrow channels; projection method},
+author={Kloss, Yu.Yu. and Tcheremissine, F.G. and Shuvalov, P.V.},
+pages={1093-1103},
+language={English}
+}
+
+@Inproceedings{smile2006,
+ title = {\uppercase{SMILE} system for 2\uppercase{D}/3\uppercase{D} \uppercase{DSMC} computations},
+ author= {M. Ivanov and A. Kashkovsky and S. Gimelshein and G. Markelov and A. Alexeenko and Y. Bondar and G. Zhukova and S. Nikiforov},
+ pages = {8},
+ booktitle = {25th International Symposium on Rarefied Gas Dynamics, 21--28 Jukly 2006, St. Petersburg, Russia},
+ editor = {},
+ publisher = {Publishing House of the Siberian Branch of the Russian Academy of Sciences},
+ address = {Novosibirsk, Russia},
+ year    = {2007},
+ series  = {AIP Conference Proceedings},
+ number  = {},
+}
+
+@article{Munafo2014152,
+title = "A spectral-Lagrangian Boltzmann solver for a multi-energy level gas",
+journal = "Journal of Computational Physics ",
+volume = "264",
+number = "",
+pages = "152 - 176",
+year = "2014",
+note = "",
+issn = "0021-9991",
+doi = "http://dx.doi.org/10.1016/j.jcp.2014.01.036",
+url = "http://www.sciencedirect.com/science/article/pii/S0021999114000631",
+author = "Alessandro Munafò and Jeffrey R. Haack and Irene M. Gamba and Thierry E. Magin",
+keywords = "Boltzmann equation",
+keywords = "Fourier transform",
+keywords = "Spectral methods",
+keywords = "Lagrange multipliers",
+keywords = "Rarefied gas-dynamics "
+}
+
+@article{Wu201327,
+title = "Deterministic numerical solutions of the Boltzmann equation using the fast spectral method ",
+journal = "Journal of Computational Physics ",
+volume = "250",
+number = "",
+pages = "27 - 52",
+year = "2013",
+note = "",
+issn = "0021-9991",
+doi = "http://dx.doi.org/10.1016/j.jcp.2013.05.003",
+url = "http://www.sciencedirect.com/science/article/pii/S0021999113003276",
+author = "Lei Wu and Craig White and Thomas J. Scanlon and Jason M. Reese and Yonghao Zhang",
+keywords = "Boltzmann equation",
+keywords = "Lennard–Jones potential",
+keywords = "Sutherland’s formula of shear viscosity",
+keywords = "Fourier spectral method",
+keywords = "Rarefied gas dynamics ",
+abstract = "Abstract The Boltzmann equation describes the dynamics of rarefied gas flows, but the multidimensional nature of its collision operator poses a real challenge for its numerical solution. In this paper, the fast spectral method [36], originally developed by Mouhot and Pareschi for the numerical approximation of the collision operator, is extended to deal with other collision kernels, such as those corresponding to the soft, Lennard–Jones, and rigid attracting potentials. The accuracy of the fast spectral method is checked by comparing our numerical solutions of the space-homogeneous Boltzmann equation with the exact Bobylev–Krook–Wu solutions for a gas of Maxwell molecules. It is found that the accuracy is improved by replacing the trapezoidal rule with Gauss–Legendre quadrature in the calculation of the kernel mode, and the conservation of momentum and energy are ensured by the Lagrangian multiplier method without loss of spectral accuracy. The relax-to-equilibrium processes of different collision kernels with the same value of shear viscosity are then compared; the numerical results indicate that different forms of the collision kernels can be used as long as the shear viscosity (not only the value, but also its temperature dependence) is recovered. An iteration scheme is employed to obtain stationary solutions of the space-inhomogeneous Boltzmann equation, where the numerical errors decay exponentially. Four classical benchmarking problems are investigated: the normal shock wave, and the planar Fourier/Couette/force-driven Poiseuille flows. For normal shock waves, our numerical results are compared with a finite difference solution of the Boltzmann equation for hard sphere molecules, experimental data, and molecular dynamics simulation of argon using the realistic Lennard–Jones potential. For planar Fourier/Couette/force-driven Poiseuille flows, our results are compared with the direct simulation Monte Carlo method. Excellent agreements are observed in all test cases, demonstrating the merit of the fast spectral method as a computationally efficient method for rarefied gas dynamics. "
+}
+
+@article{Wu2015602,
+title = "A fast spectral method for the Boltzmann equation for monatomic gas mixtures ",
+journal = "Journal of Computational Physics ",
+volume = "298",
+number = "",
+pages = "602 - 621",
+year = "2015",
+note = "",
+issn = "0021-9991",
+doi = "http://dx.doi.org/10.1016/j.jcp.2015.06.019",
+url = "http://www.sciencedirect.com/science/article/pii/S0021999115004167",
+author = "Lei Wu and Jun Zhang and Jason M. Reese and Yonghao Zhang",
+keywords = "Boltzmann equation",
+keywords = "Gas mixtures",
+keywords = "Fourier spectral method",
+keywords = "Rarefied gas dynamics ",
+abstract = "Abstract Although the fast spectral method has been established for solving the Boltzmann equation for single-species monatomic gases, its extension to gas mixtures is not easy because of the non-unitary mass ratio between the different molecular species. The conventional spectral method can solve the Boltzmann collision operator for binary gas mixtures but with a computational cost of the order m r 3 N 6 , where m r is the mass ratio of the heavier to the lighter species, and N is the number of frequency nodes in each frequency direction. In this paper, we propose a fast spectral method for binary mixtures of monatomic gases that has a computational cost O ( m r M 2 N 4 log ⁡ N ) , where M 2 is the number of discrete solid angles. The algorithm is validated by comparing numerical results with analytical Bobylev–Krook–Wu solutions for the spatially-homogeneous relaxation problem, for m r up to 36. In spatially-inhomogeneous problems, such as normal shock waves and planar Fourier/Couette flows, our results compare well with those of both the numerical kernel and the direct simulation Monte Carlo methods. As an application, a two-dimensional temperature-driven flow is investigated, for which other numerical methods find it difficult to resolve the flow field at large Knudsen numbers. The fast spectral method is accurate and effective in simulating highly rarefied gas flows, i.e. it captures the discontinuities and fine structures in the velocity distribution functions. "
+}
+
+@Inproceedings{StephaniVargteesGoldsteina2012,
+title = "Generation of a Hybrid DSMC/CFD Solution for Gas Mixtures with Internal Degrees of Freedom",
+journal = "50th AIAA Aerospace Sciences Meeting including the New Horizons Forum and Aerospace Exposition",
+volume = "",
+series = "Aerospace Sciences Meetings",
+pages = "",
+year = "2012",
+note = "",
+issn = "",
+doi = "10.2514/6.2012-648",
+url = "http://dx.doi.org/10.2514/6.2012-648",
+publisher = "American Institute of Aeronautics and Astronautics",
+author = "Kelly Stephani and David Goldstein and Philip Varghese",
+abstract = "A consistent approach for generating a hybrid DSMC/CFD solution is presented for re-entry applications involving neutral gas mixtures with internal energy. A quality hybrid solution requires consistency in the thermo-chemical models employed by the particle (DSMC) and continuum (CFD) solvers, as well as an appropriate boundary condition for the transfer of flux information across the hybrid interface. The first half of this work focuses on achieving consistency in the transport properties obtained by particle and continuum solvers, including species diffusion, viscosity and translational and internal thermal conductivities for a five-species air mixture. In the second portion, a new approach for the generation of particles at a hybrid interface is presented for gas mixtures with internal degrees of freedom. Particle thermal velocities and internal energies are prescribed from the appropriate non-equilibrium (perturbed) distribution, in which diffusion, shear stress and heat flux terms are included in the Generalized Chapman-Enskog formulation of the perturbation. The significance of the contributions from these terms on the perturbation are examined at a hybrid interface within non-equilibrium boundary layer flow, as well as within the breakdown region near a normal shock, in a five-species air gas mixture. The validity of the Chapman-Enskog perturbation at each of these hybrid interfaces is assessed by comparison with the Generalized Chapman-Enskog perturbations."
+}
+
+@article{burt2012novel,
+  title={Novel cartesian implementation of the direct simulation Monte Carlo method},
+  author={Burt, Jonathan M and Josyula, Eswar and Boyd, Iain D},
+  journal={Journal of thermophysics and heat transfer},
+  volume={26},
+  number={2},
+  pages={258--270},
+  year={2012}
+}
+
+@article{AlekseenkoJosyula2012a,
+title = "Deterministic solution of the spatially homogeneous Boltzmann equation using discontinuous Galerkin discretizations in the velocity space ",
+journal = "Journal of Computational Physics ",
+volume = "272",
+number = "0",
+pages = "170 - 188",
+year = "2014",
+note = "",
+issn = "0021-9991",
+doi = "http://dx.doi.org/10.1016/j.jcp.2014.03.031",
+url = "http://www.sciencedirect.com/science/article/pii/S0021999114002186",
+author = "A. Alekseenko and E. Josyula",
+keywords = "Boltzmann collision operator",
+keywords = "Deterministic solution",
+keywords = "Discontinuous Galerkin methods ",
+abstract = "Abstract We present a new deterministic approach for the solution of the spatially homogeneous Boltzmann kinetic equation based on nodal discontinuous Galerkin (DG) discretizations in the velocity space. In the new approach the collision operator has the form of a bilinear operator with a pre-computed kernel; its evaluation requires O ( n 5 ) operations at every point of the phase space where n is the number of degrees of freedom in one velocity dimension. The method is generalized to any molecular potential. Results of numerical simulations are presented for the problem of spatially homogeneous relaxation for the hard spheres potential. Comparison with the method of Direct Simulation Monte Carlo showed excellent agreement. "
+}
+
+@article{AlekseenkoEuler2015,
+year={2015},
+issn={0935-1175},
+journal={Continuum Mechanics and Thermodynamics},
+doi={10.1007/s00161-014-0407-0},
+title={A Bhatnagar–Gross–Krook kinetic model with velocity-dependent collision frequency and corrected relaxation of moments},
+url={http://dx.doi.org/10.1007/s00161-014-0407-0},
+publisher={Springer Berlin Heidelberg},
+keywords={BGK model equation; Velocity-dependent collision frequency; Boltzmann equation},
+author={Alekseenko, Alexander and Euler, Craig},
+pages={1-13},
+language={English},
+}
+
+
+@ARTICLE{Kalman96,
+    author = {Dan Kalman},
+    title = {A singularly valuable decomposition: The SVD of a matrix},
+    journal = {College Math Journal},
+    year = {1996},
+    volume = {27},
+    pages = {2--23}
+}
+
+@BOOK{LAPACK,
+      AUTHOR = {Anderson, E. and Bai, Z. and Bischof, C. and
+                Blackford, S. and Demmel, J. and Dongarra, J. and
+                Du Croz, J. and Greenbaum, A. and Hammarling, S. and
+                McKenney, A. and Sorensen, D.},
+      TITLE = {{LAPACK} Users' Guide},
+      EDITION = {Third},
+      PUBLISHER = {Society for Industrial and Applied Mathematics},
+      YEAR = {1999},
+      ADDRESS = {Philadelphia, PA},
+      ISBN = {0-89871-447-8 (paperback)} 
+}
+      
+
+@book{HesthavenWarburtoin2007,
+  title={Nodal Discontinuous Galerkin Methods: Algorithms, Analysis, and Applications},
+  author={Hesthaven, J.S. and Warburton, T.},
+  isbn={9780387720654},
+  lccn={2007939528},
+  series={Texts in Applied Mathematics},
+  year={2007},
+  publisher={Springer}
+}
+
+@article{Alpert1993,
+   AUTHOR  = {B. K. Alpert},
+   TITLE   = {A class of basises in $L^2$ for the sparse representation of integral operators},
+   JOURNAL = {SIAM J. Math. Anal},
+   VOLUME  = {24},
+   number  = {1},
+   PAGES   = {246--262},
+   YEAR    = {1993}
+}
+
+@INCOLLECTION{Alpert1992,
+AUTHOR       = {B. K. Alpert}, 
+Editor       = {Charles K. Chui},
+TITLE        = {Wavelets and Other Bases for Fast Numerical Linear Algebra},
+BOOKTITLE    = {Wavelets, Volume 2: A Tutorial in Theory and Applications (Wavelet Analysis and Its Applications)},
+Pages        = {181-216},
+Publisher    = {Academic Press},
+YEAR         = {1992},
+Organization = {},
+Address      = {},
+Month        = {},
+Note         = {},
+Key          = {},
+isbn = {0121745902},
+ean = {9780121745905}
+}
+      
+      
+@MISC{PROPACK,
+Author = {Larsen, R.},
+Title  = {PROPACK: Computing the Singular Value Decomposition of Large and Sparse or Structured Matrices. Computer software.}, 
+Edition ={Vers.\ 2.1.},
+Date =  {April 20},
+Year = {2005}
+}
+
+@INCOLLECTION{EMA,
+AUTHOR       = {Dinov, Ivo D.}, 
+Editor       = {},
+TITLE        = {Expectation Maximization and Mixture Modeling Tutorial},
+BOOKTITLE    = {Statistics Online Computational Resource},
+Pages        = {},
+Publisher    = {UCLA: Statistics Online Computational Resource},
+YEAR         = {2008},
+Organization = {},
+Address      = {},
+Month        = {},
+Note         = {},
+Key          = {},
+URL  = {http://escholarship.org/uc/item/1rb70972}
+}
+
+@book{bishop1995,
+  title={Neural Networks for Pattern Recognition},
+  author={Bishop, C.M.},
+  isbn={9780198538646},
+  lccn={95040465},
+  series={Advanced Texts in Econometrics},
+  url={https://books.google.com/books?id=-aAwQO\_-rXwC},
+  year={1995},
+  publisher={Clarendon Press}
+}
+
+ 
+@book{Aristov2001,
+  title={Direct Methods for Solving the Boltzmann Equation and Study of Nonequilibrium Flows},
+  author={Aristov, V.V.},
+  isbn={9780792368311},
+  lccn={00069630},
+  series={Fluid Mechanics and Its Applications},
+  year={2001},
+  publisher={Kluwer Academic Publishers}
+}
+
+
+@incollection{INVTRANSF,
+year={1986},
+isbn={978-1-4613-8645-2},
+booktitle={Non-Uniform Random Variate Generation},
+doi={10.1007/978-1-4613-8643-8_2},
+title={General Principles in Random Variate Generation},
+url={http://dx.doi.org/10.1007/978-1-4613-8643-8_2},
+publisher={Springer New York},
+author={Devroye, Luc},
+pages={27-82},
+language={English}
+}
+
+@book{Bird1994,
+  title={Molecular Gas Dynamics and the Direct Simulation of Gas Flows},
+  author={Bird, G.A.},
+  year={1994},
+  address={New York, USA},
+  series  ={Oxford Engineering Science Series},
+  publisher={Oxford University Press}
+}
+
+@Article{BGK54,
+  title = {A Model for Collision Processes in Gases. I. Small Amplitude Processes in Charged and Neutral One-Component Systems},
+  author = {Bhatnagar, P. L. and Gross, E. P. and Krook, M. },
+  journal = {Phys. Rev.},
+  volume = {94},
+  number = {3},
+  pages = {511--525},
+  numpages = {14},
+  year = {1954},
+  month = {May},
+  doi = {10.1103/PhysRev.94.511},
+  publisher = {American Physical Society},
+}
+
+@article{Shakhov1968a,
+year={1968},
+issn={0015-4628},
+journal={Fluid Dynamics},
+volume={3},
+number={5},
+doi={10.1007/BF01029546},
+title={Generalization of the Krook kinetic relaxation equation},
+url={http://dx.doi.org/10.1007/BF01029546},
+publisher={Kluwer Academic Publishers-Plenum Publishers},
+author={Shakhov, E.M.},
+pages={95-96},
+language={English}
+}
+
+@article{Shakhov1968b,
+year={1968},
+issn={0015-4628},
+journal={Fluid Dynamics},
+volume={3},
+number={1},
+doi={10.1007/BF01016254},
+title={Approximate kinetic equations in rarefied gas theory},
+url={http://dx.doi.org/10.1007/BF01016254},
+publisher={Kluwer Academic Publishers-Plenum Publishers},
+author={Shakhov, E.M.},
+pages={112-115},
+language={English}
+}
+
+@article{H66,
+   AUTHOR = {L. H. Holway},
+   TITLE   = {New statistical models for kinetic theory: methods of construction},
+   JOURNAL = {Phys.\ Fluids},
+   VOLUME = {9},
+   NUMBER = {9},
+   YEAR = {1966},
+   PAGES = {1658--1673},
+}
+
+@article{Boyd1991411,
+title = "Vectorization of a Monte Carlo simulation scheme for nonequilibrium gas dynamics",
+journal = "Journal of Computational Physics",
+volume = "96",
+number = "2",
+pages = "411 - 427",
+year = "1991",
+note = "",
+issn = "0021-9991",
+doi = "10.1016/0021-9991(91)90243-E",
+url = "http://www.sciencedirect.com/science/article/pii/002199919190243E",
+author = "Iain D Boyd"
+}
+
+@book{Struchtrup2005,
+  title={Macroscopic Transport Equations for Rarefied Gas Flows Approximation Methods in Kinetic Theory},
+  author={Struchtrup, H.},
+  year={2005},
+  series = {Interaction of Mechanics and Mathematics Series},
+  publisher={Springer},
+  address = {Heidelberg}
+}
+
+@book{Nussbaumer1982,
+  title={Fast Fourier Transform and Convolution Algorithms},
+  author={H. J. Nussbaumer},
+  year={1982},
+  series = {Springer Series in Information Sciences},
+  publisher={Springer-Verlag},
+  address = {Heidelberg},
+  doi = "10.1007/978-3-642-81897-4"
+}
+
+@article{Levermore1996,
+year={1996},
+issn={0022-4715},
+journal={Journal of Statistical Physics},
+volume={83},
+number={5-6},
+doi={10.1007/BF02179552},
+title={Moment closure hierarchies for kinetic theories},
+url={http://dx.doi.org/10.1007/BF02179552},
+publisher={Kluwer Academic Publishers-Plenum Publishers},
+keywords={Kinetic theory; moment closures; hyperbolic systems; entropy, BGK},
+author={Levermore, C.David},
+pages={1021-1065},
+language={English}
+}
+
+@book{succi2001,
+  title={The Lattice Boltzmann Equation: For Fluid Dynamics and Beyond},
+  author={Succi, S.},
+  isbn={9780198503989},
+  lccn={2001036220},
+  series={Numerical Mathematics and Scientific Computation},
+  url={https://books.google.com/books?id=OC0Sj\_xgnhAC},
+  year={2001},
+  publisher={Clarendon Press}
+}
+
+@article{AndallahBabovsky2009,
+author = {Andallah, L. and Babovsky, H.},
+title = {A Discrete Boltzmann Equation Based on a Cub-Octahedron in $\mathbb{R}^3$},
+journal = {SIAM Journal on Scientific Computing},
+volume = {31},
+number = {2},
+pages = {799-825},
+year = {2009},
+doi = {10.1137/060673850},
+
+URL = {http://epubs.siam.org/doi/abs/10.1137/060673850},
+eprint = {http://epubs.siam.org/doi/pdf/10.1137/060673850}
+}
+
+@article{Babovsky2008,
+   author = "Babovsky, Hans",
+   title = "Kinetic Models on Orthogonal Groups and the Simulation of the Boltzmann Equation",
+   journal = "AIP Conference Proceedings",
+   year = "2008",
+   volume = "1084",
+   number = "1", 
+   eid = {},
+   pages = "415-420",
+   url = "http://scitation.aip.org/content/aip/proceeding/aipcp/10.1063/1.3076513",
+   doi = "http://dx.doi.org/10.1063/1.3076513" 
+}
+
+@book{Cercignani2000,
+  title={Rarefied Gas Dynamics: From Basic Concepts to Actual Caclulations},
+  author={Cercignani, C.},
+  year={2000},
+  address={Cambridge, UK},
+  isbn={0-521-65008-9},
+  publisher={Cambridge University Press},
+}
+
+@book{Cercignani1969,
+  title={Mathematical Methods in Kinetic Theory},
+  author={Cercignani, C.},
+  year={1969},
+  address={New York},
+  isbn={},
+  publisher={Plenum Press},
+}
+
+@book{Kogan1969,
+  title={Rarefied Gas Dynamics},
+  author={Kogan, M.N.},
+  lccn={lc69012532},
+  year={1969},
+  address={New York, USA},
+  publisher={Plenum Press}
+}
+
+
+@Article{FoxVedula2010,
+ author      ={Fox, R. O. and Vedula, P.},
+ title       ={Quadrature-based moment model for moderately dense polydisperse gas-particle flows},
+ journal     ={Industrial and Engineering Chemistry Research},
+ volume      =49,
+ number      = 11, 
+ pages       ={5174--5187},
+ year        =2010
+                            }
+
+@Inproceedings{GreenVedula2011,
+ title = {Validation of a collisional Lattice Boltzmann Method},
+ author= {Green, B. I. and Vedula, P.},
+ pages = {14},
+ booktitle ={20th AIAA Computational Fluid Dynamics Conference, 27-30 June 2011, Honolulu Hawaii},
+ editor = {},
+ publisher ={American Institute of Physics},
+ address ={},
+ year    =   {2011},
+ series  ={AIP Conference Proceedings},
+ number  = {3403},
+}
+
+@article{Titarev2012,
+   AUTHOR = {V. A. Titarev},
+   TITLE   = {Efficient deterministic modelling of three-dimensional rarefied gas flows},
+   JOURNAL = {Communications in Computational Physics},
+   VOLUME = {162},
+   NUMBER = {1},
+   YEAR = {2012},
+   PAGES = {162--192},
+}
+
+@article{FLM6104992,
+author = {Selden,N. and Ngalande,C and Gimelshein, N. and Gimelshein, S. and Ketsdever, A.},
+title = {Origins of radiometric forces on a circular vane with a temperature gradient},
+journal = {Journal of Fluid Mechanics},
+volume = {634},
+month = {9},
+year = {2009},
+issn = {1469-7645},
+pages = {419--431},
+numpages = {13},
+doi = {10.1017/S0022112009007976},
+URL = {http://journals.cambridge.org/article_S0022112009007976},
+}
+
+@article {PanferovHeintz2002,
+author = {Panferov, Vladislav A. and Heintz, Alexei G.},
+title = {A new consistent discrete-velocity model for the Boltzmann equation},
+journal = {Mathematical Methods in the Applied Sciences},
+volume = {25},
+number = {7},
+publisher = {John Wiley & Sons, Ltd.},
+issn = {1099-1476},
+url = {http://dx.doi.org/10.1002/mma.303},
+doi = {10.1002/mma.303},
+pages = {571--593},
+year = {2002},
+}
+
+@article{AristovZabelok2002,
+   AUTHOR = {V. V. Aristov and S. A. Zabelok},
+   TITLE  = {A Deterministic Method for the Solution of the Boltzmann Equation with Parallel Computations },
+   JOURNAL = {Zhurnal Vychislitel'noi Tekhniki i Matematicheskoi Physiki},
+   VOLUME = {42},
+   NUMBER = {3},
+   YEAR = {2002},
+   PAGES = {425--437},
+}
+
+@article{MouhotPareschi2006,
+     jstor_articletype = {research-article},
+     title = {Fast Algorithms for Computing the Boltzmann Collision Operator},
+     author = {Mouhot, Clément and Pareschi, Lorenzo},
+     journal = {Mathematics of Computation},
+     jstor_issuetitle = {},
+     volume = {75},
+     number = {256},
+     jstor_formatteddate = {Oct., 2006},
+     pages = {pp. 1833-1852},
+     url = {http://www.jstor.org/stable/4100126},
+     ISSN = {00255718},
+     abstract = {The development of accurate and fast numerical schemes for the five-fold Boltzmann collision integral represents a challenging problem in scientific computing. For a particular class of interactions, including the so-called hard spheres model in dimension three, we are able to derive spectral methods that can be evaluated through fast algorithms. These algorithms are based on a suitable representation and approximation of the collision operator. Explicit expressions for the errors in the schemes are given and spectral accuracy is proved. Parallelization properties and adaptivity of the algorithms are also discussed.},
+     language = {English},
+     year = {2006},
+     publisher = {American Mathematical Society},
+     copyright = {Copyright © 2006 American Mathematical Society},
+    }
+
+@article{FilbetMouhotPareschi2006,
+author = {Filbet, F. and Mouhot, C. and Pareschi, L.},
+title = {Solving the Boltzmann Equation in N log2N},
+journal = {SIAM Journal on Scientific Computing},
+volume = {28},
+number = {3},
+pages = {1029-1053},
+year = {2006},
+doi = {10.1137/050625175},
+URL = {http://epubs.siam.org/doi/abs/10.1137/050625175},
+eprint = {http://epubs.siam.org/doi/pdf/10.1137/050625175}
+}
+
+@article{KirschRjasanov2007,
+year={2007},
+issn={0022-4715},
+journal={Journal of Statistical Physics},
+volume={129},
+number={3},
+doi={10.1007/s10955-007-9374-1},
+title={A Weak Formulation of the Boltzmann Equation Based on the Fourier Transform},
+url={http://dx.doi.org/10.1007/s10955-007-9374-1},
+publisher={Springer US},
+keywords={Kinetic theory of gases; Boltzmann equation},
+author={Kirsch, R. and Rjasanow, S.},
+pages={483-492},
+language={English}
+}
+
+
+@article{GambaTharkabhushanam2009,
+ author = {Gamba, Irene M. and Tharkabhushanam, Sri Harsha},
+ title = {Spectral-Lagrangian methods for collisional models of non-equilibrium statistical states},
+ journal = {J. Comput. Phys.},
+ issue_date = {April, 2009},
+ volume = {228},
+ number = {6},
+ month = apr,
+ year = {2009},
+ issn = {0021-9991},
+ pages = {2012--2036},
+ numpages = {25},
+ url = {http://dx.doi.org/10.1016/j.jcp.2008.09.033},
+ doi = {10.1016/j.jcp.2008.09.033},
+ acmid = {1503114},
+ publisher = {Academic Press Professional, Inc.},
+ address = {San Diego, CA, USA},
+ keywords = {Boltzmann transport equation, Conservative/non-conservative deterministic method, FFT, Lagrangian optimization, Spectral method},
+} 
+
+@article{GambaTharkabhushanam2010,
+    author = {Gamba, I. M. and Tharkabhushanam, S. H.},
+    citeulike-article-id = {10725016},
+    citeulike-linkout-0 = {http://dx.doi.org/10.4208/jcm.1003-m0011},
+    doi = {10.4208/jcm.1003-m0011},
+    issn = {02549409},
+    journal = {Journal of Computational Mathematics},
+    keywords = {boltzmann-equation, shock-wave, spectral},
+    posted-at = {2012-06-01 15:40:02},
+    priority = {0},
+    title = {{Shock and Boundary Structure Formation by Spectral-Lagrangian Methods for the Inhomogeneous Boltzmann Transport Equation}},
+    url = {http://dx.doi.org/10.4208/jcm.1003-m0011},
+    year = {2010}
+}
+
+@Inproceedings{GambaZhang2014,
+ title = {A conservative discontinuous Galerkin scheme with $O(N^2)$ operations in computing Boltzmann collision weight matrix},
+ author= {Gamba, I.M. and Zhang, C.},
+ pages = {8},
+ booktitle ={29th International Symposium on Rarefied Gas Dynamics, July 2014, China},
+ editor = {},
+ publisher ={American Institute of Physics},
+ address ={},
+ year    =   {2014},
+ series  ={AIP Conference Proceedings},
+ number  = {},
+}
+
+@Article{Tcher2003,
+ author      ={Tcheremissine, F. G.},
+ title       ={Solution to the Boltzmann kinetic equation for high-speed flows},
+ journal     ={Computational Mathematics and Mathematical Physics},
+ volume      =46,
+ number      = 2, 
+ pages       ={315--329},
+ year        =2006
+   }
+
+@article{Majorana2011,
+ author = {Armando Majorana},
+ title = {A numerical model of the Boltzmann equation related to the discontinuous \uppercase{G}alerkin method},
+ journal = {Kinetic and Related Models},
+ issue_date = {},
+ volume = {4},
+ number = {1},
+ month = {March},
+ year = {2011},
+ issn = {},
+ pages = {139 - 151},
+ numpages = {13},
+ url = {http://dx.doi.org/10.3934/krm.2011.4.139},
+ doi = {10.3934/krm.2011.4.139},
+ acmid = {},
+ publisher = {American Institute of Mathematical Sciences},
+ address = {Springfield, MO USA},
+ keywords = {Boltzmann equation, discontinuous Galerkin finite elements},
+} 
+
+@article{PareschiPerthame1996,
+author = {Pareschi, Lorenzo and Perthame, Benoit},
+title = {A Fourier spectral method for homogeneous boltzmann equations},
+journal = {Transport Theory and Statistical Physics},
+volume = {25},
+number = {3-5},
+pages = {369-382},
+year = {1996},
+doi = {10.1080/00411459608220707},
+URL = {http://www.tandfonline.com/doi/abs/10.1080/00411459608220707},
+eprint = {http://www.tandfonline.com/doi/pdf/10.1080/00411459608220707}
+}
+
+@Article{sw_thermo,
+author = {Schrock, C.R. and Wood, A.W.},
+title = {Distributional Monte Carlo Solution Technique for Rarefied Gasdynamics},
+journal = {Journal of Thermophysics and Heat Transfer},
+year = {2012},
+volume = {26},
+number = {1},
+pages = {185-189}
+}
+
+@article{H66,
+   AUTHOR = {L. H. Holway},
+   TITLE   = {New statistical models for kinetic theory: methods of construction},
+   JOURNAL = {Phys.\ Fluids},
+   VOLUME = {9},
+   NUMBER = {9},
+   YEAR = {1966},
+   PAGES = {1658--1673},
+}
+
+@article{Boltzmann1872,
+ author={L. Boltzmann},
+ year={1874},
+ title={Weitere Studien u ber das Warmegleichgewicht unter Gasmolekulen}
+}

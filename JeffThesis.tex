@@ -56,7 +56,12 @@
 \newcommand{\manM}{$\mathcal{M}$}
 \newcommand{\manMs}{$\mathcal{M} $ }
 % Math mode friendly shortcuts
-\newcommand{\Rexp}[1]{{\mathbb{R}^{#1}}}
+% % %
+\def\T{\mathbb{T}}
+\def\R{\mathbb{R}}
+\def\Sbb{\mathbb{S}}
+\def\e{\mathrm{e}}
+\def\calF{\mathcal{F}}
 \newcommand{\dydx}[2]{\frac{\partial{#1}}{\partial{#2}}}
 \newcommand{\vecx}{\vec{x}}
 \newcommand{\vecv}{\vec{v}}
@@ -154,14 +159,14 @@
 \begin{equation*}
 	\vec{g} = v_1 - v\, , \quad \vec{g}' = \vec{v}'-\vec{v}_1' \, .
 \end{equation*}
-To denote the modulus of $\vec{g}$ and $\vec{g}'$, the vector notation is dropped, e.g. $g$. $b$ denotes the offset of the centers of the molcules orthogonal to $\vec{g}$. $\varepsilon$ denotes the azimuthal angle between the two particles. 
+$b$ denotes the offset of the centers of the molcules orthogonal to $\vec{g}$. $\varepsilon$ denotes the azimuthal angle between the two particles. 
 
 By conservation of momentum, we have that 
 \begin{equation}
 \label{eq:consv_momentum}
 m \vecv + m \vecv_1 = m\vecv' + m\vecv_1'\, .
 \end{equation}
-Equation \ref{eq:consv_momentum} yields $g' = g$. In addition, due to the hard sphere assumption, the collision is considered to be perfectly elastic, giving
+Equation \ref{eq:consv_momentum} yields $|g'| = |g|$. In addition, due to the hard sphere assumption, the collision is considered to be perfectly elastic, giving
 \begin{equation}
 \label{eq:consv_kin}
 \frac{1}{2} m|\vecv| + \frac{1}{2} m|\vecv_1| = \frac{1}{2}m|\vecv'| + \frac{1}{2}m|\vecv_1'|
@@ -172,10 +177,10 @@ The apsidal vector, $\vec{k}$ given by
 \vec{k} = \frac{\vec{g} - \vec{g}'}{|\vec{g} - \vec{g'}|}\, ,
 \end{equation*}
 bisects the angle between asymptotic relative velocities. Using this vector, we can write a relationship between the pre- and post-collisional velocities by
-\begin{align*}
-\vec{v}_1' &= \vec{v}_1 - \vec{k}(\vec{k} \cdot \vec{h})\, , \\
-\vec{v}' &= \vec{v} + \vec{k}(\vec{k} \cdot \vec{h})\, .
-\end{align*}
+\begin{equation}
+\label{eq:vel_relation}
+\vec{v}_1' = \vec{v}_1 - \vec{k}(\vec{k} \cdot \vec{g})\, , \quad \vec{v}' = \vec{v} + \vec{k}(\vec{k} \cdot \vec{g})\, .
+\end{equation}
 
 
 \section{The Boltzmann Equation}
@@ -196,16 +201,21 @@ Where $I[f]$ is referred to as the collision operator. The explicit form of $I[f
 
 In order to explicitly write the collision operator, we must describe the collisions within the gas. Consider a particle with velocity $\vecv$. In the volume element $\vecx d\vecx$
 \begin{equation}
-dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f_1 f b g\,  db \, d\varepsilon\, dv_1 \, dv \, .
+dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f_1 f b |g|\,  db \, d\varepsilon\, dv_1 \, dv \, .
 \end{equation}
 
 \begin{equation}
-I[f](t, \vecx, \vecv) = \int_\Rexp{3} \int_\Rexp{3} (f_1' f' - f_1 f) g\, b\, db\, d\varepsilon\, d\vecv_1\, ,
+\label{eq:explicit_I}
+I[f](t, \vecx, \vecv) = \int_{\R^3} \int_{\R^3} (f_1' f' - f_1 f) |g|\, b\, db\, d\varepsilon\, d\vecv_1\, ,
 \end{equation}
 where,
 \begin{equation*}
 f_1' \equiv f(t, \vecx, \vecv_1')\quad f' \equiv f(t, \vecx, \vecv') \quad f_1 \equiv f(t, \vecx, \vecv_1 \quad f \equiv f(t, \vecx, \vecv)\, .
 \end{equation*}
+From here, we can substitute (\ref{eq:explicit_I}) into (\ref{eq:boltzmann}) to arrive to the explicit form of the Boltzmann equation,
+\begin{equation}
+\dydx{}{t}f(t, \vecx, \vecv) + \vecv \cdot \nabla_x f(t, \vecx, \vecv) = \int_{\R^3} \int_{\R^3} (f_1' f' - f_1 f) |g|\, b\, db\, d\varepsilon\, d\vecv_1\, .
+\end{equation}
 The Boltzmann equation is a non-linear integro-differential equation. The right hand side is a five dimensional integral that must be evaluated at each point in 6-dimensional space.
 
 \section{Moments of the Distribution Function}
@@ -240,109 +250,227 @@ When the gas is in equilibrium, the difference between the number of particles t
 I[f_M](t,\vecx,\vecv) = \int_{\R^3} \int_{\R^3} f_{M1}'f_M' - f_{M1} f_M  g\, b\, db\, d\varepsilon\, d\vecv_1\ = 0
 \end{equation*}
 
+\section{Dimensionless Reduction}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% CHAPTER THREE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Discontinuous Galerkin Discretization in the Velocity Variable}
+
+Discontinuous Galerkin methods is a method of discretizing equations. The following section describes the DG formulation found in~\cite{AlekseenkoJosyula2012},~\cite{AlekseenkoNguyenWood2015}.
+
+\section{DG Discretization in Velocity Space}
+We denote the points in the velocity space as $\vec{v} = (u,v,w)$. The velocity space is reduced to a rectangular parallelpiped $K=[u_L, u_R] \times [v_L,v_R] \times [w_L,w_R]$. It is assumed that outside the parallelpiped the contribution of the function to the first few moments is negligible. Depending on the parallelpiped, this will not result in large errors in terms of conservation of density and temperature. 
+
+We partition $K$ into $N$ smaller rectangular parallelpipeds $K_j = [u_L^j, u_R^j] \times [v_L^j, v_R^j] \times [w_L^j, w_R^j]$. Each $K_j$ will contain a set of basis function, $\phi_j^i$, $i=1,\dots, s$ as described. We introduce nodes of Gauss quadratures of order $s_u$, $s_v$, and $s_w$ on each of the intervals $[u_L^j,u_R^j]$, $[v_L^j,v_R^j]$, and $[w_L^j,w_R^j]$. The nodes are denoted as
+$\kappa^{u}_{p;j}$, $\dots$, $p=1,s_{u}$,
+$\kappa^{v}_{q;j}$, $\dots$, $q=1,s_{v}$, and 
+$\kappa^{w}_{r;j}$, $\dots$, $r=1,s_{w}$. From the nodes, the one-dimensional Lagrange basis functions are defined:
+\begin{equation}
+\label{eq:01}
+\phi^{u}_{l;j}(u)=\prod_{{p=1,s_{u}} \atop {p\neq l}} \frac{\kappa^{u}_{p;j}-u}{\kappa^{u}_{p;j}-\kappa^{u}_{l;j}}\, ,\quad 
+\phi^{v}_{m;j}(v)=\prod_{{q=1,s_{v}} \atop {q\neq m}} \frac{\kappa^{v}_{q;j}-v}{\kappa^{v}_{q;j}-\kappa^{v}_{m;j}}\, ,\quad 
+\phi^{w}_{n;j}(w)=\prod_{{r=1,s_{w}} \atop {r\neq n}} \frac{\kappa^{w}_{r;j}-w}{\kappa^{w}_{r;j}-\kappa^{w}_{n;j}}\, .
+\end{equation}
+The three-dimensional basis function is defined as
+\begin{equation}
+\label{eq:01a}
+\phi_{i;j}(\vec{v})=\phi^{u}_{l;j}(u)\phi^{v}_{m;j}(v)
+\phi^{w}_{n;j}(w)
+\end{equation} 
+where $i=1,\dots, s= s_u s_v s_w$. A useful property of the basis functions (\ref{eq:01a}) is that they vanish on all nodes except one. In addition, the quadrature nodes used are exact on polynomials of degree at most $2s_u-1$, $2s_v-1$, and $2s_w-1$. In addition, the following lemma holds,
+\begin{lemma} (see also \cite{AlekseenkoJosyula2012a, HesthavenWarburtoin2007})
+The following identities hold for basis functions $\phi_{i;j}(\vec{v})$:
+\begin{equation}
+\label{eq:lemma2.1} 
+\int_{K_{j}} \phi_{p;j}(\vec{v})\phi_{q;j}(\vec{v})\, d\vec{v} = \frac{\omega_{p}\Delta\vec{v}^{j}}{8}\delta_{pq}
+\qquad\mbox{and} \qquad
+\int_{K_{j}} \vec{v}\phi_{p;j}(\vec{v})\phi_{q;j}(\vec{v})\, d\vec{v} 
+= \frac{\omega_{p}\Delta\vec{v}^{j}}{8}\vec{v}_{p;j}\delta_{pq},
+\end{equation}
+where indices $l$, $n$, and $m$ of one dimensional basis functions correspond to 
+the three-dimensional basis functions 
+$\phi_{p;j}(\vec{v})=
+\phi^{u}_{l;j}(u)\phi^{v}_{m;j}(v)\phi^{w}_{n;j}(w)$, 
+and the vector $\vec{v}_{p;j}=(\kappa^{u}_{l;j},\kappa^{v}_{m;j},\kappa^{w}_{n;j})$. 
+\end{lemma}
+\section{Nodal-DG Velocity Discretization of the Boltzmann Equation}
+We assume that on each $K_j$, the solution to the Boltzmann equation is sought of the form 
+\begin{equation}
+\label{eq:3.4}
+f(t,\vec{x},\vec{v})|_{K_{j}} = \sum_{i=1,s} f_{i;j}(t,\vec{x})\phi_{i;j}(\vec{v})\, .
+\end{equation}
+We substitute equation \ref{eq:3.4} into $\ref{eq:boltzmann}$, multiply the result by test basis function, integrate over $K_j$, and apply identity (\ref{eq:lemma2.1}) to arrive to
+\begin{equation}
+\label{discveloblzm}
+\partial_{t} f_{i;j}(t,\vec{x}) + \vec{v}_{i;j}\cdot \nabla_{x} f_{i;j}(t,\vec{x}) =
+\frac{8}{\omega_{i}\Delta\vec{v}^{j}}I_{\phi_{i;j}}\, ,
+\end{equation}
+where $I_{\phi_{i;j}}$ is the projection of the collision operator 
+on the basis function $\phi_{i;j}(\vec{v})$:
+\begin{equation}
+\label{eq:projcoll}
+I_{\phi_{i;j}} = \int_{K_{j}}\phi_{i;j}(\vec{v}) I[f](t,\vec{x},\vec{v})\, d\vec{v}\, .
+\end{equation} 
+
+\section{Reformulation of the Galerkin Projection of the Collision Operator}
+\label{sec:reform_galerkin}
+Similarly to \cite{AlekseenkoJosyula2012,AlekseenkoJosyula2012a,Majorana2011}, we rewrite the 
+DG projection of the collision operator $I_{\phi_{i;j}}$ in the form of a bilinear integral operator 
+with a time-independent kernel. The principles of kinetic theory suggest that changes to $f(t,\vecx, \vecv)$ with respect to $\vecx$ at the distance of a few $b^*$ are negligible, see e.g., \cite{Struchtrup2005}. Specifically, using the well-known identities (see, e.g.,  \cite{Kogan1969}, Section 2.4), and applying the first principles assumption, we have 
+\begin{align}
+\label{eq:transfer_eq}
+I_{\phi_{i;j}}&= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}) f(t,\vec{x},\vec{v}_{1})
+\int_{\Sbb^2}(\phi_{i;j}(\vec{v}')-\phi_{i;j}(\vec{v})) b_{\alpha}(\theta) |g|^\alpha \, d\sigma\,
+ d\vec{v}_{1}\, d\vec{v} \nonumber \\
+{} & = \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}) f(t,\vec{x},\vec{v}_{1})
+ A(\vec{v},\vec{v}_{1};\phi_{i;j})   d\vec{v}_{1}\, d\vec{v}\, ,
+\end{align}
+where  
+\begin{align}
+\label{eq:A_definition}
+A(\vec{v},\vec{v}_{1};\phi_{i;j})= |g|^\alpha \int_{\Sbb^2} (\phi_{i;j}(\vec{v}')
+- \phi_{i;j}(\vec{v})) b_{\alpha}(\theta) \, d\sigma\, .
+\end{align}
+The kernel $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ is independent of time and can be pre-computed. 
+In \cite{AlekseenkoJosyula2012a} properties of a kernel closely related to $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ 
+are considered.
+In particular, due to the local support of $\phi_{i;j}(\vec{v})$, it is anticipated that 
+kernel  $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ will have only $O(M^{5})$ non-zero components for each $\phi_{i;j}(\vec{v})$, 
+where $M$ is the number of discrete velocity points in each velocity dimension. As a result, evaluation of  
+(\ref{eq:transfer_eq}) will require $O(M^{8})$ operations for each spatial point. This number of evaluations 
+is very high. However, as we will show later, it can be reduced to $O(M^6)$ operations using symmetries of
+$A(\vec{v},\vec{v}_{1};\phi_{i;j})$, the convolution form of (\ref{eq:transfer_eq}) and the Fourier 
+transform. 
+
+We remark that in many numerical re-formulations of the Boltzmann equation, the collision 
+operator is separated into the gain and loss terms.
+This separation can be performed in (\ref{eq:transfer_eq}),
+\begin{align}
+I_{\phi_{i;j}}&= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}) f(t,\vec{x},\vec{v}_{1})
+\int_{\Sbb^2}(\phi_{i;j}(\vec{v}')-\phi_{i;j}(\vec{v})) b_{\alpha}(\theta) |g|^\alpha \, d\sigma\,
+ d\vec{v}_{1}\, d\vec{v} \nonumber \\
+&= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}) f(t,\vec{x},\vec{v}_{1}) (\int_{\Sbb^2}\phi_{i;j}(\vec{v}')b_{\alpha}(\theta) |g|^\alpha d\sigma\, - |g|^\alpha\int_{\Sbb^2}\phi_{i;j}(\vec{v})b_{\alpha}(\theta)  d\sigma\,)  d\vec{v}_{1}\, d\vec{v} \nonumber \\
+&= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}) f(t,\vec{x},\vec{v}_{1}) (A^+(\vecv,\vecv_1;\phi_{i;j}) - |g|^\alpha \sigma_T)  d\vec{v}_{1}\, d\vec{v}
+\end{align}
+where
+\begin{equation}
+A^+(\vecv,\vecv_1;\phi_{i;j}) = \int_{\Sbb^2}\phi_{i;j}(\vec{v}')b_{\alpha}(\theta) |g|^\alpha d\sigma\, , \quad \sigma_T = \int_{\Sbb^2}\phi_{i;j}(\vec{v})b_{\alpha}(\theta)  d\sigma\, .
+\end{equation}
+Theoretical properties of $A^+(\vecv,\vecv_1;\phi_{i;j}$ are very similar to that of $A(\vecv,\vecv_1;\phi_{i;j})$. 
+$A^+(\vecv,\vecv_1;\phi_{i;j})$ has theoretical properties that are better than that of $A(\vecv,\vecv_1;\phi_{i;j})$ for a Fourier transform. 
+$A(\vecv,\vecv_1;\phi_{i;j})$ is grows linearly to infinity in some direction whereas $A^+(\vecv,\vecv_1;\phi_{i;j})$ does not. It can then be argued that $A^+(\vecv,\vecv_1;\phi_{i;j})$ is better suited for a Fourier transform than $A(\vecv,\vecv_1;\phi_{i;j})$. The algorithms in this paper also have straightforward extensions to the the split formulation of (\ref{eq:transfer_eq}). However, in practice, the split formulation of (\ref{eq:transfer_eq}) had significant errors in conservation.
+
+\section{Properties of the Kernel $A(\vecv,\vecv_1;\phi_{i;j})$}
+\label{sec:props_of_a}
+\begin{lemma}
+\label{lem1} 
+Let operator $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ be defined by (\ref{eq:A_definition}). Then $\forall\xi\in \R^3$
+\begin{equation*}
+A(\vec{v}+\vec{\xi},\vec{v}_{1}+\vec{\xi};\phi_{i;j}(\vec{v}-\vec{\xi}))=
+A(\vec{v},\vec{v}_{1};\phi_{i;j}) \, .
+\end{equation*}
+\end{lemma}
+
+\proof
+Consider $A(\vec{v}+\vec{\xi},\vec{v}_{1}+\vec{\xi};\phi_{i;j}(\vec{v}-\vec{\xi}))$. We clarify that these notations mean that
+particle velocities $\vec{v}$ and $\vec{v}_{1}$ in (\ref{eq:A_definition}) are replaced with $\vec{v}+\vec{\xi}$ and $\vec{v}_{1}+\vec{\xi}$
+correspondingly and that basis function $\phi_{i;j}(\vec{v})$ is replaced with a ``shifted'' function 
+$\phi_{i;j}(\vec{v}-\vec{\xi})$. We notice that the relative speed of the molecules with velocities $\vec{v}+\vec{\xi}$ 
+and $\vec{v}_{1}+\vec{\xi}$ is still $\vec{g}=\vec{v}+\vec{\xi}-(\vec{v}_{1}+\vec{\xi}_{1})=\vec{v}-\vec{v}_{1}$. 
+The post-collision velocities for the pair of particles will be $\vec{v}'+\vec{\xi}$ and $\vec{v}'_{1}+\vec{\xi}$, where $\vec{v}'$ and $\vec{v}'_{1}$ are given by (\ref{eq:vel_relation}). We notice, in particular, that choices of $\theta$ and $\varepsilon$ in 
+(\ref{eq:vel_relation}) are not affected by $\vec{\xi}$. The rest of the statement follows by a direct substitution:
+\begin{align*}
+A(\vec{v}&+\vec{\xi},\vec{v}_{1}+\vec{\xi};\phi_{i;j}(\vec{v}-\vec{\xi})) = |g|^{\alpha} \int_{\Sbb^2} \phi_{i;j}((\vec{v}'+\vec{\xi})-\vec{\xi}) b_{\alpha}(\theta)\, d\sigma\,= |g|^{\alpha} \int_{\Sbb^2} \phi_{i;j}(\vec{v}') b_{\alpha}(\theta)\, d\sigma \\
+&  = A(\vec{v},\vec{v}_{1};\phi_{i;j})\, . 
+\end{align*}
+\endproof
+We remark that Lemma~{\ref{lem1}} holds for all potentials of molecular 
+interaction used in rarefied gas dynamics. This property was used in 
+\cite{AlekseenkoJosyula2012a} to reduce the storage requirement 
+on uniform partitions. 
+
+\section{Rewriting the Collision Operator in the Form of a Convolution (Mostly Copy and Pasted from the Paper, needs rewrite?)}
+It was shown in~\cite{AlekseenkoNguyenWood2015} that the Galerkin projection of the collision operator can be reformulated in terms of a convolution. This work is recalled in this section. 
+We select a partition cell $K_c$ and designate this cell as a generating cell. 
+Similarly, the basis functions $\phi_{i;c}(\vec{v})$ on $K_c$ are designated as the generating basis functions. 
+Basis functions $\phi_{i;j}(\vec{v})$ on other cells can be obtained using a shift in the velocity variable, namely $\phi_{i;j} (\vec{v})=\phi_{i;c} (\vec{v}+\vec{\xi_{j}})$ where $ \vec{\xi}_{j} \in \mathbb{R}^3$ is the vector that connects the center of $K_j$ to the center of $K_c$.
+
+According to  Lemma~{\ref{lem1}}, operator $A(\vec{v},\vec{v}_1,\phi_{i;j})$ is invariant with respect to translations. Therefore
+\begin{align}
+\label{eq3.1}
+I_{\phi_{i;j}} &= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v})f(t,\vec{x},\vec{v}_{1})A(\vec{v}+\vec{\xi_{j}},\vec{v}_1+\vec{\xi_{j}}; \phi_{i;j}(\vec{u} - \vec{\xi_{j}})) \, d\vec{v}_{1} d\vec{v} \notag\\
+ &= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v})f(t,\vec{x},\vec{v}_{1})A(\vec{v}+\vec{\xi^{j}},\vec{v}_{1}+\vec{\xi_{j}}; \phi_{i;c}(\vec{u})) \, d\vec{v} d\vec{v_{1}} \, .
+\end{align}
+Performing the substitutions $\vec{\hat{v}} = \vec{v}+\vec{\xi_{j}} $ and $ \vec{\hat{v}}_1 = \vec{v}_{1}+\vec{\xi_{j}}$ in (\ref{eq3.1}), we have
+\begin{equation*}
+I_{\phi_{i;j}} = \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{\hat{v}}-\vec{\xi_{j}}) f(t,\vec{x},\vec{\hat{v}}_1-\vec{\xi_{j}}) A(\vec{\hat{v}},\vec{\hat{v}}_{1};\phi_{i;c}(\vec{u})) \, d\vec{\hat{v}} d\vec{\hat{v}}_1 \, .
+\end{equation*}
+We then introduce a bilinear convolution operator, $i=1,\ldots,s$
+\begin{equation}
+\label{eq:continuous_convolution}
+I_i(\vec{\xi}) = \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}-\vec{\xi})f(t,\vec{x},\vec{v}_{1}-\vec{\xi})A(\vec{v},\vec{v}_{1}; \phi_{i;c}) \, d\vec{v} d\vec{v}_{1} \, ,
+\end{equation}
+and notice that $I_{\phi_{i;j}}$ can be obtained from (\ref{eq:continuous_convolution}) as
+$I_{\phi_{i;j}}=I_i(\vec{\xi}_j)$. In the following, we will refer to (\ref{eq:continuous_convolution}) 
+as the convolution form of the Galerkin projection of the collision integral.
+
+\section{Discretization of the Collision Integral (COpy and pasted again)}
+In order to calculate (\ref{eq:continuous_convolution}), we replace the three-dimensional integrals with the Gauss quadratures associated with then nodal-DG discretization, (\ref{eq:01a}). 
+As is discussed above, we are only interested in 
+computing convolution (\ref{eq:continuous_convolution}) at vectors 
+$\vec{\xi}=\vec{\xi}_{j}$ that connect centers of the velocity cells $K_j$ to the 
+center of the velocity cell $K_c$, the support of $\phi_{i;c}(\vec{v})$. Since the 
+same nodal points are used on all velocity cells, shifts $\vec{\xi}_{j}$ 
+translate nodal points in one cell to nodal points 
+in another cell. As a result, the quadrature sums to evaluate convolution (\ref{eq:continuous_convolution})
+use values of the unknown $f(t,\vec{x},\vec{v})$ at the nodal points
+only. In fact, the shift in the velocity variable 
+$\vec{v}_{i;l}-\vec{\xi}_{j}$ will correspond 
+to a shift in the three dimensional index of the velocity cell 
+which we will write formally as $l-j$, 
+producing the velocity node $\vec{v}_{i;l-j}(\vec{v})$. The exact expression 
+for the shift $l-j$ will be made clear later by considering the cell indices in 
+each velocity dimension. The index $i$ of the node within the cell is not 
+affected in this process. 
+
+We can write the discrete form of (\ref{eq:continuous_convolution}) as 
+\begin{equation}
+\label{eq:I_dist}
+I_{i;j}:=I_{i}(\vec{\xi}_{j}) = \sum_{i',i''=1}^s  \sum_{j'=1}^{M^3} \sum_{j''=1}^{M^3} f_{i';j'-j} f_{i'';j''-j} A_{i',i'';j',j'';i} 
+\end{equation}
+where $f_{i';j'-j}=f(t,\vec{x},\vec{v}_{i';j'-j})$, 
+$A_{i',i'';j',j'';i}=A(\vec{v}_{i';j'},\vec{v}_{i'';j''}; \phi_{i;c})$ and the three dimensional 
+indices $i'$ and $i''$ run over the velocity nodes within a single velocity cell 
+and indices $j'$ and $j''$ run over all velocity cells. We note that for some index 
+shifts $j'-j$, the resulting cells are outside of the velocity domain. 
+In \cite{AlekseenkoJosyula2012a} the values outside of the domain 
+were substituted with zeros. In cases when the support of the solution 
+was well contained within the computational domain, this assumption did not lead to 
+large numerical errors. 
+
+We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ operations to calculate it, $O(M^6)$ at one velocity node for $O(M^3)$ velocity nodes. However, recall that the property stated in section \ref{sec:reform_galerkin} that only has $O(M^5)$ components bringing down the total cost of computing (\ref{eq:I_dist}) down to $O(M^8)$ operations. However, we wish to reduce this further. It turns out that the Discrete Fourier Transform has properties that allow us to bring down the cost of computing (\ref{eq:I_dist}) from $O(M^8)$ to $O(M^6)$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% CHAPTER FOUR
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{The Discrete Fourier Transform}
+
+\section{Discrete Convolutions, Circular Convolutions, and Periodic Continuation}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% CHAPTER FIVE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Discretization of the Collision Integral and Fast Evaluation of Discrete Convolution}
+
 \clearpage
 \addcontentsline{toc}{chapter}{References}
-\begin{footnotesize}
-\begin{thebibliography}{100}
-
-\bibitem{Bird1994} G. Bird, Molecular Gas Dynamics and the Direct Simulation of Gas Flows, Clarendon Press, Oxford, 1994.
-
-\bibitem{Boltzmann1872} L. Boltzmann, Weitere Studien u ber das Warmegleichgewicht unter Gasmolekulen. 1872.
-
-\bibitem{Kogan1969} M. Kogan, Rarefied Gas Dynamics, Plenum Press, New York, USA, 1969.
-
-\bibitem{Cercignani2000} C. Cercignani, Rarefied Gas Dynamics: From Basics Concepts to Actual Calculations, Cambridge University Press, Cambridge, UK, 2000.
-
-\bibitem{Cockburn2000} B. Cockburn, G. Karniadakis, and C. Shu, Discontinuous Galerkin Methods: Theory, Computation, and Applications. Berlin: Springer, 2000.
-
-\bibitem{Golse} F. Golse. 2006. Chapter 3 The Boltzmann Equation and Its Hydrodynamic Limits. Handbook of Differential Equations: Evolutionary Equations, 159-301.
-
-\bibitem{AMA} A. Alekseenko, and E. Josyula: Deterministic solution of the Boltzmann equation using a discontinuous Galerkin velocity discretization. In \textit{28th International Symposium on Rarefied Gas Dynamics, 9-13 July  2012, Zaragoza, Spain, AIP Conference Proceedings,} page 8. American Institute of Physics, 2012.
-
-\bibitem{AMA1} A. Alekseenko and E. Josyula: Deterministic solution of the spatially homogeneous Boltzmann equation using discontinuous Galerkin discretizations in the velocity space. \textit{Journal of Computational Physics,} 272(0): 170 - 188, 2014. 
-
-\bibitem{Struchtrup2005} H. Struchtrup, Macroscopic Transport Equations for Rarefied Gas Flows Approximation Methods in Kinetic Theory, Interaction of Mechanics and Mathematics Series, Springer, Heidelberg, 2005.
-
-\bibitem{Worner} S. Worner, "Fast Fourier Transform," Swiss Federal Institute of Technology Zurich, Zurich.
-
-\bibitem{Osgood2007} B. Osgood, "N-dimensional Fourier Transform." The Fourier Transform and Its Applications. Stanford U, 2007. 428. Print.
-
-\bibitem{Bethune2010} I. Bethune, OpenMP Implementation of Fast Fourier Transform. Digital image. FFT. 14 Sept. 2010.
-
-%Read More: http://www.worldscientific.com/doi/abs/10.1142/S0218202591000137
-
-\bibitem{KALMAN} D. Kalman, A Singularly Valuable Decomposition: The SVD of a Matrix. \textit{The College Mathematics Journal,} The American University, Washington, DC (2002).
-
-\bibitem{LAPACK} E Anderson, Z. Bai, C. Bischof, S. Blackford, J. Demmel, J. Dongarra, J. Du Croz, A. Greenbaum, S. Hammarling, A. McKenne and D. Sorensen, \textit{LAPACK Users' Guide, Third Edition, 1999, pub. Society for Industrial and Applied Mathematics, Philadelphia, PA, ISBN 0-89871-447-8}.
-
-\bibitem{PROPACK} R. Larsen Computing the Singular Value Decomposition of Large and Sparse or Structured Matrices. Computer software. PROPACK. Vers. 2.1. N.p., 20 Apr. 2005.
-
-\bibitem{Burden2004} L. Burden, and J. Douglas Faires, Numerical Analysis. 8th ed. Boston: PWS-Kent Pub., 2004.
-
-\bibitem{INVTRANSF} L. Devroye, "Inversion by Numerical Solution of F(X) = U." New York: Springer-Verlag, 1986.
-
-\bibitem{EMA} I. Dinov, "Statistics Online Computational Resource." SOCR. eScholarship Repository, University of California, 2008.
-
-\bibitem{GAMBA} Gamba, Irene M., and Chenglong Zhang. "A Conservative Discontinuous Galerkin Scheme with $O(N^2)$ Operations in Computing Boltzmann Collision Weight Matrix." (2014)
-
-\bibitem{GAMBA1} I. M. Gamba and S. H. Tharkabhushanam. Shock and Boundary Structure Formation by Spectral-Lagrangian Methods for the Inhomogeneous Boltzmann Transport Equation. \textit{Journal of Computational Mathematics}, 2010.
-
-\bibitem{GAMBA2} Irene M. Gamba and Sri Harsha Tharkabhushanam. Spectral-lagrangian methods for collisional models of non-equilibrium statistical states. \textit{J. Comput. Phys.,} 228(6):2012-2036, April 2009.
-
-%% The followings are from the actual paper:
-
-\bibitem{ANDALLAH} L. Andallah and H. Babovsky. A discrete Bolzmann equation based on a cub-octahedron in $\R^3$. \textit{SIAM Journal on Scientific Computing,} 31(2):799-825, 2009.
-
-\bibitem{ARISTOV1} V. V. Aristov and S. A. Zabelok. A deterministic method for the solution of the Boltzmann equation with parallel computations. \textit{Zhurnal Vychislitel'noi Tekhniki i Matematicheskoi Physiki,} 42(3):425-437, 2002.
-
-\bibitem{ARISTOV2} V. V. Aristov. \textit{Direct Methods for Solving the Boltzmann Equation and Study of Nonequilibrium Flows.} Fluid Mechanics and Its Application. Kluwer Academic Publishers, 2001.
-
-\bibitem{BABOVSKY} Hans Babovsky. Kinetic models on orthogonal groups and the simulation of the Bolzmann Equation. \textit{AIP Conference Proceedingds,} 1084(1), 2008.
-
-\bibitem{BHATNAGAR} P. L. Bhatnagar, E. P. Gross, and M. Krook. A model for collision processes in gases. i. small amplitude processes in charged and neutral one-component systems. \textit{Phys. Rev.,} 94(3):511-525, May 1954.
-
-\bibitem{BIRD} G. A. Bird. \textit{Molecular Gas Dynamics and the Direct Simulation of Gas Flows.} Oxford Engineering Science Series. Oxford University Press, New York, USA, 1994.
-
-\bibitem{BOYD} Iain D Boyd. \textit{Vectorization of a Monte Carlo simulation scheme for nonequilibrium gas dynamics. Journal of Computational Physics,} 96(2):411-427, 1991.
-
-\bibitem{FILBET} F. Filbet, C. Mouhot, and L. Pareschi. Solving the Bolzmann equation in n log2n. \textit{SIAM Journal on Scientific Computing,} 28(3):1029-1053, 2006.
-
-\bibitem{FOX} R. O. Fox and P. Vedula. Quadrature-based moment model for moderately dense polydisperse gas-particle flows. \textit{Industrial and Engineering Chemistry Research,} 49(11):5174-5187, 2010.
-
-\bibitem{GREEN} B. I. Green and P. Vedula. Validiation of a collisional lattice Boltzmann method. In \textit{20th AIAA Computational Fluid Dynamics Conference, 27-30 June 2011, Honolulu Hawaii,} number 3403 in AIP Conference Proceedings, page 14. American Institute of Physics, 2011.
-
-\bibitem{HOLWAY} L. H. Holway. New statistical models for kinetic theory: methods of construction. \textit{Phys. Fluids,} 9(9):1658-1673, 1966.
-
-\bibitem{KIRSCH} R. Kirsch and S. Rjasanov. A weak formulation of the Boltzmann equation based on the Fourier transform. \textit{Journal of Statistical Physics,} 129(3):483-492, 2007.
-
-\bibitem{LEVERMORE} C. David Levermore. Moment closure hierarchies for kinetic theories. \textit{Journal of Statistical Physics,} 83(5-6
-:1021-1065, 1996.
-
-\bibitem{MAJORANA} Armando Majorana. A numerical model of the Boltzmann equation related to the discontinuous Galerkin method. \textit{Kinetic and Related Models,} 4(1):139-151, 2011.
-
-\bibitem{MOUHOT} Clement Mouhot and Lorenzo Pareschi. Fast algorithms for computing the Boltzmann collision operator. \textit{Mathematics of Computation,} 75(256):PP. 1833-1852, 2006.
-
-\bibitem{PANFEROV} Vladislav A. Panferov and Alexei G. Heintz. A new consistent discrete-velocity model for the Boltzmann equation. \textit{Mathematical Methods in the Applied Sciences,} 25(7):571-593, 2002.
-
-\bibitem{PARESCHI} Lorenzo Pareschi and Benoit Perthame. A Fourier spectral method for homogeneous Boltzmann equations. \textit{Trnasport Theory and Statistical Physics,} 25(3-5):369-382, 1996.
-
-\bibitem{SCHROCK} C. R. Schrock and A. W. Wood. Convergence of a distributional Monte Carlo method for the Boltzmann equation. \textit{Advances in Applied Mathematics and Mechanics,} 4(1):102-121, 2012.
-
-\bibitem{SCHROCK1} C. R. Schrock and A. W. Wood. Distributional Monte Carlo technique for rarefied gas dynamics. \textit{Journal of Thermophysics and Heat Transfer,} 26(1)185-189, 2012.
-
-\bibitem{SELDEN} NATHANIEL SELDEN, CEDRICK NGALANDE, NATALIA GIMELSHEIN, SERGEY GIMELSHEIN, and ANDREW KETSDEVER. Origins of radiometric forces on a circular vane with a temperature gradient. \textit{Journal of Fluid Mechanics,} 634:419-431, 9 2009.
-
-\bibitem{SHAKHOV} E. M. Shakhov. Approximate kinetic equations in rarefied gas theory. \textit{Fluid Dynamics,} 3(1):112-115, 1968
-
-\bibitem{SHAKHOV1} E. M. Shakhov. Generalization of the krook kinetic relaxation equation. \textit{Fluid Dynamics,} 3(5):95-96, 1968.
-
-\bibitem{TITAREV} V. A. Titarev. Efficient deterministic modeling of three dimensional rarefied gas flows. \textit{Communications in the Computational Physics,} 162(1):162-192, 2012.
-
-\bibitem{SUCCI} S. Succi. \textit{The Lattice Boltzmann Equation: For Fluid Dynamics and Beyond.} Numerical Mathematics and Scientific Computation. Clarendon Press, 2011.
-
-\bibitem{TCHEREMISSINE} F. G. Tcheremissine. SOlution to the Boltzmann kinetic equation for high-speed flows. \textit{Computational Mathematics and Mathematical Physics,} 46(2):315-329, 2006.
- 
-\end{thebibliography} 
-\end{footnotesize}
-
+\bibliographystyle{plain}
+\bibliography{ffb10092017}
 \end{document}

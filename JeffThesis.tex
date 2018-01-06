@@ -458,7 +458,55 @@ We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ 
 
 \chapter{The Discrete Fourier Transform}
 
-\section{Discrete Convolutions, Circular Convolutions, and Periodic Continuation}
+The goal is to compute (\ref{eq:I_dist}) faster than $O(M^6)$. We note that (\ref{eq:I_dist}) is similar to a discrete convolution form. The Discrete Fourier Transform is a tool that can be used to speed up the computations of convolutions. However, in order to do this, we must first take a periodic extension of our form. This section discusses the background of the Discrete Fourier Transform, convolution theorem, and periodic continuation needed to quickly compute (\ref{eq:I_dist}) 
+
+\section{The One-Dimensional Discrete Fourier Transform and its Properties}
+
+The Discrete Fourier Transform (DFT) is the discrete analog of the Fourier transform. It is a tool often used describe the relationship between the time and frequency representation of discrete signals. 
+\begin{definition}
+Let $\{x_n\}_{n=0}^{N-1}$ be a sequence of $N$ complex numbers. The DFT is defined as
+\begin{equation}
+\label{eq:dft_1d}
+x_{l} = \frac{1}{N} \sum_{k=0}^{N-1} W^{-lk} \calF[x]_{k}, \qquad  
+\mbox{where}\quad 
+W=\e^{-\imath 2\pi/N}\, .
+\end{equation}
+\end{definition}
+The DFT is invertible.
+\begin{definition}
+Let $\{\calF [x]_k\}_{k=0}^{N-1}$ be a sequence of $N$ complex numbers such that it is the DFT of the complex valued sequence $\{x_l\}_{l=0}^{N-1}$. Then the inverse DFT is defined as
+\begin{equation}
+\label{eq:idft_1d}
+x_{l} = \frac{1}{N} \sum_{k=0}^{N-1} W^{-lk} \calF[x]_{k} \, .
+\end{equation}
+\end{definition}
+
+The DFT is linear. That is, if we have two complex sequences $\{x_n\}_{n=0}^{N-1}$ and $\{y_n\}_{n=0}^{N-1}$, then 
+\begin{equation}
+\label{eq:dft_lin}
+\calF[x+y]_k = \calF[x]_k + \calF[y]_k\, .
+\end{equation}
+This property will be used in order to apply the DFT to discrete convolution form of the collision integral.
+
+Another important result is the convolution theorem. The result is stated and proved here. 
+\begin{definition}
+Let $x_{n}$ and $y_{n}$ be periodic sequences with period $N$. An $N$-point circular 
+convolution of $x_{n}$ and $y_{n}$ is defined as (see, e.g., \cite{Nussbaumer1982})
+\begin{equation}
+\label{eq:cirlconv}
+z_{l}=\sum_{n=0}^{N-1} x_{n}y_{l-n}\, .
+\end{equation} 
+\end{definition}
+A well known property of the Fourier transform is that it converts circular 
+convolution (\ref{cirlconv}) into a product, namely, 
+\begin{equation}
+\label{eq:dft_circ_conv}
+\calF[z]_{k}=\calF[x]_{k}\calF[y]_{k}\, .
+\end{equation}
+After calculating $\calF[z]_k$ using (\ref{eq:dft_circ_conv}), the sequence $\{z_n\}_{n=0}^{N-1}$ can be retrieved via application of the inverse DFT, (\ref{eq:idft_1d}), e.g. $\calF^{-1}[\calF[z]]_n = z_n$. 
+
+The convolution theorem seemingly gives no computational gain. Straightforward computation of the DFT and inverse DFT will take $O(N^2)$ complex operations. Computation of (\ref{eq:cirlconv}) also takes $O(N^2)$ operations without needing to perform any complex multiplications. However, the complexity of calculating (\ref{eq:dft_1d}) can be reduced by an algorithm known as the Fast Fourier Transform (FFT) which can calculate both the forward and inverse DFT in $O(N \log N)$ operations.
+\section{The Fast Fourier Transform}
 
 
 
@@ -468,6 +516,232 @@ We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Discretization of the Collision Integral and Fast Evaluation of Discrete Convolution}
+
+
+\section{Formulas for Computing the DFT of the Collision Integral Copy and Pasted}
+To derive the formula for computing the collision operator we rewrite (\ref{eq:I_dist}) as
+\begin{equation}
+\label{I+_distq1}
+I_{i;j_{u},j_{v},j_{w}}= \sum_{i',i''=1}^s I_{i,i',i'';j_{u},j_{v},j_{w}} \, ,
+\end{equation}
+where 
+\begin{equation*}
+I_{i,i',i'';j_{u},j_{v},j_{w}}=  \sum_{j_u',j_v',j_w'=0}^{M-1} \sum_{j_u'',j_v'',j_w''=0}^{M-1} f_{i';j'_{u}-j_{u},j'_{v}-j_{v},j'_{w}-j_{w}} f_{i'';j''_{u}-j_{u},j''_{v}-j_{v},j''_{w}-j_{w}} A_{i',i'';j'_{u},j'_{v},j'_{w},j''_u,j''_{v},j''_{w};i}\, .
+\end{equation*}
+In view of (\ref{I+_distq1}), we can focus on evaluation of $I_{i,i',i'';j_{u},j_{v},j_{w}}$. 
+To simplify the notations in the discussion below, we drop the $i$, $i'$, and $i''$ subscripts from 
+$I_{i,i',i'';j_{u},j_{v},j_{w}}$, $f_{i';j'_{u},j'_{v},j'_{w}}$, 
+$A_{i',i'';j'_{u},j'_{v},j'_{w},j''_u,j''_{v},j''_{w};i}$, and  $\calF[I_{i,i',i''}]_{k_{u},k_{v},k_{w}}$ 
+and write $I_{j_u,j_v,j_w}$, $f_{j'_{u},j'_{v},j'_{w}}$, 
+$A_{j'_{u},j'_{v},j'_{w},j''_u,j''_{v},j''_{w}}$, and $\calF[I]_{k_{u},k_{v},k_{w}}$, respectively. 
+In particular, we have
+\begin{equation}
+\label{I_all_index}
+I_{j_u,j_v,j_w}=  \sum_{j_u',j_v',j_w'=0}^{M-1} \sum_{j_u'',j_v'',j_w''=0}^{M-1}f_{j'_{u}-j_{u},j'_{v}-j_{v},j'_{w}-j_{w}} f_{j''_{u}-j_{u},j''_{v}-j_{v},j''_{w}-j_{w}} A_{j'_{u},j'_{v},j'_{w},j''_u,j''_{v},j''_{w}}\, .
+\end{equation}
+As is seen from definition (\ref{mdft_def}), the multi-dimensional DFT results from applying the one-dimensional DFT along each dimension of the sequence for every fixed value of indices in the other dimensions (see e.g., \cite{Nussbaumer1982}).
+
+We fix indices $j_v$ and $j_w$  in equation (\ref{I_all_index}) and apply the one-dimensional DFT in the remaining index $j_u$. Using linearity of the DFT and reordering the sums, we have 
+\begin{equation*}
+\calF[I_{j_v,j_w}]_{k_u} = \sum_{j_v',j'_w=0}^{M-1} \sum_{j_v'',j''_{w}=0}^{M-1}  \calF[\hat{I}_{j_v,j_v',j_v'',j_w,j_w',j_w''}]_{k_u}\, ,
+\end{equation*}
+where 
+\begin{equation*}
+\calF[\hat{I}_{j_v,j_v',j_v'',j_w,j_w',j_w''}]_{k_u} = 
+\sum_{j_u=0}^{M-1}  W^{ k_u j_u} \hat{I}_{j_u;j_v,j_v',j_v'',j_w,j_w',j_w''} 
+\end{equation*}
+\begin{equation*}
+\hat{I}_{j_u;j_v,j_v',j_v'',j_w,j_w',j_w''} = \sum_{j_u''=0}^{M-1} \sum_{j_u'=0}^{M-1} f_{j'_{u}-j_{u},j'_{v}-j_{v},j'_{w}-j_{w}} f_{j''_{u}-j_{u},j''_{v}-j_{v},j''_{w}-j_{w}} A_{j'_{u},j'_{v},j'_{w},j''_u,j''_{v},j''_{w}}\, .
+\end{equation*}
+Once again, for purposes of calculating the one-dimensional discrete Fourier transform along dimension $j_u$, we need only consider the transform of $\hat{I}_{j_u,j_v,j_v',j_v'',j_w,j_w',j_w''}$. 
+By similar argument as before, we fix and drop indices $j_v$, $j_v'$, $j_v''$, $j_w$, $j_w'$, and $j_w''$ in the latter formula and write 
+\begin{align}
+\hat{I}_{j_u} &= \sum_{j_u''=0}^{M-1} \sum_{j_u'=0}^{M-1} f_{j'_{u}-j_{u}} f_{j''_{u}-j_{u},} A_{j'_{u},j''_u} \label{I_onedim_u} \\
+\calF[\hat{I}]_{k_u} &= \sum_{j_u=0}^{M-1} \sum_{j_u''=0}^{M-1} \sum_{j_u'=0}^{M-1} W^{k_u j_u} f_{j'_{u}-j_{u}} f_{j''_{u}-j_{u},} A_{j'_{u},j''_u}\, . \label{FI_onedim_u}
+\end{align}
+We note that evaluating $\calF[\hat{I}]_{k_u}$ directly would require $O(M^3)$ operations.
+However, taking into consideration the discussion in the last section, expression in the right side of (\ref{I_onedim_u}) can be considered as a circular convolution, having a form similar to (\ref{cirlconv}). This motivates us to explore properties of the DFT and rewrite (\ref{FI_onedim_u}) in a form suitable for numerical computation. This is accomplished in the following lemma.
+
+\begin{lemma}
+\label{lemma_dft}
+Let $\{ f_j\}_{j=0}^{M-1}$ be a $M$ periodic sequence and $\{A_{ij}\}_{ij}$ be a two index sequence that is $M$ periodic in both its indices. Let $\{\hat{I}_j\}_{j=0}^{M-1}$ be a new sequence defined by 
+\begin{equation}
+\label{I_onedim}
+\hat{I}_{j} =  \sum_{j'=0}^{M-1} \sum_{j''=0}^{M-1} f_{j'-j}f_{j''-j} A_{j',j''} 
+\end{equation}
+Let $\calF[\hat{I}]_k$ be the DFT of $\hat{I}_j$, then  
+\begin{equation}
+\label{onedfconv}
+\calF[\hat{I}]_k = M \sum_{l=0}^{M-1} \calF^{-1}[f]_{k-l} \calF^{-1}[f]_{l} \calF[A]_{k-l,l}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Applying the one-dimensional DFT to $\hat{I}_j$, we have
+\begin{equation}
+\label{FI_u_index}
+\calF[\hat{I}]_k = \sum^{M-1}_{j_u=0} \sum^{M-1}_{j'=0} \sum^{M-1}_{j''=0} W^{k j } f_{j'-j}f_{j''-j}A_{j',j''}
+\end{equation}
+We define $\calF[A_{j'}]_{l}$ to be the one-dimensional DFT of $A_{j',j''}$ in the second index, i.e.,
+\begin{align*}
+%\label{ondim_FAdef}
+\calF[A_{j'}]_{l} = \sum_{j''=0}^{M-1} W^{ j'' l} A_{j',j''}\, ,
+\end{align*}
+and rewrite $A_{j',j''}$ as
+\begin{align}
+\label{one_dim_FA}
+A_{j',j''}= \frac{1}{M} \sum_{l=0}^{M-1} W^{ -j'' l} \calF[A_{j'}]_{l}\, .
+\end{align}
+Substituting (\ref{one_dim_FA}) into (\ref{FI_u_index}), we have
+\begin{align}
+\label{original}
+\calF [\hat{I}]_k &= \frac{1}{M} \sum_{j=0}^{M-1} \sum_{j'=0}^{M-1} \sum_{j''=0}^{M-1} W^{jk} f_{j'-j}f_{j''-j}
+\left( \sum_{l=0}^{N-1} W^{-j'' l} \calF[A_{j'}]_{l} \right)  \nonumber \\
+&= \frac{1}{M} \sum_{l=0}^{M-1} \sum_{j=0}^{M-1} \sum_{j'=0}^{M-1} \sum_{j''=0}^{M-1} W^{jk} f_{j'-j}f_{j''-j} W^{-j'' l } \calF[A_{j'}]_{l} 
+\end{align}
+Consider the sum that runs over index $j''$. Assuming that indices $l$, $j$, and $j'$ are held constant, we split the sum into two parts.
+\begin{align}
+\label{j''_split}
+&\sum_{j''=0}^{M-1} W^{jk} f_{j'-j}f_{j''-j} W^{-j'' l } \calF[A_{j'}]_{l}  \nonumber \\
+=&\sum_{j''=0}^{j-1} W^{jk} f_{j'-j}f_{j''-j} W^{-j'' l } \calF[A_{j'}]_{l} + \sum_{j''=j}^{M-1} W^{jk} f_{j'-j}f_{j''-j} W^{-j'' l } \calF[A_{j'}]_{l} \, .
+\end{align}
+
+Notice $j''-j < 0$ in the first sum. Using the periodicity of $f_{j}$ the summation index can be redefined so that only values $f_{j''-j}$ with positive $j''-j$ appear in the sum. Indeed, we assume that $j'' < j$ and notice that $f_{j''-j}=f_{j''-j+M}$ since $f_{j}$ is $M$ periodic. We also have $W^{M}=1$, so $W^{j'' l } = W^{j''l+Ml} = W^{(j''+M)l}$. 
+Introducing $\hat{j}''=j''+M$, we observe 
+\begin{align*}
+\sum_{j''=0}^{j-1} W^{jk} f_{j'-j}f_{j''-j} W^{-j'' l } \calF[A_{j'}]_{l} &
+=\sum_{j''=0}^{j-1} W^{jk} f_{j'-j}f_{j''-j+M} W^{(-j''+M) l } \calF[A_{j'}]_{l} \\
+&=\sum_{\hat{j}''=M}^{M-1+j} W^{jk} f_{j'-j}f_{\hat{j}''-j} W^{-\hat{j}'' l } \calF[A_{j'}]_{l}\, . 
+\end{align*}
+Combining the last formula with (\ref{j''_split}) we have 
+\begin{align}
+\label{j''_split2}
+\sum_{j''=0}^{M-1} W^{jk} f_{j'-j}f_{j''-j} W^{-j'' l } \calF[A_{j'}]_{l} 
+&= \sum_{j''=j}^{M-1+j} W^{jk} f_{j'-j}f_{j''-j} W^{-j'' l } \calF[A_{j'}]_{l} \, .
+\end{align}
+Introducing a substitution of index $u''=j''-j$ we rewrite the right side of  (\ref{j''_split2}) as follows 
+\begin{align*}
+\sum_{j''=0}^{M-1} W^{jk} f_{j'-j}f_{j''-j} W^{-j'' l } \calF[A_{j'}]_{l} 
+= \sum_{u''=0}^{M-1} W^{jk} f_{j'-j}f_{u''} W^{(-u''-j) l } \calF[A_{j'}]_{l}\, .
+\end{align*}
+Going back to (\ref{original}), we replace the inside sum with the last expression to have
+\begin{align}
+\label{original_u''}
+\frac{1}{M} \sum_{l=0}^{M-1} &\sum_{j=0}^{M-1} \sum_{j'=0}^{M-1} \sum_{u''=0}^{M-1} W^{jk} f_{j'-j}f_{u''} W^{(-u''-j) l } \calF[A_{j'}]_{l} \nonumber \\
+&= \frac{1}{M} \sum_{l=0}^{M-1} \sum_{j'=0}^{M-1} \sum_{u''=0}^{M-1} W^{-u'' l }f_{u''} \left( \sum_{j=0}^{M-1} W^{j(k-l)} f_{j'-j}  \calF[A_{j'}]_{l}  \right)\, .
+\end{align}
+
+Now we focus on the term within the parentheses in (\ref{original_u''}). Splitting the sum and using periodicity, we obtain
+\begin{align}
+\sum_{j=0}^{M-1}& W^{j(k-l)} f_{j'-j} \calF[A_{j'}]_{l} \\
+&=\sum_{j=0}^{j'} W^{j(k-l)} f_{j'-j} \calF[A_{j'}]_{l} + \sum_{j=j'+1}^{M-1} W^{j(k-l)} f_{j'-j} \calF[A_{j'}]_{l}  \nonumber \\
+&=\sum_{j=0}^{j'} W^{j(k-l)} f_{j'-j} \calF[A_{j'}]_{l} + \sum_{j=j'+1}^{M-1} W^{(j-M)(k-l)} f_{j'-j+M} \calF[A_{j'}]_{l}  \nonumber \\
+&=\sum_{j=0}^{j'} W^{j(k-l)} f_{j'-j} \calF[A_{j'}]_{l} + \sum_{\hat{j}=j'-M+1}^{-1} W^{\hat{j}(k-l)} f_{j'-\hat{j}} \calF[A_{j'}]_{l}  \nonumber  \\
+&=\sum_{j=j'-M+1}^{j'} W^{j(k-l)} f_{j'-j} \calF[A_{j'}]_{l} 
+= \sum_{u'=0}^{M-1} W^{(j'-u')(k-l)} f_{u'} \calF[A_{j'}]_{l}\, .
+\end{align}
+Here $u'=j'-j$. 
+Substituting this result into (\ref{original_u''}) and regrouping sums, we yield
+\begin{align}
+\label{grouped}
+\frac{1}{M} \sum_{l=0}^{M-1} &\sum_{j'=0}^{M-1} \sum_{u''=0}^{M-1} W^{-u'' l }f_{u''} \left( \sum_{j=0}^{M-1} W^{j(k-l)} f_{j'-j}  \calF[A_{j'}]_{l}  \right) \nonumber \\
+&= \frac{1}{M} \sum_{l=0}^{M-1} \sum_{j'=0}^{M-1} \sum_{u''=0}^{M-1} W^{-u'' l}f_{u''} \left(\sum_{u'=0}^{M-1} W^{(j'-u')(k-l)} f_{u'} \calF[A_{j'}]_{l} \right) \nonumber \\
+&= M\sum_{l=0}^{M-1} \left( \frac{1}{M} \sum_{u'=0}^{M-1} W^{-u'(k-l)} f_{u'}  \right) \left( \frac{1}{M} \sum_{u''=0}^{M-1} W^{-u'' l} f_{u''} \right) \left(  \sum_{j'=0}^{M-1} W^{j'(k-l)} \calF[A_{j'}]_{l} \right).
+\end{align}
+The terms in the parentheses in (\ref{grouped}) are just the definitions of the DFT. Thus we can write the equation as
+\begin{align*}
+\calF [\hat{I}]_k = M \sum_{l=0}^{M-1} \calF^{-1}[f]_{k-l} \calF^{-1}[f]_l \calF[A]_{k-l,l} \, .
+\end{align*}
+\end{proof}
+
+Lemma~\ref{lemma_dft} allows us to compute (\ref{FI_onedim_u}) in $O(M^2)$ operations. Indeed, it takes 
+$O(M \log M)$ operations to compute $\calF^{-1}[f]_{k_{u}}$ using a fast Fourier transform and it takes 
+$O(M^2)$ operations to compute discrete convolution in the frequency space (\ref{onedfconv}). To extend this result to $\calF[I]_{k_{u},k_{v},k_{w}}$, it is sufficient to repeat the approach for indices $j_{v}$ and $j_{w}$ focusing on one dimension at a time. The following theorem summarizes the result. 
+
+\begin{theorem}
+\label{thm3.1}
+Let $f_{j_{u},j_{v},j_{w}}$ be a three-index sequence that is periodic in each index with period $M$ and let $A_{j'_{u},j'_{v},j'_{w},j''_{u},j''_{v},j''_{w}}$ be a $M$-periodic six-dimensional tensor. The multi-dimensional discrete Fourier transform of equation (\ref{I_all_index}) can be represented as
+\begin{equation}
+\label{FI_formula}
+\calF [I]_{k_{u},k_{v},k_{w}} = M^3 \sum_{l_{u},l_{v},l_{w}=0}^{M-1} \calF^{-1}[f]_{k_{u}-l_{u},k_{v}-l_{v},k_{w}-l_{w}} \calF^{-1}[f]_{l_{u},l_{v},l_{w}} \calF[A]_{k_{u}-l_{u},k_{v}-l_{v},k_{w}-l_{w},l_{u},l_{w},l_{w}}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+We apply the one dimensional discrete Fourier transform along $j_u$ in equation (\ref{I_all_index}) and apply Lemma {\ref{lemma_dft}}:
+\begin{align}
+\label{lemma_once}
+\calF[I_{j_v,j_w}]_{k_{u}}&= \sum_{j_v',j_w'=0}^{M-1} \sum_{j_v'',j_w''=0}^{M-1} \left(\sum_{j_u=0}^{M-1} \sum_{j_u'=0}^{M-1} \sum_{j_u''=0}^{M-1} W^{j_u k} f_{j_u'-j_u,j_v'-j_v,j_w'-j_w} f_{j_u''-j_u,j_v''-j_v,j_w''-j_w} A_{j'_{u},j'_{v},j'_{w},j''_u,j''_{v},j''_{w}}\right) \nonumber \\ 
+&= M\sum_{j_v',j_w'=0}^{M-1} \sum_{j_v'',j_w''=0}^{M-1} \sum_{l_{u}=0}^{M-1} \calF^{-1}[f_{j_v'-j_v,j_w'-j_w}]_{k_{u}-l_{u}} \calF^{-1}[f_{j_v''-j_v,j_w''-j_w}]_{l_u} \calF[A_{j'_{v},j'_{w},j''_{v},j''_{w}}]_{k_{u}-l_{u},l_{u}} \nonumber \\ 
+&= M\sum_{l_u=0}^{M-1} \sum_{j_w'=0}^{M-1} \sum_{j_w''=0}^{M-1} \nonumber \\
+& \hspace{10mm} 
+\left( \sum_{j_v'=0}^{M-1} \sum_{j_v''=0}^{M-1}   \calF^{-1}[f_{j_v'-j_v,j_w'-j_w}]_{k_{u}-l_{u}} \calF^{-1}[f_{j_v''-j_v,j_w''-j_w}]_{l_{u}} \calF[A_{j'_{v},j'_{w},j''_{v},j''_{w}}]_{k_{u}-l_{u},l_{u}} \right) .
+\end{align}
+
+We now focus on the terms inside the parentheses. We fix the indices $j_w$, $j_w'$, $j_w''$, $k_{u}$, and $l_{u}$ in the grouped terms We drop these indices and write
+\begin{align*}
+\tilde{I}_{j_v} =  \sum_{j_v'=0}^{M-1} \sum_{j_v''=0}^{M-1} \tilde{f}_{j_v'-j_v} \tilde{f}_{j_v''-j_v} \tilde{A}_{j_v',j_v''}\, , 
+\end{align*}
+where 
+\begin{equation*}
+\tilde{f}_{j_v'-j_v} = \calF^{-1}[f_{j_v'-j_v}],\qquad 
+\tilde{A}_{j_v',j_v''} =  \calF[A_{j'_{v},j''_{v}}].
+\end{equation*}
+We can see that this expression is identical to (\ref{I_onedim}). We take the discrete Fourier transform along the $j_v$ index of $\calF[\tilde{I}]_{k_v}$ and apply Lemma~\ref{lemma_dft} to arrive at
+\begin{align}
+\label{dft_dft}
+\calF[\tilde{I}]_{k_v} &= M \sum_{l_{v}=0}^{M-1} \calF^{-1}[ \tilde{f}]_{k_{v}-l_{v}} \calF^{-1}[\tilde{f}]_{l_{v}} \calF[\tilde{A}]_{k_{v}-l_{v},l_{v}}\, .
+\end{align}
+We recall definitions of $\tilde{f}_{j_v'-j_v}$ and $\tilde{A}_{j_v',j_v''}$ and notice that the 
+multi-index  Fourier transform results from applying the one-dimensional transform in each index. 
+Bringing indices
+$j_w'$, $j_w''$, $k_{u}$ and $l_{u}$ back, equation (\ref{dft_dft}) becomes
+\begin{equation*}
+\calF[I_{j_w}]_{k_u,k_v} = M^2 \sum_{l_u,l_v=0}^{M-1} \calF^{-1}[f_{j'_w-j_w}]_{k_u-l_u,k_v-l_v} \calF^{-1}[f_{j''_w-j_w}]_{l_u,l_v} \calF[A_{j'_w,j''_w}]_{k_u-l_u,k_w-l_w,l_u,l_w}\, .
+\end{equation*}
+Performing the discrete Fourier transform in the $j_w$ and repeating the argument once more we arrive at the statement of the theorem.
+\end{proof}
+
+\section{The Algorithm and its Complexity Copy and Pasted}
+
+Theorem~\ref{thm3.1} allows us to calculate the collision operator 
+(\ref{I+_dist1}) in $O(s^3 M^6)$ operations using the algorithm outlined below. 
+We note that $\calF[A_{i,i',i''}]_{k_{u},k_{v},k_{w},l_{u},l_{w},l_{w}}$ 
+can be precomputed and therefore does not factor into the algorithmic complexity analysis. 
+\begin{enumerate}
+	\item The first step of the algorithm is to evaluate $\calF^{-1}[f_i]_{k_u,k_v,k_w}$. Evaluation of the inverse Fourier transform requires $O(M^3 \log M)$ operations for each value of index $i$ by utilizing three-dimensional FFT. This must be repeated for each $i$, resulting in the total of $O(s^3 M^3 \log M)$ operations where $s^3$ is the number of velocity nodes in each velocity cell.
+    \item Next we directly compute the convolution
+	\begin{equation*}
+		\calF [I_{i,i',i''}]_{k_{u},k_{v},k_{w}} = M^3 \sum_{l_{u},l_{v},l_{w}=0}^{M-1} \calF^{-1}[f_{i'}]_{k_{u}-l_{u},k_{v}-l_{v},k_{w}-l_{w}} \calF^{-1}[f_{i''}]_{l_{u},l_{v},l_{w}} \calF[A_{i,i',i''}]_{k_{u}-l_{u},k_{v}-l_{v},k_{w}-l_{w},l_{u},l_{w},l_{w}}\, 
+	\end{equation*}
+	using periodicity of both $\calF^{-1}[f_{i}]_{l_{u},l_{v},l_{w}}$ 
+	and $\calF[A_{i,i',i''}]_{k_{u},k_{v},k_{w},l_{u},l_{w},l_{w}}$. 
+	
+    For fixed values of indices $i$, $i'$, $i''$ and $k_u$, $k_v$, $k_w$, calculating 
+    $\calF [I_{i,i',i''}]_{k_{u},k_{v},k_{w}}$ requires $O(M^3)$ arithmetic operations. 
+    There are $M^3$ combinations of $k_u,k_v,k_w$ and $s^3$ combinations of indices  $i$, $i'$, and $i''$, therefore complexity of this step is $O(s^3 M^6)$.
+
+    \item Linearity of the Fourier transform allows us to sum $\calF[I_{i,i',i''}]_{k_u,k_v,k_w}$ along $i'$, $i''$ to calculate $\calF[I_i]_{k_u,k_v,k_w}$. 
+    \begin{align*}
+    \calF[I_{i}]_{k_{u},k_{v},k_{w}}
+= \sum_{i',i''=1}^s \calF[I_{i,i',i''}]_{k_{u},k_{v},k_{w}}\, . 
+    \end{align*}
+    This step requires adding $s^2$ sequences of length $M^3$ for every value of $i$, resulting in a complexity of $O(s^3 M^3)$ operations. 
+    \item We recover $\calF^{-1}[\calF[I_{i}]]_{j_u,j_v,j_w}=I_{i;j_u,j_v,j_w}$.
+    This requires calculating the three-dimensional inverse DFT for every $i$ which gives a complexity of $O(s M^3 \log M)$
+\end{enumerate}
+
+Overall, the algorithm has the numerical complexity of $O(s^3 M^6)$ dominated by step 2. 
+We note that $s=s_{u}s_{v}s_{w}$ is usually kept fixed and the number of cells 
+$M^3$ in velocity domain is changing. In this case, the main contribution to 
+complexity growth comes from $M$, the number of velocity cells in one velocity dimension. Thus 
+we can consider the algorithm to be of 
+complexity $O(M^6)$. In our simulations $s_u,s_v,s_w \leq 3$, however higher values 
+may be used too, at least theoretically. The results of this analysis are validated 
+within the next chapter.
+
+\chapter{Numerical Results}
+
 
 \clearpage
 \addcontentsline{toc}{chapter}{References}

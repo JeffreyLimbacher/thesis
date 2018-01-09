@@ -228,12 +228,21 @@ A gas is usually described by its macroscopic states. Kinetic theory defines the
 \end{align}
 where $C_i=v_i-\bar{v}_i$, $C^2=C_1^2 + C_2^2 + C_3^2$, and $R$ is the specific gas constant. The number density $n(t, \vecx)$ denote the number of particles contained in our distribution. $\bulkv (t,\vecx)$ denotes that average velocity of particles within the gas. The temperature denotes the deviation form the average. 
 
-An important property of the collision integral 
+An important property of the collision integral is that the first five moments are conservative (see \cite{Kremer2010}), that is
+\begin{equation}
+\label{eq:I_conservative}
+\begin{split}
+	\int_{\mathbb{R}^3}  I[f](t,\vec{x},\vec{v}) d\vec{v} = 0\, ,  \\
+	\int_{\mathbb{R}^3} v_i I[f](t,\vec{x},\vec{v}) d\vec{v} = 0\, ,  \\
+	\int_{\mathbb{R}^3} C^2 I[f](t,\vec{x},\vec{v}) d\vec{v} = 0 \, .
+\end{split}
+\end{equation}
 
 \section{The Maxwellian Distribution}
 
 If the gas is free from external influence, then the gas will approach an equilibrium. In this equilibrium, the gas distribution takes a specific shape known as the Maxwellian distribution given below.
 \begin{equation}
+\label{eq:maxwellian}
 f_M(\vec{v},n,\vec{\bar{v}},T) = \frac{1}{\sqrt{2 \pi R T}^3} \exp\left( -\frac{ |\vec{v} - \vec{\bar{v}}|^2}{2RT} \right)
 \end{equation} 
 	
@@ -247,7 +256,7 @@ Note that the exact shape of the Maxwellian distribution depends on the macrosco
 
 When the gas is in equilibrium, the difference between the number of particles that enter and leave a particular phase volume vanishes. In other words, 
 \begin{equation*}
-I[f_M](t,\vecx,\vecv) = \int_{\R^3} \int_{\R^3} f_{M1}'f_M' - f_{M1} f_M  g\, b\, db\, d\varepsilon\, d\vecv_1\ = 0
+I[f_M](t,\vecx,\vecv) = \int_{\R^3} \int_{\R^3} (f_{M1}'f_M' - f_{M1} f_M)  g\, b\, db\, d\varepsilon\, d\vecv_1\ = 0
 \end{equation*}
 
 \section{Dimensionless Reduction}
@@ -279,7 +288,11 @@ The three-dimensional basis function is defined as
 \phi_{i;j}(\vec{v})=\phi^{u}_{l;j}(u)\phi^{v}_{m;j}(v)
 \phi^{w}_{n;j}(w)
 \end{equation} 
-where $i=1,\dots, s= s_u s_v s_w$. A useful property of the basis functions (\ref{eq:01a}) is that they vanish on all nodes except one. In addition, the quadrature nodes used are exact on polynomials of degree at most $2s_u-1$, $2s_v-1$, and $2s_w-1$. In addition, the following lemma holds,
+where $l=1, \dots , s_u$, 
+$m=1,\dots ,s_v$, 
+$n=1,\dots ,s_w$ and $i$ 
+is the index that runs through all possible combinations of $l$, $n$, and $m$, and is computed as $i=((l-1)s_v)+(m-1)s_w)+n$.  
+A useful property of the basis functions (\ref{eq:01a}) is that they vanish on all nodes except one. In addition, the quadrature nodes used are exact on polynomials of degree at most $2s_u-1$, $2s_v-1$, and $2s_w-1$. In addition, the following lemma holds,
 \begin{lemma} (see also \cite{AlekseenkoJosyula2012a, HesthavenWarburtoin2007})
 The following identities hold for basis functions $\phi_{i;j}(\vec{v})$:
 \begin{equation}
@@ -348,6 +361,7 @@ We remark that in many numerical re-formulations of the Boltzmann equation, the 
 operator is separated into the gain and loss terms.
 This separation can be performed in (\ref{eq:transfer_eq}),
 \begin{align}
+\label{eq:I_split}
 I_{\phi_{i;j}}&= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}) f(t,\vec{x},\vec{v}_{1})
 \int_{\Sbb^2}(\phi_{i;j}(\vec{v}')-\phi_{i;j}(\vec{v})) b_{\alpha}(\theta) |g|^\alpha \, d\sigma\,
  d\vec{v}_{1}\, d\vec{v} \nonumber \\
@@ -356,10 +370,11 @@ I_{\phi_{i;j}}&= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}) f(t,\vec{x},\vec{v}
 \end{align}
 where
 \begin{equation}
+\label{eq:A_split}
 A^+(\vecv,\vecv_1;\phi_{i;j}) = \int_{\Sbb^2}\phi_{i;j}(\vec{v}')b_{\alpha}(\theta) |g|^\alpha d\sigma\, , \quad \sigma_T = \int_{\Sbb^2}\phi_{i;j}(\vec{v})b_{\alpha}(\theta)  d\sigma\, .
 \end{equation}
-Theoretical properties of $A^+(\vecv,\vecv_1;\phi_{i;j}$ are very similar to that of $A(\vecv,\vecv_1;\phi_{i;j})$. 
-$A^+(\vecv,\vecv_1;\phi_{i;j})$ has theoretical properties that are better than that of $A(\vecv,\vecv_1;\phi_{i;j})$ for a Fourier transform. 
+$A^+(\vecv,\vecv_1;\phi_{i;j})$ has similar properties to that of $A(\vecv,\vecv_1;\phi_{i;j})$, but
+$A^+(\vecv,\vecv_1;\phi_{i;j})$ has certain properties that are better than that of $A(\vecv,\vecv_1;\phi_{i;j})$ for a Fourier transform. 
 $A(\vecv,\vecv_1;\phi_{i;j})$ is grows linearly to infinity in some direction whereas $A^+(\vecv,\vecv_1;\phi_{i;j})$ does not. It can then be argued that $A^+(\vecv,\vecv_1;\phi_{i;j})$ is better suited for a Fourier transform than $A(\vecv,\vecv_1;\phi_{i;j})$. The algorithms in this paper also have straightforward extensions to the the split formulation of (\ref{eq:transfer_eq}). However, in practice, the split formulation of (\ref{eq:transfer_eq}) had significant errors in conservation.
 
 \section{Properties of the Kernel $A(\vecv,\vecv_1;\phi_{i;j})$}
@@ -498,16 +513,16 @@ z_{l}=\sum_{n=0}^{N-1} x_{n}y_{l-n}\, .
 \end{equation} 
 \end{definition}
 A well known property of the Fourier transform is that it converts circular 
-convolution (\ref{cirlconv}) into a product, namely, 
+convolution (\ref{eq:cirlconv}) into a product, namely, 
 \begin{equation}
 \label{eq:dft_circ_conv}
 \calF[z]_{k}=\calF[x]_{k}\calF[y]_{k}\, .
 \end{equation}
 After calculating $\calF[z]_k$ using (\ref{eq:dft_circ_conv}), the sequence $\{z_n\}_{n=0}^{N-1}$ can be retrieved via application of the inverse DFT, (\ref{eq:idft_1d}), e.g. $\calF^{-1}[\calF[z]]_n = z_n$. 
 
-The convolution theorem seemingly gives no computational gain. Straightforward computation of the DFT and inverse DFT will take $O(N^2)$ complex operations. Computation of (\ref{eq:cirlconv}) also takes $O(N^2)$ operations without needing to perform any complex multiplications. However, the complexity of calculating (\ref{eq:dft_1d}) can be reduced by an algorithm known as the Fast Fourier Transform (FFT) which can calculate both the forward and inverse DFT in $O(N \log N)$ operations.
-\section{The Fast Fourier Transform}
-
+The convolution theorem seemingly gives no computational gain. Straightforward computation of the DFT and inverse DFT will take $O(N^2)$ complex operations. Computation of (\ref{eq:cirlconv}) also takes $O(N^2)$ operations without needing to perform any complex multiplications if both $\{x_n\}$ and $\{y_n\}$ are real. However, the complexity of calculating (\ref{eq:dft_1d}) can be reduced by an algorithm known as the Fast Fourier Transform (FFT) which can calculate both the forward and inverse DFT in $O(N \log N)$ operations.
+\section{The One-Dimensional Fast Fourier Transform}
+In this section, technical details about the implementation of the Radix-2 Fast Fourier Transform are given. However, it should be noted that the Fast Fourier Transform has been implemented for many different radixes. 
 
 
 
@@ -703,6 +718,7 @@ Performing the discrete Fourier transform in the $j_w$ and repeating the argumen
 \end{proof}
 
 \section{The Algorithm and its Complexity Copy and Pasted}
+\label{sec:algorithm}
 
 Theorem~\ref{thm3.1} allows us to calculate the collision operator 
 (\ref{I+_dist1}) in $O(s^3 M^6)$ operations using the algorithm outlined below. 
@@ -727,8 +743,8 @@ can be precomputed and therefore does not factor into the algorithmic complexity
 = \sum_{i',i''=1}^s \calF[I_{i,i',i''}]_{k_{u},k_{v},k_{w}}\, . 
     \end{align*}
     This step requires adding $s^2$ sequences of length $M^3$ for every value of $i$, resulting in a complexity of $O(s^3 M^3)$ operations. 
-    \item We recover $\calF^{-1}[\calF[I_{i}]]_{j_u,j_v,j_w}=I_{i;j_u,j_v,j_w}$.
-    This requires calculating the three-dimensional inverse DFT for every $i$ which gives a complexity of $O(s M^3 \log M)$
+    \item We recover $\calF^{-1}[\calF[I_{i}]]_{j_u,j_v,j_w}=I_{i;j_u,j_v,j_w}'$.
+    This requires calculating the three-dimensional inverse DFT for every $i$ which gives a complexity of $O(s M^3 \log M)$.
 \end{enumerate}
 
 Overall, the algorithm has the numerical complexity of $O(s^3 M^6)$ dominated by step 2. 
@@ -740,8 +756,307 @@ complexity $O(M^6)$. In our simulations $s_u,s_v,s_w \leq 3$, however higher val
 may be used too, at least theoretically. The results of this analysis are validated 
 within the next chapter.
 
+
+\textbf{needs rewriting}
+In the implementation of the algorithm, we use the tensor product ordering for $f$. However, after taking the inverse FFT of $\calF[I_i]_{i;j_u,j_v,j_w}$, we get differently ordered sequence, $I_{i;j_u,j_v,j_w}'$. This is due to the fact we take the FFT with respect to $j$, the shift in velocity cell. To retrieve back $I_{i;j_u,j_v,j_w}$ from $I_{i;j_u,j_v,j_w}'$, the following equation was used:
+\begin{equation*}
+j_u = (j_u'-j_{u;c} \mod M)\, ,\ j_v = (j_v'-j_{v;c} \mod M)\, ,\ j_w = (j_w'-j_{w;c} \mod M)\, ,
+\end{equation*}
+where $j_u{u;c}$ is canonical node, $j_u'$ is the old index in $I_{i;j_u,j_v,j_w}$, and the $\mod$ operation always returns the positive remainder. To be explicit, the algorithm below
+
+{\singlespacing
+\begin{algorithm}[H]
+\caption{Perform FFT convolution at a single point in space.}
+\label{alg:fft_conv}
+\begin{algorithmic}[1]
+\Function{IndicesKeepTrack}{$f$,$\calF[A]$}
+	\State Input $f$, $Q$	\Comment{The solution at time $t$.}
+	\State Input $\calF[A]$ \Comment{The DFT of the $A$ operator.}
+	\For{i=1,s}
+		\State $F_i = \calF^{-1}[f]$ \Comment{Calculate the inverse DFT of $f$ along velocity cells.}
+	\EndFor
+	\For{Each combination of $i,i',i''=1,s$}
+		\State $\calF[I_{i,i',i''}] = M^3 \sum_{l_{u},l_{v},l_{w}=0}^{M-1} \calF^{-1}[f_{i'}]_{k_{u}-l_{u},k_{v}-l_{v},k_{w}-l_{w}} \calF^{-1}[f_{i''}]_{l_{u},l_{v},l_{w}} \calF[A_{i,i',i''}]_{k_{u}-l_{u},k_{v}-l_{v},k_{w}-l_{w},l_{u},l_{w},l_{w}}\,  $
+		\State $\calF[I_{i}] = \calF[I_{i}] + \calF[I_{i,i',i''}]$
+	\EndFor
+	\State $I_i' = \calF^{-1}[\calF[I_i]]$ \Comment{Take inverse DFT of $\calF{I_i}$ along velocity cells}.
+	\For{i=1,s} \Comment{Reordering step.}
+		\For{j=1,M}
+			\State $j_u'=j_u-j_{u;c} \mod M$
+			\State $j_v'=j_u-j_{v;c} \mod M$
+			\State $j_w'=j_w-j_{w;c} \mod M$
+			\State $I_{j_u,j_v,j_w;i} = I_{j_u',j_v',j_w';i}$
+		\EndFor
+	\EndFor
+	\State \Return $I_i$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+}
+\section{Alternative Formulation Involving $A^+$ Discretization}
+
 \chapter{Numerical Results}
 
+This chapter will cover the numerical results of computing the collision operator using the nodal-DG velocity discretizations and convolution using the DFT. 
+
+\section{Reduction in Computational Complexity}
+
+This section will cover estimating the numerical complexity of the method. 
+The analysis in section \ref{sec:algorithm} suggested that the algorithm had a total number of operations of $O(M^6)$ where $M$ is the number of velocity cells in one velocity dimension. 
+As discussed in \cite{AlekseenkoJosyula2012a}, the direction evaluation of convolution (\ref{eq:I_dist}) requires $O(M^8)$ operations. Thus we expect the FFT evaluation of (\ref{eq:I_dist}) to take much less time than the method discussed in \cite{AlekseenkoJosyula2012a}.
+
+The results in Table \ref{tab:01} display the CPU times for evaluating the collision operator at one spatial point using both the FFT and direct evaluations. 
+The computations were done on a Intel Core i7-3770 3.4 GHz processor. 
+The code was compiled using the Intel Fortran Compilers along with Intel Math Kernal Library.
+The number of cells in the velocity domain were varied from 9 to 27. $s=1$ in each run. 
+The computational complexity was modeled using $t=O(M^\alpha)$ where $\alpha$ is a constant. 
+The estimated values of $\alpha$ were calculated as $\hat{\alpha}=\ln(M_{1}/M_{2})/\ln(t_{1}/t_{2})$. 
+
+\textbf{Copy and Pasted Paragraph} Note that in the case of the Fourier evaluation, the observed orders are significantly 
+higher than the projected value of 6. Still, the orders are significantly lower than the 
+orders of the direct evaluation. Deviations from the theoretical estimate of 
+$\alpha=6$ may be due to the costs of the memory transfer operations and due to the choice of 
+the specific fast Fourier transform that was automatically selected by the KML library based 
+on the value of $M$. Overall, the new approach showed a dramatic improvement in speed as 
+compared to the direct evaluation of the collision operator used in \cite{AlekseenkoJosyula2012}.
+The acceleration is expected to be even larger for higher values of $M$.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}[c]{ c c c c c c}
+    \hline 
+    & \multicolumn{2}{c|}{FFT} & \multicolumn{2}{c|}{Direct} & Speedup\\
+    \hline
+    $M$ & time, s & $\hat{\alpha}$ & time, s & $\hat{\alpha}$ &  \\
+    \hline
+    9   & 1.47E-02 &         & 1.25E-01 &       & 8.5  \\
+    15  & 3.94E-01 &  6.43   & 4.91E+00 &  7.18 & 12.5 \\
+    21  & 3.09E+00 &  6.14   & 7.80E+01 &  8.21 & 25.2 \\
+    27  & 1.64E+01 &  6.65   & 6.05E+02 &  8.15 & 36.7 \\
+    \hline
+  \end{tabular}
+\caption{\label{tab:01} CPU times for evaluating the collision operator directly and using the Fourier transform.}
+\end{table}
+
+\section{The Micro-Macro Decomposition}
+The form of the collision integral can be reformulated for the purpose of numerical implementation. During simulations, it was observed that the ability of numerical simulations to conserve mass, momentum, and energy is strongly affected by the form of the discrete collision integral. 
+
+One such reformulation is the micro-macro decomposition [{\bf ??}] which considers the solution has the sum of the target Maxwellian distribution and the deviation from the Maxwellian, i.e.,
+\begin{equation}
+\label{eq:decomp}
+f(t,\vecx,\vecv) = f_M(t, \vecx, \vecv) + \Delta f(t,\vecx,\vecv)\, ,
+\end{equation}
+where $f_M(t,\vecx,\vecv)$ takes the form (\ref{eq:maxwellian}) with the same temperature, bulk velocity, and temperature as $f(t,\vecx,\vecv)$. This form was applied in \cite{AlekseenkoJosyula2012} in order to improve conservation properties of the scheme when the solution is near continuum. The numerical implementation used for the FFT convolution also used this decomposition. We substitute (\ref{eq:decomp}) into (\ref{eq:transfer_eq}) to obtain an alternative form of the collision integral:
+\begin{align}
+\label{eq:I_decomp_continuous}
+I_{\phi_{i;j}}&= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}) f(t,\vec{x},\vec{v}_{1})
+ A(\vec{v},\vec{v}_{1};\phi_{i;j})   d\vec{v}_{1}\, d\vec{v}\, \nonumber \\
+ &=\int_{\R^3}\int_{\R^3} [f_{M}(t,\vec{x},\vec{v}) \Delta f(t,\vec{x},\vec{v}_{1})
+ +\Delta f(t,\vec{x},\vec{v}) f_{M}(t,\vec{x},\vec{v}_{1})\nonumber \\
+ &\hspace*{10mm}{}+ \Delta f(t,\vec{x},\vec{v}) \Delta f(t,\vec{x},\vec{v}_{1})]
+ A(\vec{v},\vec{v}_{1};\phi_{i;j})   d\vec{v}_{1}\, d\vec{v}\, . 
+\end{align}
+where we used that $I[f_M](t,\vecx,\vecv)=0$. It was found that this form of the operator provided much better numerical results. Thus the numerical results in the rest of this work use (\ref{eq:I_decomp_continuous}) for all the calculations. 
+
+\section{Numerical Results of the Split Form of the Operator}
+As was discussed in section \ref{sec:reform_galerkin}, there is an alternative formulation of (\ref{eq:transfer_eq}) which we write as (\ref{eq:I_split}). This section discusses the numerical issues with conservation that this form had.
+
+\textbf{Begin copy and paste} In Figure~\ref{fig01} results of the evaluation of the collision integral 
+at a single spatial point are presented for both split and non-split 
+formulations. The value of the solution $f(t,\vec{v})$ in these computations 
+is given by the sum of two Maxwellian distributions with dimensionless 
+densities, bulk velocities, and temperatures given as follows: $n_{1}=1.6094$, 
+$n_{2}=2.8628$, $\bar{\vec{u}}_{1}=(0.7750,0,0)$, $\bar{\vec{u}}_{2}=(0.4357,0,0)$,
+$T_{1}=0.3$, and $T_{2}=0.464$. These values correspond to upstream and downstream conditions
+of a normal shock wave with the Mach number 1.55. Discretization of the solution was done using 
+27 velocity cells in each dimension and one velocity node per cell. The collision operator was 
+evaluated using both the split and non-split forms and using both direct evaluation and evaluation 
+using the Fourier transform. Results of the direct evaluation of the 
+split form of the collision operator are shown in plots (b) and (e). Notably, values 
+of the collision operator are zero at the 
+boundary of the domain, which is what one would expect from the collision process. Results 
+of evaluation of the split form of the collision operator using the Fourier transform are shown in plots (a) and (b). 
+Significant non-zero values can be observed at the corners of the domain. This is likely to be 
+a manifestation of aliasing. Results of evaluating the non-split form of the collision 
+operator using the Fourier transform are shown in plots (c) and (f). One can notice that 
+in the case of the non-split form, aliasing is not visible. In fact, the 
+$L^{1}$-norm of the difference between the direct and Fourier
+evaluations of the non-split collision operator in this case was 2.9E-4 and 
+the $L^{\infty}$-norm was 
+1.1E-4. We note that the diameters of the support of the collision kernels 
+are comparable in both split and non-split cases. However, the non-split kernel is 
+more sparse. We also note that by padding the solution and the collision kernel with zeros, 
+the aliasing errors can be reduced in the case of the split formulations. However, 
+this will also increase memory and time costs of calculations. The non-split form 
+of the collision operator has significantly smaller aliasing errors and does not 
+require zero padding. Therefore, it is more efficient. 
+
+\begin{center}
+\begin{figure}[h]
+\centering
+  \begin{tabular}{@{}ccc@{}}
+  \includegraphics[height=.18\textheight]{images/27N_split_fourier.pdf}&
+  \includegraphics[height=.18\textheight]{images/27N_split_direct.pdf}&
+  \includegraphics[height=.18\textheight]{images/27N_fourier.pdf}\\
+  \includegraphics[height=.18\textheight]{images/27N_split_fourier_topdown.pdf}&
+  \includegraphics[height=.18\textheight]{images/27N_split_direct_topdown.pdf}&
+  \includegraphics[height=.18\textheight]{images/27N_fourier_topdown.pdf}\\
+\end{tabular}
+\caption{\label{fig01} Evaluation of the collision operator using split and non-split forms: (a) and (d) the split form evaluated using the Fourier transform; (b) and (e) the split form evaluated directly; (c) and (f) the non-split form evaluated using the Fourier transform.}
+\end{figure}
+\end{center}
+
+Another important issue that makes the non-split formulation more attractive is concerned 
+with conservation of mass, momentum, and energy in the discrete solutions. It is the property of 
+the exact Boltzmann collision operator that its mass, momentum, and temperature moments are zero. 
+Generally, the conservation laws are satisfied only approximately when the Boltzmann equation is 
+discretized. Many numerical approaches include mechanisms dedicated to enforcement of  
+the conservation laws in discrete solutions in order to guarantee a physically meaningful result.
+
+ \begin{table}[h]
+  \begin{tabular}[c]{ c c c c c | c c c c }
+  \hline
+  \multicolumn{5}{c|}{Error in Conservation of Mass} &
+  \multicolumn{4}{c}{Error in Conservation of Temperature}\\
+    \hline 
+    & \multicolumn{2}{c|}{Split} & \multicolumn{2}{c|}{Non-split} &
+    \multicolumn{2}{c|}{Split} & \multicolumn{2}{c}{Non-split} \\
+    \hline
+    $n$ & Fourier& Direct & Fourier & Direct 
+        & Fourier& Direct & Fourier & Direct \\
+    \hline
+    9   & 0.37 & 1.26 & 1.71E-5 & 1.92E-5 &
+          3.51 & 1.69 & 1.71E-2 & 1.84E-2  \\
+    15  & 0.10 & 1.20 & 1.45E-5 & 1.71E-5 & 
+          0.29 & 1.25 & 1.64E-3 & 3.15E-3 \\
+    21  & 0.18 & 1.18 & 0.67E-5 & 0.93E-5 & 
+          1.38 & 1.24 & 5.61E-5 & 1.75E-3 \\
+    27  & 0.18 & 1.18 & 0.61E-5 & 0.86E-5 & 
+          1.37 & 1.24 & 5.40E-4 & 1.05E-3 \\
+    \hline
+  \end{tabular}
+\caption{\label{tab02} Absolute errors in conservation of mass and temperature in the discrete collision integral computed using split and non-split formulations.}
+\end{table}
+
+It was observed that if no measures are introduced to enforce the conservation laws,  
+solutions to the problem of spatially homogeneous relaxation obtained using the 
+split formulation of the collision integral exhibit large, on the order of 5\%\ errors in 
+temperature. The mass and momentum are also poorly conserved in this case. 
+At the same time, solutions obtained using the non-split formulation had their mass, momentum,
+and temperature accurate to three or more digits. To further explore this phenomena, 
+we evaluated the collision operator in both split and non-split forms and computed its mass, 
+momentum, and temperature moments. The solution was taken to be the sum of two Maxwellians 
+in the example above. The numbers of velocity cells were 
+varied from 9 to 27. In both split and non-split 
+formulations of the collision integral, the decomposed form (\ref{dec01}) of the solution was 
+used. For both forms, evaluation of the collision operator was done directly and using the Fourier transform. 
+The results are summarized in Table~\ref{tab02}. It can be seen that errors in the mass and 
+temperature in the non-split formulation are several orders of magnitude smaller than in 
+the split formulation. The errors are also larger in the case of direct evaluation. 
+A possible explanation to this is the combined effect of finite precision 
+arithmetic and truncation errors in integration that lead to catastrophic cancellation 
+when gain and loss terms are combined. 
+We note that in 
+both split and non-split forms, fulfilment of 
+conservation laws requires exact cancellation of the respective integration 
+sums. 
+When the gain and
+loss terms are computed separately using numerical quadratures, the 
+relative truncation errors are expected to be acceptable for each of the terms. 
+This may change, however, when the terms are combined. It is 
+conceivable that significant digits cancel in the two terms and the 
+truncation errors are promoted into significance, manifesting in strong 
+violations of conservation laws. At the same time, increasing 
+the number of velocity cells may not remedy the problem 
+due to the expected accumulation of roundoff 
+errors. Indeed, evaluation of the gain term in (\ref{eq:I_split}) requires 
+$O(M^8)$ arithmetic operations. 
+It is possible that combination of large and small values in the finite 
+precision arithmetic results in loss of low order digits and a significant 
+accumulation of roundoff. When the gain and loss terms are combined, 
+this, again, will lead to loss of significance and to perturbations of 
+conservation laws. In the case when both the  
+non-split form and the decomposition (\ref{eq:I_decomp_continuous}) are used, 
+much of the cancellation is happening 
+on the level of the integrand. 
+We hypothesize here 
+that the resulting values of the integrand are smaller and vary less 
+in scale. As a result, the accumulated absolute truncation and 
+roundoff errors are also smaller, which gives better accuracy in 
+conservation laws.
+
+Because of the poor conservation properties and because of the 
+susceptibility to aliasing errors we do not recommend the 
+split form (\ref{eq:I_split}) for numerical implementation. 
+\textbf{end copy and paste}
+
+\section{0d Homogeneuous Relaxation COPY AND PASTED}
+
+In this section we present results of solution of the problem of 
+spatially homogeneous relaxation using Fourier evaluation of the 
+collision operator. Two cases of initial data were considered. In 
+both cases, the initial data is a sum of two Maxwellian densities. 
+In the first case, the 
+dimensionless densities, bulk velocities, and temperatures of the 
+Maxwellians are $n_1=1.0007$, $n_2=2.9992$, 
+$\bar{\vec{u}}_{1}=(1.2247,0,0)$, $\bar{\vec{u}}_{2}=(0.4082,0,0)$,
+$T_{1}=0.2$, $T_{2}=0.7333$. These parameters correspond to upstream 
+and downstream conditions of the Mach 3 normal shock wave.  
+In the second case, we use the parameters of the example of the previous  
+section: $n_{1}=1.6094$, $n_{2}=2.8628$, $\bar{\vec{u}}_{1}=(0.7750,0,0)$, $\bar{\vec{u}}_{2}=(0.4357,0,0)$, $T_{1}=0.3$, and $T_{2}=0.464$. These 
+parameters correspond to upstream and downstream conditions of a Mach 1.55 
+shock wave. 
+
+In Figures~{\ref{fig02}} and {\ref{fig03}}, relaxation of moments in the 
+Mach~3.0 and Mach~1.55 solutions are presented. In the case of Mach~3.0, 
+$M=33$ velocity cells were used in each velocity dimension with one 
+velocity node on each cell, $s=1$. In the case of Mach~1.55, $M=15$ and $s=1$ 
+were used. In the computed solutions, the collision operator was evaluated 
+both using the Fourier transform and directly. In the Mach 3.0 instance, the directional 
+temperature moments were compared to the moments obtained from a DSMC solution
+\cite{Boyd1991411}. 
+
+\begin{center}
+\begin{figure}[h]
+\centering
+  \begin{tabular}{@{}cc@{}}
+  \includegraphics[height=.218\textheight]{images/m300_N33_mom2.pdf}&
+  \includegraphics[height=.218\textheight]{images/m300_N33_mom3.pdf}\\      
+  \includegraphics[height=.218\textheight]{images/m300_N33_mom4.pdf}&
+  \includegraphics[height=.218\textheight]{images/m300_N33_mom6.pdf}\\
+  \end{tabular}
+\caption{\label{fig02} Relaxation of moments $f_{\varphi_{i,p}} = 
+\int_{R^3} (u_{i}-\bar{u}_{i})^p f(t,\vec{u})\, du$, $i=1,2$, $p=2,3,4,6$ 
+in a mix of Maxwellian streams corresponding to a shock wave with 
+Mach number 3.0 obtained by solving the Boltzmann equation using Fourier and direct evaluations of the collision integral. In the case of $p=2$, the relaxation of moments 
+is also compared to moments of a DSMC solution \cite{Boyd1991411}. }
+\end{figure}
+\end{center}
+
+\begin{center}
+\begin{figure}[h]
+\centering
+  \begin{tabular}{@{}cc@{}}
+  \includegraphics[height=.218\textheight]{images/m155_15N_mom2.pdf}&
+  \includegraphics[height=.218\textheight]{images/m155_15N_mom3.pdf}\\      
+  \includegraphics[height=.218\textheight]{images/m155_15N_mom4.pdf}&
+  \includegraphics[height=.218\textheight]{images/m155_15N_mom6.pdf}\\
+  \end{tabular}
+\caption{\label{fig03} Relaxation of moments $f_{\varphi_{i,p}}$, $i=1,2$, $p=2,3,4,6$ 
+in a mix of Maxwellian streams corresponding to a shock wave with 
+Mach number 1.55 obtained by solving the Boltzmann equation using Fourier and direct evaluations of the collision integral.}
+\end{figure}
+\end{center}
+
+It can be seen that the solutions obtained by the Fourier evaluation of the collision 
+integral are close to those computed by the direct evaluation. The low order moments 
+are in excellent agreement for both presented solutions. However, there are 
+differences in the higher moments. It appears that the differences are caused 
+by a small amount of the aliasing error in the solutions. This can be reduced 
+by padding the solution and the kernel with zeros at the expense of higher numerical 
+costs, both in time and memory. Overall, however, the $O(M^6)$ evaluation of 
+the collision operator using the Fourier transform appears to be consistent 
+and stable. 
 
 \clearpage
 \addcontentsline{toc}{chapter}{References}

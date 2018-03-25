@@ -199,11 +199,21 @@ However, when the effects of collisions cannot be neglected, the right hand side
 \end{equation}
 Where $I[f]$ is referred to as the collision operator. The explicit form of $I[f]$ depends on the properties of the gas. To describe it explicitly, we make several assumptions. First, the gas composed entirely of a single species of molecule. Second, we assume hard sphere collisions as described in section \ref{sec:bincol}. 
 
-In order to explicitly write the collision operator, we must describe the collisions within the gas. Consider a particle with velocity $\vecv$. In the volume element $\vecx d\vecx$
+In order to explicitly write the collision operator, we must describe the collisions within the gas. Consider a particle with velocity $\vecv_1$ at point $\vecx$. This particle will collide with $f(t,\vecx, \vecv)d\vecv_1 g \Delta t b \, db \, d\varepsilon$ particles within the ranges of $\vecv_1$ and $\vecv_1 + d\vecv_1$. Integrating this by all all possible angles $(0 <= \varepsilon < 2 \pi)$, over all impact parameters, $(0 \leq b \leq b^*)$, and over all velocities, for all particles within the volume element $\vecx d\vecx$, we get that there are 
 \begin{equation}
-dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f_1 f b |g|\,  db \, d\varepsilon\, dv_1 \, dv \, .
+\label{eq:depletion}
+dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f(t, \vecx, \vecv_1) f(t, \vecx, \vecv) b |g|\,  db \, d\varepsilon\, d\vecv_1 
+\end{equation}
+total collisions within the volume element that annihilate points with velocity $\vecv$. Likewise, there are collisions that create points with velocity $\vecv$. Using the results of the lasts section, points with velocity $\vecv'$ and $\vecv_1'$, impact parameter $b'=b$, and azimuthal angle $\varepsilon' = \pi + \varepsilon$ will result in particles with post-collisional velocity of $\vecv$ and $\vecv_1$. The number of such collisions is
+\begin{equation}
+\label{eq:restitution}
+\begin{split}
+&dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f(t, \vecx, \vecv_1') f(t, \vecx, \vecv') b' |g'|\,  db \, d\varepsilon'\, d\vecv_1 \,  \\
+=&dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f(t, \vecx, \vecv_1') f(t, \vecx, \vecv') b |g|\,  db \, d\varepsilon\, d\vecv_1 \, .
+\end{split}
 \end{equation}
 
+Subtracting (\ref{eq:depletion}) from (\ref{eq:restitution}) gives the net number of particles enter or leave the volume element $\vecv + d\vecv$; that is
 \begin{equation}
 \label{eq:explicit_I}
 I[f](t, \vecx, \vecv) = \int_{\R^3} \int_{\R^3} (f_1' f' - f_1 f) |g|\, b\, db\, d\varepsilon\, d\vecv_1\, ,
@@ -473,21 +483,25 @@ We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ 
 
 \chapter{The Discrete Fourier Transform}
 
-The goal is to compute (\ref{eq:I_dist}) faster than $O(M^6)$. We note that (\ref{eq:I_dist}) is similar to a discrete convolution form. The Discrete Fourier Transform is a tool that can be used to speed up the computations of convolutions. However, in order to do this, we must first take a periodic extension of our form. This section discusses the background of the Discrete Fourier Transform, convolution theorem, and periodic continuation needed to quickly compute (\ref{eq:I_dist}) 
+The goal is to compute (\ref{eq:I_dist}) faster than $O(M^6)$. We note that (\ref{eq:I_dist}) is similar to a discrete convolution form. The Discrete Fourier Transform (DFT) can be used to speed up the computations of convolutions using the \textit{Convolution Theorem}. In particular, it is used to speed up circular convolutions. In order to apply the DFT to our problem, we must first assume a periodic extension of the discrete form of $f$. This section discusses the background of the Discrete Fourier Transform, convolution theorem, and periodic continuation needed to quickly compute (\ref{eq:I_dist}) 
 
 \section{The One-Dimensional Discrete Fourier Transform and its Properties}
 
-The Discrete Fourier Transform (DFT) is the discrete analog of the Fourier transform. It is a tool often used describe the relationship between the time and frequency representation of discrete signals. 
+The Discrete Fourier Transform is the discrete analog of the Fourier transform. It is a tool often used describe the relationship between the time and frequency representation of discrete signals \cite{Nussbaumer1982}. 
 \begin{definition}
 Let $\{x_n\}_{n=0}^{N-1}$ be a sequence of $N$ complex numbers. The DFT is defined as
 \begin{equation}
 \label{eq:dft_1d}
-x_{l} = \frac{1}{N} \sum_{k=0}^{N-1} W^{-lk} \calF[x]_{k}, \qquad  
+\calF[x]_{k} =  \sum_{l=0}^{N-1} W^{lk} x_l, \qquad  
 \mbox{where}\quad 
 W=\e^{-\imath 2\pi/N}\, .
 \end{equation}
 \end{definition}
-The DFT is invertible.
+
+\subsection{Properties of the DFT}
+
+Many properties of the DFT are a natural consequence of its defintion. In this subsection, we review the properties of the DFT that will be important for applying the DFT to \ref{eq:I_dist}. First, the DFT is invertible.
+
 \begin{definition}
 Let $\{\calF [x]_k\}_{k=0}^{N-1}$ be a sequence of $N$ complex numbers such that it is the DFT of the complex valued sequence $\{x_l\}_{l=0}^{N-1}$. Then the inverse DFT is defined as
 \begin{equation}
@@ -496,6 +510,20 @@ x_{l} = \frac{1}{N} \sum_{k=0}^{N-1} W^{-lk} \calF[x]_{k} \, .
 \end{equation}
 \end{definition}
 
+We can see that definition of the inverse will give back the original sequence. If we have a sequence $\{x_l\}_{l=0}^{N-1}$, then note that if we take the inverse of $\calF[x]_k$
+
+\begin{align*}
+\calF^{-1}[\calF[x]]_l &= \frac{1}{N} \sum_{k=0}^{N-1}W^{-lk}(\sum_{j=0}^{N-1} W^{kj} x_j) \\
+ &= \frac{1}{N} \sum_{k=0}^{N-1} \sum_{j=0}^{N-1} W^{-lk} W^{kj} x_j \\
+ &= \frac{1}{N} \sum_{j=0}^{N-1}  x_j (\sum_{k=0}^{N-1} W^{(j-l)k}) \\
+ &= N \frac{1}{N} x_l = x_l
+\end{align*}
+where the last step used that if $l \not = j$ then $\sum_{k=0}^{N-1} W^{(j-l)k} = 0$ and for $l=j$ we have that $\sum_{k=0}^{N-1} W^{(j-l)k} = \sum_{k=0}^{N-1} 1 = N$. Thus the definition given above returns the original sequence. To see this:
+\begin{align*}
+\calF[z]_k &= \sum_{l=0}^{N-1} W^{kn} \sum_{n=0}^{N-1} x_{n}y_{l-n} \\
+&= \sum_{n=0}^{N-1} x_{n} ( \sum_{l=0}^{N-1} W^{kn}y_{l-n}
+\end{align*}
+
 The DFT is linear. That is, if we have two complex sequences $\{x_n\}_{n=0}^{N-1}$ and $\{y_n\}_{n=0}^{N-1}$, then 
 \begin{equation}
 \label{eq:dft_lin}
@@ -503,7 +531,14 @@ The DFT is linear. That is, if we have two complex sequences $\{x_n\}_{n=0}^{N-1
 \end{equation}
 This property will be used in order to apply the DFT to discrete convolution form of the collision integral.
 
-Another important result is the convolution theorem. The result is stated and proved here. 
+The last property we need is the shift property. This says that if $\{y_n\}$ is a periodic sequence created by shifting $\{x_n\}$ by $l$, that is $\{y_n\} = \{x_{n+l}\}$, then
+\begin{equation}
+\label{eq:shift_prop}
+\calF[y]_k = W^{lk}\calF[x]_k\, .
+\end{equation}
+
+\subsection{The Convolution Theorem}
+Another important result is the convolution theorem. The result is stated and proved here. First we start with a definition.
 \begin{definition}
 Let $x_{n}$ and $y_{n}$ be periodic sequences with period $N$. An $N$-point circular 
 convolution of $x_{n}$ and $y_{n}$ is defined as (see, e.g., \cite{Nussbaumer1982})

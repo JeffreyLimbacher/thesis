@@ -55,6 +55,8 @@
 \newcommand{\limit}[3]{\underset{#1 \to #2}{\lim}  #3}  %this defines a command called limit with 3 slots
 \newcommand{\manM}{$\mathcal{M}$}
 \newcommand{\manMs}{$\mathcal{M} $ }
+\newcommand{\Tref}{T_{\infty}}
+\newcommand{\Cref}{C_{\infty}}
 % Math mode friendly shortcuts
 % % %
 \def\T{\mathbb{T}}
@@ -271,6 +273,44 @@ I[f_M](t,\vecx,\vecv) = \int_{\R^3} \int_{\R^3} (f_{M1}'f_M' - f_{M1} f_M)  g\, 
 
 \section{Dimensionless Reduction}
 
+Gas dynamic constants can vary greatly in scale. This can cause an accumulation of round-off error using floating point arithmetic when performing a large number of computations. In order to reduce the error that can be introduced by the varying scales, a dimensionless reduction is performed on the constants and equations. The dimensionless reduction aims to reduce the scale of all the variables to roughly of order one to minimize the round-off error. Note that the dimensionless reduction process can never eliminate round-off error since it is inherit to floating point arithmetic. The techniques used for dimensionless reduction vary from problem to problem. This thesis adopts the convention borrowed from Chapter 3 of [][][][].
+
+Let $\hat{t}$, $\hat{x}$, and $\hat{v}$ denote the conventional dimensional variables. In general, all quantities bearing $\hat{\cdot}$ will represent dimensional quantities, i.e. whose numbers have units understood to have physical meaning (e.g.. seconds, meters, meters per second). For example, $\hat{f}(\hat{t},\hat{x},\hat{v})$ will represent the molecular number density distribution function.
+
+We assume some time scale $\mathbb{T}$, reference temperature $\Tref$, and some length scale $L$, which are selected with a particular application in mind. We define $\Cref = \sqrt{2R\Tref}$. In addition, we define
+\begin{equation}
+\label{eq:new_dimless}
+t=\frac{\hat{t}}{\T},
+\quad x_{i}=\frac{\hat{x}}{L},
+\quad v=\frac{\hat{v}}{C_{\infty}}, 
+\quad \mbox{or}
+\quad \hat{t}=t\T,
+\quad \hat{x}=x L,
+\quad \hat{v}=vC_{\infty}\, .
+\end{equation}
+The dimensionless density is
+\begin{equation}
+f(t,x,v) = \frac{L^3 \Cref^3}{N} \hat{f}(t\mathbb{T},xL, v\Cref) = \hat{f}(\hat{t},\hat{x},\hat{v})\, ,
+\end{equation}
+where $N$ is total number of molecules in the gas volume $L^3$. 
+
+With these definitions, then the relationship between the dimensionless macroparameters and the dimensional pacroparameters are now as follows. We define
+\begin{equation}
+\begin{split}
+\label{eq:dimless_macro}
+n(t,x)&:=\int_{R^3} f(t,x,v)  dv\, ,  \\
+n(t,x)\bar{u}(t,x)&:=\int_{R^3} vf(t,x,v) dv\,  ,  \\
+n(t,x)T(t,x)&:=\frac{2}{3} \int_{R^3} (v - \bar{u})^2 f(t,x,v) dv\, , 
+\end{split}
+\end{equation}
+thus, 
+\begin{equation}
+\begin{split}
+n(t,x)&=\frac{L^3 }{N} \hat{n}(\hat{t},\hat{x})\, , \nonumber  \\
+\bar{u}(t,x)&=\frac{\bar{\hat{u}}(\hat{t},\hat{x})}{C_{\infty}}\, , \nonumber \\ 
+T(t,x) &= \frac{\hat{T}(\hat{t},\hat{x})}{T_{\infty}} \, .
+\end{split}
+\end{equation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CHAPTER THREE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

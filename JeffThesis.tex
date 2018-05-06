@@ -10,7 +10,7 @@
 %%%%%%%%%
 \usepackage{color}
 \newcommand{\hl}[1]{\colorbox{lightgray}{#1}}
-%\usepackage{tocloft}
+%\usepackage{tocloft}3
 \usepackage{setspace}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -298,19 +298,67 @@ With these definitions, then the relationship between the dimensionless macropar
 \begin{equation}
 \begin{split}
 \label{eq:dimless_macro}
-n(t,x)&:=\int_{R^3} f(t,x,v)  dv\, ,  \\
-n(t,x)\bar{u}(t,x)&:=\int_{R^3} vf(t,x,v) dv\,  ,  \\
-n(t,x)T(t,x)&:=\frac{2}{3} \int_{R^3} (v - \bar{u})^2 f(t,x,v) dv\, , 
+n(t,x)&:=\int_{\R^3} f(t,x,v)  dv\, ,  \\
+n(t,x)\bar{u}(t,x)&:=\int_{\R^3} vf(t,x,v) dv\,  ,  \\
+n(t,x)T(t,x)&:=\frac{2}{3} \int_{\R^3} (v - \bar{u})^2 f(t,x,v) dv\, , 
 \end{split}
 \end{equation}
-thus, 
+
+From the above definitions, we get the relationships of the dimensionless and dimensional macroparameters. First note that in the discussion of follows, we have $d\hat{v} = C_{\infty}^3 dv$. Then,
+\begin{equation}
+\begin{split}
+n(t,x) &= \int_{\R^3} f(t,x,v)  dv\, \\
+&= \int_{\R^3} \frac{L^3 \Cref^3}{N} \hat{f}(\hat{t},\hat{x},\hat{v})\frac{d\hat{v}}{\Cref^3} \\
+&= \frac{L^3}{N}  \int_{\R^3}  \hat{f}(\hat{t},\hat{x},\hat{v}) d\hat{v}\\
+&= \frac{L^3}{N} \hat{n}(t\T,xL)\, .
+\end{split}
+\end{equation}
+In addition,
+\begin{equation}
+\begin{split}
+n(t,x) \bar{u}_i(t,x) &= \int_{\R^3} v_j f(t,x,v)  dv\, \\
+&= \int_{\R^3} \frac{L^3 \Cref^3}{N} \frac{\hat{v}_j}{\Cref} \hat{f}(\hat{t},\hat{x},\hat{v})\frac{d\hat{v}}{\Cref^3} \\
+&= \frac{L^3}{\Cref N}  \int_{\R^3} \hat{v}_j  \hat{f}(\hat{t},\hat{x},\hat{v}) d\hat{v}\\
+&= \frac{L^3}{\Cref N} \hat{n}(t,x,v) \hat{\bar{u}}(\hat{t},\hat{x}) d\hat{v} \\
+&= \frac{\hat{\bar{u}}_j(t,x)}{\Cref}n(t,x)\, ,
+\end{split}
+\end{equation}
+and
+\begin{equation}
+\begin{split}
+n(t,x)T(t,x) &= \frac{2}{3} \int_{\R^3}(v-\bar{u})^2 f(t,x,v)dv \\
+&= \frac{2}{3} \int_{\R^3} \frac{L^3 \Cref^3}{N} \left( \left( \frac{\hat{v}}{\Cref} \right)^2 - \left( \frac{\hat{\bar{u}}}{\Cref} \right)^2 \right)\hat{f}(\hat{t},\hat{x},\hat{v} \frac{d\hat{v}}{\Cref^3} \\
+&= \frac{2L^3}{3 \Cref^2 N} \int_{\R^3} (\hat{v} - \hat{\bar{u}})^2\hat{f}(\hat{t},\hat{x},\hat{v}) d\hat{v} \\
+&= \frac{L^3}{\Tref N }\hat{n}(\hat{t},\hat{x}) T(\hat{t},\hat{x}) \\ 
+&= n(t,x) \frac{\hat{T}(\hat{t},\hat{x})}{\Tref} \, .\\
+\end{split}
+\end{equation}
+To summarize the above results,
 \begin{equation}
 \begin{split}
 n(t,x)&=\frac{L^3 }{N} \hat{n}(\hat{t},\hat{x})\, , \nonumber  \\
-\bar{u}(t,x)&=\frac{\bar{\hat{u}}(\hat{t},\hat{x})}{C_{\infty}}\, , \nonumber \\ 
-T(t,x) &= \frac{\hat{T}(\hat{t},\hat{x})}{T_{\infty}} \, .
+\bar{u}(t,x)&=\frac{\bar{\hat{u}}(\hat{t},\hat{x})}{\Cref}\, , \nonumber \\ 
+T(t,x) &= \frac{\hat{T}(\hat{t},\hat{x})}{T_{\infty}} \, . \\
 \end{split}
 \end{equation}
+
+Next, the Maxwellian distribution with density $\hat{n}(\hat{t},\hat{x})$, average velocity 
+$\hat{\bar{u}}_{j}(\hat{t},\hat{x})$ and temperature $\hat{T}(\hat{t},\hat{x})$ translates 
+into the dimensionless Maxwellian distribution as follows:
+\begin{equation}
+\begin{split}
+\hat{f}_{M}(\hat{t},\hat{x},\hat{u}) &= \hat{n}(2\pi R\hat{T})^{-3/2} \exp \left(- \frac{(\hat{u}-\hat{\bar{u}})^2}{2R\hat{T}}\right) \\
+&= \hat{n}(2 \pi R T)^{-3/2}(\Tref / \hat{T}) ^{3/2} \exp \left(- \frac{(\hat{u}-\hat{\bar{u}})^2}{2R \Tref}\frac{\Tref}{\hat{T}}\right)\\
+&= \hat{n}\pi^{-3/2} \Cref^{-3} (1/T) ^{3/2} \exp \left(- \frac{(\hat{u}-\hat{\bar{u}})^2}{T}\right)\\
+&= n \frac{N}{L^3 \Cref^3} (\pi T)^{-3/2} \exp \left(- \frac{(\hat{u}-\hat{\bar{u}})^2}{T}\right)\\
+&=\frac{N}{L^3 C^3_{\infty}} f_{M}(t,x,u)\, ,
+\end{split}
+\end{equation}
+where 
+\begin{equation}
+f_{M}(t,x,u) :=  \frac{n}{(\pi T)^{3/2}} \exp\Bigl(-\frac{(u-\bar{u})^2}{T} \Bigr )\, . 
+\end{equation}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CHAPTER THREE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -561,7 +609,7 @@ We can see that definition of the inverse will give back the original sequence. 
 where the last step used that if $l \not = j$ then $\sum_{k=0}^{N-1} W^{(j-l)k} = 0$ and for $l=j$ we have that $\sum_{k=0}^{N-1} W^{(j-l)k} = \sum_{k=0}^{N-1} 1 = N$. Thus the definition given above returns the original sequence. To see this:
 \begin{align*}
 \calF[z]_k &= \sum_{l=0}^{N-1} W^{kn} \sum_{n=0}^{N-1} x_{n}y_{l-n} \\
-&= \sum_{n=0}^{N-1} x_{n} ( \sum_{l=0}^{N-1} W^{kn}y_{l-n}
+&= \sum_{n=0}^{N-1} x_{n} ( \sum_{l=0}^{N-1} W^{kn}y_{l-n})
 \end{align*}
 
 The DFT is linear. That is, if we have two complex sequences $\{x_n\}_{n=0}^{N-1}$ and $\{y_n\}_{n=0}^{N-1}$, then 
@@ -844,7 +892,7 @@ where $j_u{u;c}$ is canonical node, $j_u'$ is the old index in $I_{i;j_u,j_v,j_w
 \caption{Perform FFT convolution at a single point in space.}
 \label{alg:fft_conv}
 \begin{algorithmic}[1]
-\Function{IndicesKeepTrack}{$f$,$\calF[A]$}
+\Function{FFTBoltzmann}{$f$,$\calF[A]$}
 	\State Input $f$, $Q$	\Comment{The solution at time $t$.}
 	\State Input $\calF[A]$ \Comment{The DFT of the $A$ operator.}
 	\For{i=1,s}

@@ -563,7 +563,7 @@ were substituted with zeros. In cases when the support of the solution
 was well contained within the computational domain, this assumption did not lead to 
 large numerical errors. 
 
-We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ operations to calculate it, $O(M^6)$ at one velocity node for $O(M^3)$ velocity nodes. However, recall that the property stated in section \ref{sec:reform_galerkin} that only has $O(M^5)$ components bringing down the total cost of computing (\ref{eq:I_dist}) down to $O(M^8)$ operations. However, we wish to reduce this further. It turns out that the Discrete Fourier Transform has properties that allow us to bring down the cost of computing (\ref{eq:I_dist}) from $O(M^8)$ to $O(M^6)$.
+We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ operations to calculate it, $O(M^6)$ at one velocity node for $O(M^3)$ velocity nodes. However, recall the property stated in section \ref{sec:reform_galerkin} that $A$ only has $O(M^5)$ components bringing down the total cost of computing (\ref{eq:I_dist}) down to $O(M^8)$ operations. However, we wish to reduce this further. It turns out that the Discrete Fourier Transform has properties that allow us to bring down the cost of computing (\ref{eq:I_dist}) from $O(M^8)$ to $O(M^6)$. The DFT and its properties are discussed in the next section.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CHAPTER FOUR
@@ -571,7 +571,7 @@ We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ 
 
 \chapter{The Discrete Fourier Transform}
 
-The goal is to compute (\ref{eq:I_dist}) faster than $O(M^6)$. We note that (\ref{eq:I_dist}) is similar to a discrete convolution form. The Discrete Fourier Transform (DFT) can be used to speed up the computations of convolutions using the \textit{Convolution Theorem}. In particular, it is used to speed up circular convolutions. In order to apply the DFT to our problem, we must first assume a periodic extension of the discrete form of $f$. This section discusses the background of the Discrete Fourier Transform, convolution theorem, and periodic continuation needed to quickly compute (\ref{eq:I_dist}) 
+The goal is to compute (\ref{eq:I_dist}) faster than $O(M^6)$. We note that (\ref{eq:I_dist}) is similar to a discrete convolution form (which will be defined later). The Discrete Fourier Transform (DFT) can be used to speed up the computations of convolutions using the \textit{Convolution Theorem}. In particular, it is used to speed up circular convolutions. In order to apply the DFT to our problem, we must first assume a periodic extension of the discrete form of $f$. This section discusses the background of the Discrete Fourier Transform, convolution theorem, and periodic continuation needed to quickly compute (\ref{eq:I_dist}) 
 
 \section{The One-Dimensional Discrete Fourier Transform and its Properties}
 
@@ -632,7 +632,7 @@ Let $x_{n}$ and $y_{n}$ be periodic sequences with period $N$. An $N$-point circ
 convolution of $x_{n}$ and $y_{n}$ is defined as (see, e.g., \cite{Nussbaumer1982})
 \begin{equation}
 \label{eq:cirlconv}
-z_{l}=\sum_{n=0}^{N-1} x_{n}y_{l-n}\, .
+z_{l}=\sum_{n=0}^{N-1} x_{n}y_{l-n}\, . \quad l=1,\dots,N-1
 \end{equation} 
 \end{definition}
 A well known property of the Fourier transform is that it converts circular 
@@ -643,9 +643,35 @@ convolution (\ref{eq:cirlconv}) into a product, namely,
 \end{equation}
 After calculating $\calF[z]_k$ using (\ref{eq:dft_circ_conv}), the sequence $\{z_n\}_{n=0}^{N-1}$ can be retrieved via application of the inverse DFT, (\ref{eq:idft_1d}), e.g. $\calF^{-1}[\calF[z]]_n = z_n$. 
 
+
 The convolution theorem seemingly gives no computational gain. Straightforward computation of the DFT and inverse DFT will take $O(N^2)$ complex operations. Computation of (\ref{eq:cirlconv}) also takes $O(N^2)$ operations without needing to perform any complex multiplications if both $\{x_n\}$ and $\{y_n\}$ are real. However, the complexity of calculating (\ref{eq:dft_1d}) can be reduced by an algorithm known as the Fast Fourier Transform (FFT) which can calculate both the forward and inverse DFT in $O(N \log N)$ operations.
 \section{The One-Dimensional Fast Fourier Transform}
 In this section, technical details about the implementation of the Radix-2 Fast Fourier Transform are given. However, it should be noted that the Fast Fourier Transform has been implemented for many different radixes. 
+
+\section{Linear Convolutions}
+{\textbf rewrite} The DFT can be used to calculate circular convolutions quickly. However, while (\ref{eq:I_dist}) has a form similar to the definition of a circular convolution, we note that it is not a circular convolution. In the discussion that follows (\ref{eq:I_dist}), we mention that for an $f_{i;j}$ with $j \leq 0$ or $j > M$, we set $f_{i;j}=0$. If (\ref{eq:I_dist}) was truly a circular convolution, then we must assume that $f_{i;j}=f_{i;j+M}$ for any $j \leq 0$ or $f_{i;j}=f_{i;k-M}$ for any $j > M$. 
+
+Formally, (\ref{eq:I_dist}) is a linear convolution. The discussion here is inspired by Oppenheim, Shafter and Buck Digital signal processing (add citation).
+
+\subsection{Linear Convolution of Two Finite-Length sequences}
+For the sake of ease of notation for later discussions, we introduce a linear convolution for infinite sequences. 
+\begin{definition}
+Let $\{x_n\}_{n=-\infty}^{\infty}$, $\{y_n\}_{n=-\infty}^{\infty} \subset \mathbb{C}$ be sequences of (possibly complex) numbers. Then a linear convolution is defined as 
+\begin{equation}
+\label{eq:idft_1d}
+z_{l}=\sum_{n=-\infty}^{\infty} x_{n}y_{l-n}\, , l \in \mathbb{N}
+\end{equation}
+\end{definition}
+
+
+If the sequences are finite sequences of length $N$, then we may set $x_n=0$ and $y_n=0$ if $n<0$ or $n \geq N$. In that case, the above definition readily extends to finite sequences.
+For purposes of calculating (\ref{eq:I_dist}), we consider $M=N$ only. In addition, we note that the output of the linear convolution, $z_l$, is actually of length $N-M-2$, while we restrict the length of (\ref{eq:I_dist}) output to be of length $N$.
+
+Under certain conditions, circular convolutions and linear convolutions can be considered as equivalent operations. Suppose we have two sequences $\{x_n\}_{n=-\infty}^{\infty}$,$\{y_n\}_{n=-\infty}^{\infty} \subset \mathbb{C}$ 
+such that $\lVert x_n \lVert = 0$ for $n<0$ and $n\geq N$ and $\lVert y_n \lVert = 0$ for $n<0$ and $n \geq P$, and let $z_l$ be the result of performing a linear convolution between these two sequences. Note that $x_n y_{l-n}=0$ for $l < 0$ and $l > L + P - 2$. In other words, $z_l \not = 0$ for $0 \leq l \leq L + P - 2$. If $\{x_n\}$ and $\{y_n\}$ are finite sequences, then $z_l$ is also a finite sequence of length $L+P-1$.
+
+\subsection{Circular Convolution as Linear Convolution with Aliasing.}
+
 
 
 

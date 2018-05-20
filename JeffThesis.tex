@@ -571,7 +571,7 @@ We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ 
 
 \chapter{The Discrete Fourier Transform}
 
-The goal is to compute (\ref{eq:I_dist}) faster than $O(M^6)$. We note that (\ref{eq:I_dist}) is similar to a discrete convolution form (which will be defined later). The Discrete Fourier Transform (DFT) can be used to speed up the computations of convolutions using the \textit{Convolution Theorem}. In particular, it is used to speed up circular convolutions. In order to apply the DFT to our problem, we must first assume a periodic extension of the discrete form of $f$. This section discusses the background of the Discrete Fourier Transform, convolution theorem, and periodic continuation needed to quickly compute (\ref{eq:I_dist}) 
+The goal is to compute (\ref{eq:I_dist}) faster than $O(M^8)$. We note that (\ref{eq:I_dist}) is similar to a discrete convolution form (which will be defined later). The Discrete Fourier Transform (DFT) can be used to speed up the computations of convolutions using the \textit{Convolution Theorem}. In particular, it is used to speed up circular convolutions. In order to apply the DFT to our problem, we must first assume a periodic extension of the discrete form of $f$. This section discusses the background of the Discrete Fourier Transform, convolution theorem, and periodic continuation needed to quickly compute (\ref{eq:I_dist}) 
 
 \section{The One-Dimensional Discrete Fourier Transform and its Properties}
 
@@ -619,12 +619,19 @@ The DFT is linear. That is, if we have two complex sequences $\{x_n\}_{n=0}^{N-1
 \end{equation}
 This property will be used in order to apply the DFT to discrete convolution form of the collision integral.
 
-The last property we need is the shift property. This says that if $\{y_n\}$ is a periodic sequence created by shifting $\{x_n\}$ by $l$, that is $\{y_n\} = \{x_{n+l}\}$, then
+The last property we need is the shift property. This says that if $\{y_n\}$ is a periodic sequence created by shifting $\{x_n\}$ by $l$, that is $\{y_n\} = \{x_{n-l}\}$, then
 \begin{equation}
 \label{eq:shift_prop}
-\calF[y]_k = W^{lk}\calF[x]_k\, .
+\calF[y]_k = W^{kl}\calF[x]_k\, .
 \end{equation}
-
+To see this
+\begin{align*}
+\calF[y]_k &= \sum_{n=0}^{N-1} W^{kn} y_n \\
+&= \sum_{n=0}^{N-1} W^{kn} x_{n-l} \\
+&= \sum_{n=0}^{N-1}  W^{k(n-l)} x_{n-l} \\
+&= W^{kl} \sum_{n=0}^{N-1} W^{k(n-l)}x_{n-l} \\
+&= W^{kl} \calF[x]_k\, .
+\end{align*}
 \subsection{The Convolution Theorem}
 Another important result is the convolution theorem. The result is stated and proved here. First we start with a definition.
 \begin{definition}
@@ -635,12 +642,25 @@ convolution of $x_{n}$ and $y_{n}$ is defined as (see, e.g., \cite{Nussbaumer198
 z_{l}=\sum_{n=0}^{N-1} x_{n}y_{l-n}\, . \quad l=1,\dots,N-1
 \end{equation} 
 \end{definition}
-A well known property of the Fourier transform is that it converts circular 
-convolution (\ref{eq:cirlconv}) into a product, namely, 
+We are now ready to state the convolution theorem.
+\begin{theorem}
+Let $\{x_n\}$ and $\{y_n\}$ be $N$-periodic sequences. Let $z_l$ denote the circular convolution given by (\ref{eq:cirlconv}). Then
 \begin{equation}
 \label{eq:dft_circ_conv}
 \calF[z]_{k}=\calF[x]_{k}\calF[y]_{k}\, .
 \end{equation}
+\end{theorem}
+\begin{proof}
+This can be proven with a straight forward use of the definition of the DFT and the circular convolution,
+\begin{align*}
+\calF[z]_k &= \sum_{l=0}^{N-1} W^{kl} \left( \sum_{n=0}^{N-1} x_n y_{l-n} \right) \\
+&= \sum_{n=0}^{N-1} x_n \left( \sum_{l=0}^{N-1} W^{kl} y_{l-n} \right) \\
+&= \sum_{n=0}^{N-1} x_n W^{kn} \calF[y]_k \\
+&= \calF[y]_k \left( \sum_{n=0}^{N-1} x_n W^{kn}\right)\\
+&= \calF[y]_k \calF[x]_k \, ,
+\end{align*}
+where we used the shift property (\ref{eq:shift_prop}) of the DFT, e.g. $\sum_{l=0}^{N-1} W^{kl} y_{l-n} = W^{kl} \calF[y]_k$
+\end{proof}
 After calculating $\calF[z]_k$ using (\ref{eq:dft_circ_conv}), the sequence $\{z_n\}_{n=0}^{N-1}$ can be retrieved via application of the inverse DFT, (\ref{eq:idft_1d}), e.g. $\calF^{-1}[\calF[z]]_n = z_n$. 
 
 
@@ -675,13 +695,11 @@ such that $\lVert x_n \lVert = 0$ for $n<0$ and $n\geq L$ and $\lVert y_n \lVert
 z_l = \sum_{n=\max(0,l-(P-1))}^{\min(L-1,l)} x_n y_{l-n}
 \end{equation}
 
-\subsection{Linear Convolution as Circular Convolution with Aliasing}
+\subsection{Linear Convolution as Circular Convolution Equivalence}
 	In fact, due to the similarity of the definition of the linear convolution (\ref{eq:lin_conv}) and the circular convolution (\ref{eq:cirlconv}), there are conditions in which linear convolutions and circular convolutions are equivalent. The linear convolution involves multiplying a sequence by a index-reversed and shifted version of the other, then summing the products, i.e. $x_n y_{l-n}$ where $y_n$ is reversed and shifted. The circular convolution also reverses and shifts, but in particular, the finite sequences of $\tilde{x}_n$ and $\tilde{y}$ are periodic. However, if we extend the sequences $\tilde{x}_n$ and $\tilde{y}_n$ in the appropriate manner, we can eliminate the difference between the linear convolution and circular convolution of sequences. 
 	
-	We can \textit{pad} the sequences with zeroes such that the zeros remove any extra terms added by the circular convolution. Suppose we have periodic sequences $\{\tilde{x}_n\}$, $\{\tilde{y}_n\}$ such that $\tilde{x}_n = x_n$ for $0 \leq n < L$ and $\tilde{x}_n = 0$ for $N \leq n \leq N+P-2$, and $\tilde{y}_n = y_n$ for $0 \leq n < P$ and $\tilde{y}_n = 0$ for $N \leq n \leq N+P-2$. 
-Let $\tilde{z}$ denote the sequence generated by taking the circular convolution of $\tilde{x}$ and $\tilde{y}$. Then we have that $\tilde{z}_n = z_n$ where $z_n$. 
 
-	However, there may be cases where padding by zeros in not possible. In this, \textit{aliasing} occurs. As an example, let's examine the case where $x_n=1$ for $n=0,\dots,4$ and $y_n=1$ for $0,\dots,4$. The linear convolution would be calculated as
+	We start with a motivating example. Let's examine the case where $x_n=1$ for $n=0,\dots,4$ and $y_n=1$ for $n=0,\dots,4$. The linear convolution would be calculated as
 	
 \begin{equation*}
 z_l = \sum_{n=-\infty}^{\infty } x_n y_{l-n} = \begin{cases}
@@ -694,14 +712,23 @@ x_4y_0 &= 1, \quad l= 8 \\
 0 &\text{ otherwise}
 \end{cases}
 \end{equation*}
-	The linear convolution gives a triangular sequence, $z_l = \min(l+1,9-l)$ for $l=0, \dots, 9$. However, if we were to directly do a circular convolution, we would simply get $\tilde{z}_l = 5$ for $ l=0, \dots, 4$.
-	
-However, if we were to extend $x_n$ and $y_n$ to length $L + P -2 $ by appending zeros, then we would get back the same circular convolution. 
-	
+	The linear convolution gives a triangular sequence, $z_l = \min(l+1,9-l)$ for $l=0, \dots, 8$. However, if we were to directly do a circular convolution, we would simply get $\tilde{z}_l = 5$ for $ l=0, \dots, 4$.
+
+	We can \textit{pad} the sequences with zeroes such that the zeros remove any extra terms added by the circular convolution. Let $z_n$ denote the result of linear convolution of $\{x_n\}$ and $\{y_n\}$. Suppose we have periodic sequences $\{\tilde{x}_n\}$, $\{\tilde{y}_n\}$ such that $\tilde{x}_n = x_n$ for $0 \leq n < L$ and $\tilde{x}_n = 0$ for $L \leq n \leq L+P-2$, and $\tilde{y}_n = y_n$ for $0 \leq n < P$ and $\tilde{y}_n = 0$ for $L \leq n \leq L+P-2$. Set $N=L+P-2$.
+Let $\tilde{z}$ denote the sequence generated by taking the $N$-point circular convolution of $\tilde{x}$ and $\tilde{y}$. Then we have that $\tilde{z}_n = z_n$. 
+
+To see this, note that for $l=0$, we have that $N$-point convolution becomes  $\sum_{n=0}^{L+P-2} \tilde{x}_n \tilde{y}_{l-n} = \tilde{x}_0 \tilde{y}_0$ since $\tilde{x}_1, \dots \tilde{x}_{L-1}$ is going to be multiplied against $\tilde{y}_{L+P-2}, \dots, \tilde{y}_{L+P-2-(L-2)}$ $=\tilde{y}_{P}$ which are all zero. Then for $l=1$, we must have that $\tilde{z}_l = \sum_{n=0}^{L+P-2} \tilde{x}_n \tilde{y}_{l-n} = \tilde{x}_0 \tilde{y}_1 + \tilde{x}_1 \tilde{y}_0$ which agrees with equation (\ref{eq:finite_lin_conv}). Thus we have shown how to recover the linear convolution using the circular convolution.
+
+	Now that we have shown that we can indeed recover a linear convolution using a circular convolution with zero padding, we can now apply the convolution theorem to linear convolutions.  To see this, if we set $N > L+P-2$, so if we take an $N-point$ circular convolution of $\{x_n\}$ and $\{y_n\}$, (or equivalently $\{\tilde{x}_n\}$ and $\{\tilde{y}_n\}$, then we have that
+\begin{align*}
+\calF[z]_k = \calF[x]_k \calF[y]_k\, ,
+\end{align*}
+where $\calF$ denotes the $N$-point DFT. In particular, with the correct zero padding, we can apply the DFT to (\ref{eq:I_dist}) with no error.
+
 	For purposes of calculating (\ref{eq:I_dist}), we consider $M=N$ only. In addition, we note that the output of the linear convolution, $z_l$, is actually of length $N-M-2$, while we restrict the length of (\ref{eq:I_dist}) output to be of length $N$.
 \subsection{Circular Convolution as Linear Convolution with Aliasing.}
 
-
+We saw that we can find an equivalence between the linear convolution and the circular convolution by zero padding the finite sequences $\{ x_n\}$ and $\{y_n\}$. However, in certain cases, zero-padding may not be possible. In this section we explore what happens when we are unable to zero-pad the sequences.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1235,6 +1262,63 @@ by padding the solution and the kernel with zeros at the expense of higher numer
 costs, both in time and memory. Overall, however, the $O(M^6)$ evaluation of 
 the collision operator using the Fourier transform appears to be consistent 
 and stable. 
+
+\section{Zero-Padding}
+
+As discussed in section \ref{sec:lin_conv_fin_seq}, we saw that it is possible to reduce the amount of error from the calculations if we zero-pad the resulting sequence. These results show how zero-padding affects the error of the method as a function of the number of zeros that are added to the sequence. 
+
+Zero-padding was accomplished by adding $n$ zeros to each side of the sequence of $f$. Note that since $f$ is 3-dimensional, this means that symmetrically padding $f$ with $n$ zeros on each size results in a size increase of $8n^3$ in the amount of numbers that must be stored. In addition, to na{\"i}vely perform the calculations, we must also zero-pad the $A$ kernel. This results in a memory increase of $\mathcal{O}(64n^6)$. This of course then becomes restrictive as the number zeros increases since we will then run out of memory rather quickly. However, as the table below shows, even a modest increase in the number of zeros results in much lower error compared to the the straight-forward method presented earlier.
+
+Table \ref{tab:padding_m155} shows how zero padding affected the accuracy of the method compared to a direct evaluation. These results were gathered using the parameters: $n_{1}=1.6094$, $n_{2}=2.8628$, $\bar{\vec{u}}_{1}=(0.7750,0,0)$, $\bar{\vec{u}}_{2}=(0.4357,0,0)$, $T_{1}=0.3$, and $T_{2}=0.464$ which corresponds to a mach 1.55 simulation. The table shows the error between the DFT method and direct method by symmetrically padding by zeros. Note that $n_{\text{pad}} = 1$ means that two 0s were added, one 0 to both ends of the sequence.
+
+ \begin{table}[h]
+  \begin{tabular}[c]{ c c c | c c | c c }
+  \hline
+  \multicolumn{1}{c}{} &
+  \multicolumn{2}{c|}{$N = 9$} &
+  \multicolumn{2}{c|}{$N = 15$} &
+  \multicolumn{2}{c}{$N = 21$} \\
+    \hline 
+    $n_{\text{pad}}$ & $L_{max}$  & $L_1$ & $L_{max}$  & $L_1$ & $L_{max}$  & $L_1$\\
+    \hline
+0 & 4.93E-05 & 3.74E-04 & 6.08E-05 & 4.66E-04 & 8.51E-05 & 5.39E-04\\
+1 & 5.19E-07 & 1.15E-06 & 2.61E-07 & 1.33E-06 & 1.18E-06 & 8.79E-06\\
+2 & 5.19E-07 & 1.14E-06 & 2.61E-07 & 2.93E-07 & 8.73E-08 & 9.59E-08\\
+3 & 5.19E-07 & 1.14E-06 & 2.61E-07 & 2.93E-07 & 7.33E-09 & 9.59E-08\\
+4 & 5.19E-07 & 1.14E-06 & 2.61E-07 & 2.93E-07 & 8.73E-08 & 9.58E-08\\
+    \hline
+  \end{tabular}
+\caption{\label{tab:padding_m155}  formulations.}
+\end{table}
+
+The table shows that the zero-padding the method results in more accuracy in the method. Remarkably, very little zero-padding must be done for the method to converge in accuracy. For both $N=9$ and $N=15$, the method converges in accuracy after symmetrically padding by two zeros. $N=21$ converged after $n_{\text{pad}} = 3$.  
+
+However, padding by zeros will have an impact on the performance of the method as we increase the number of operations required to fully complete the calculations. The table below shows the amount of seconds the DFT along with how long the direct method took without padding.
+
+ \begin{table}[h]
+  \begin{tabular}[c]{ c c c | c c | c c }
+  \hline
+  \multicolumn{1}{c}{} &
+  \multicolumn{2}{c|}{$N = 9$} &
+  \multicolumn{2}{c|}{$N = 15$} &
+  \multicolumn{2}{c}{$N = 21$} \\
+    \hline 
+    $n_{\text{pad}}$ & time (s)  & speed up & time (s)  & speed up & time (s)  & speed up\\
+    \hline
+0 & 0.22 & 6.28 & 1.18 & 40.38 & 6.09 & 114.30\\ 
+1 & 0.19 & 7.27 & 1.65 & 28.95 & 11.18 & 62.27\\ 
+2 & 0.31 & 4.36 & 6.23 & 7.66 & 33.19 & 20.97\\ 
+3 & 0.97 & 1.41 & 6.30 & 7.58 & 33.10 & 21.03\\ 
+4 & 2.13 & 0.64 & 11.40 & 4.19 & 51.07 & 13.63\\ 
+  
+    \hline
+  \end{tabular}
+\caption{\label{tab:timing_padding_m155}  }
+\end{table}
+
+As we can see from the table, the the fourier method still outperforms the direct method in time. However, the speed up drops dramatically as more zeros are added with the $N=21$ case having the speed up get halved by adding one zero. to the calculation, showing a severe cost for the dramatic increase in accuracy. The speed up drops by a third on $n_{\text{pad}} = 2$ to 20.97. 
+
+
 
 \clearpage
 \addcontentsline{toc}{chapter}{References}

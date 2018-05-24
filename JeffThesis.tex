@@ -156,7 +156,7 @@
 	\caption{Kremer (2010, p. 27), Fig 1.6}
 	\label{fig:binary_collision}
 \end{figure}
-	
+	In Figure \ref{fig:binary_collision}, we model a particle at the point $O$. The reference frame is taken with respect to this particle. A second particle is approaching the particle at poisition $O$ symbolized by the black dot. It follows the dotted line and collides with the particle and is deflected at an angle of $\theta$ and leaves the frame.
 	 Denote the pre- and post-collisional asymptotic velocities by $\vec{v}$, $\vec{v_1}$ and $\vec{v}'$, $\vec{v}_1'$ respectively. Define the relative pre- and post-collisional velocities, respectively, by 
 \begin{equation*}
 	\vec{g} = v_1 - v\, , \quad \vec{g}' = \vec{v}'-\vec{v}_1' \, .
@@ -639,7 +639,7 @@ Let $x_{n}$ and $y_{n}$ be periodic sequences with period $N$. An $N$-point circ
 convolution of $x_{n}$ and $y_{n}$ is defined as (see, e.g., \cite{Nussbaumer1982})
 \begin{equation}
 \label{eq:cirlconv}
-z_{l}=\sum_{n=0}^{N-1} x_{n}y_{l-n}\, . \quad l=1,\dots,N-1
+z_{l}=\sum_{n=0}^{N-1} x_{n}y_{l-n}\, ,  \quad l=1,\dots,N-1 \, .
 \end{equation} 
 \end{definition}
 We are now ready to state the convolution theorem.
@@ -665,13 +665,12 @@ After calculating $\calF[z]_k$ using (\ref{eq:dft_circ_conv}), the sequence $\{z
 
 
 The convolution theorem seemingly gives no computational gain. Straightforward computation of the DFT and inverse DFT will take $O(N^2)$ complex operations. Computation of (\ref{eq:cirlconv}) also takes $O(N^2)$ operations without needing to perform any complex multiplications if both $\{x_n\}$ and $\{y_n\}$ are real. However, the complexity of calculating (\ref{eq:dft_1d}) can be reduced by an algorithm known as the Fast Fourier Transform (FFT) which can calculate both the forward and inverse DFT in $O(N \log N)$ operations.
-\section{The One-Dimensional Fast Fourier Transform}
-In this section, technical details about the implementation of the Radix-2 Fast Fourier Transform are given. However, it should be noted that the Fast Fourier Transform has been implemented for many different radixes. 
 
-\section{Linear Convolutions}
+
+\subsection{Linear Convolutions and Circular Convolutions}
 {\textbf rewrite} The DFT can be used to calculate circular convolutions quickly. However, while (\ref{eq:I_dist}) has a form similar to the definition of a circular convolution, we note that it is not a circular convolution. In the discussion that follows (\ref{eq:I_dist}), we mention that for an $f_{i;j}$ with $j \leq 0$ or $j > M$, we set $f_{i;j}=0$. If (\ref{eq:I_dist}) was truly a circular convolution, then we must assume that $f_{i;j}=f_{i;j+M}$ for any $j \leq 0$ or $f_{i;j}=f_{i;k-M}$ for any $j > M$. 
 
-Formally, (\ref{eq:I_dist}) is a linear convolution. The discussion here is inspired by Oppenheim, Shafter and Buck Digital signal processing (add citation).
+Formally, (\ref{eq:I_dist}) is a linear convolution. However, this section will show that there are deep connections between linear convolutions and circular convolutions. Indeed, there are conditions where they can be considered equivalent. This allows us to treat (\ref{eq:I_dist}) as circular convolution and use the convolution theorem of the DFT and the speed up provided by the Fast Fourier Transform algorithm to calculate (\ref{eq:I_dist}) quickly. The discussion here is inspired by Oppenheim, Shafter and Buck Digital signal processing (add citation).
 
 \subsection{Linear Convolution of Two Finite-Length sequences}
 \label{sec:lin_conv_fin_seq}
@@ -731,6 +730,12 @@ where $\calF$ denotes the $N$-point DFT. In particular, with the correct zero pa
 We saw that we can find an equivalence between the linear convolution and the circular convolution by zero padding the finite sequences $\{ x_n\}$ and $\{y_n\}$. However, in certain cases, zero-padding may not be possible. In this section we explore what happens when we are unable to zero-pad the sequences.
 
 Suppose $\{x_n\}_{n=0}^{L-1}$ and $\{y_n\}_{n=0}^{P-1}$ For simplicity, let $L \geq P$. If we take an $L$-point DFT of $\{x_n\}$ or $\{y_n\}$ then we can perfectly reconstruct both $\{x_n\}$ and $\{y_n\}$ given $\{ \calF[x]_k \}$ and $\{ \calF[y]_k \}$. Now suppose $z_l$ is the linear convolution of $\{x_n\}$ and $\{y_n\}$. Then we have that 
+
+\section{The One-Dimensional Fast Fourier Transform}
+In this section, technical details about the implementation of the Radix-2 Fast Fourier Transform are given. However, it should be noted that the Fast Fourier Transform has been implemented for many different radixes. 
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CHAPTER FIVE
@@ -1268,7 +1273,10 @@ and stable.
 
 As discussed in section \ref{sec:lin_conv_fin_seq}, we saw that it is possible to reduce the amount of error from the calculations if we zero-pad the resulting sequence. These results show how zero-padding affects the error of the method as a function of the number of zeros that are added to the sequence. 
 
-Zero-padding was accomplished by adding $n$ zeros to each side of the sequence of $f$. Note that since $f$ is 3-dimensional, this means that symmetrically padding $f$ with $n$ zeros on each size results in a size increase of $8n^3$ in the amount of numbers that must be stored. In addition, to na{\"i}vely perform the calculations, we must also zero-pad the $A$ kernel. This results in a memory increase of $\mathcal{O}(64n^6)$. This of course then becomes restrictive as the number zeros increases since we will then run out of memory rather quickly. However, as the table below shows, even a modest increase in the number of zeros results in much lower error compared to the the straight-forward method presented earlier.
+As discussed in section \ref{add section ref}, we assume that the shape of the function helps with the zero-padding. In section \ref{sec:lin_conv_fin_seq}, we showed that if want to completely eliminate any aliasing effect, then we must pad $f$ to length $2M - 1$ completely remove any aliasing effects from taking the inverse DFT to retrieve back $I_j$. However, this is prohibitive since that would mean adding $\mathcal{O}(M^6)$ zeros to $A$ in order to remove any aliasing effects from $\calF[A]$. Since we need to double its length in each dimension, that results in a 64 times increase in the memory storage of $\calF[A]$. 
+However, we can combine modest zero padding with the fact that $f$ approaches zero in the edges of the domain to remove the numerical effects of aliasing rather quickly.
+
+Zero-padding was accomplished by adding $n_{\text{pad}}$ zeros to each side of the sequence of $f$. Note that since $f$ is 3-dimensional, this means that symmetrically padding $f$ with $n_{\text{pad}}$ zeros on each size results in a size increase of $8n_{\text{pad}}^3$ (where the 8 comes from the fact that we are symmetrically padding) in the amount of numbers that must be stored. In addition, to naively perform the calculations, we must also zero-pad the $A$ kernel. This results in a memory increase of $64n_{\text{pad}}^6$. This of course then becomes restrictive as the number zeros increases since we will then run out of memory rather quickly. However, as the table below shows, even a modest increase in the number of zeros results in much lower error compared to the the straight-forward method presented earlier.
 
 Table \ref{tab:padding_m155} shows how zero padding affected the accuracy of the method compared to a direct evaluation. These results were gathered using the parameters: $n_{1}=1.6094$, $n_{2}=2.8628$, $\bar{\vec{u}}_{1}=(0.7750,0,0)$, $\bar{\vec{u}}_{2}=(0.4357,0,0)$, $T_{1}=0.3$, and $T_{2}=0.464$ which corresponds to a mach 1.55 simulation. The table shows the error between the DFT method and direct method by symmetrically padding by zeros. Note that $n_{\text{pad}} = 1$ means that two 0s were added, one 0 to both ends of the sequence.
 
@@ -1292,7 +1300,8 @@ Table \ref{tab:padding_m155} shows how zero padding affected the accuracy of the
 \caption{\label{tab:padding_m155}  formulations.}
 \end{table}
 
-The table shows that the zero-padding the method results in more accuracy in the method. Remarkably, very little zero-padding must be done for the method to converge in accuracy. For both $N=9$ and $N=15$, the method converges in accuracy after symmetrically padding by two zeros. $N=21$ converged after $n_{\text{pad}} = 3$.  
+The table shows that the zero-padding the method results in more accuracy in the method. Remarkably, very little zero-padding must be done for the method to converge in accuracy. For both $N=9$ and $N=15$, the method converges in accuracy after symmetrically padding by two zeros. $N=21$ converged after $n_{\text{pad}} = 3$. 
+These results suggest that the assumption of $f$ approaching zero rapidly in the edges of the domain is a valid one since not many zeros are needed to reach a convergence in accuracy. In addition, the author performed padding up to $n_pad{\text{pad}}=8$  for the $N=15$ case without seeing any substantial change from the above $n_{\text{pad}}=4$ case (and therefore omitted from the above table). This of course is much beyond the required $M-2$ zeros needed to achieve perfect accuracy, so any remaining error is an artifact of numerics.
 
 However, padding by zeros will have an impact on the performance of the method as we increase the number of operations required to fully complete the calculations. The table below shows the amount of seconds the DFT along with how long the direct method took without padding.
 
@@ -1317,7 +1326,8 @@ However, padding by zeros will have an impact on the performance of the method a
 \caption{\label{tab:timing_padding_m155}  }
 \end{table}
 
-As we can see from the table, the the fourier method still outperforms the direct method in time. However, the speed up drops dramatically as more zeros are added with the $N=21$ case having the speed up get halved by adding one zero. to the calculation, showing a severe cost for the dramatic increase in accuracy. The speed up drops by a third on $n_{\text{pad}} = 2$ to 20.97. 
+As we can see from the table, the the fourier method still outperforms the direct method in time. However, the speed up drops dramatically as more zeros are added with the $N=21$ case having the speed up get halved by adding one zero. to the calculation, showing a severe cost for the dramatic increase in accuracy. 
+In the $N=21$, the speed up drops by a third on $n_{\text{pad}} = 2$ to 20.97. However, zero-padding gives a degree of flexibility to the method to balance time and accuracy.
 
 
 

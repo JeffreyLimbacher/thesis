@@ -145,7 +145,23 @@
 
 \chapter{The Boltzmann Equation}
 \label{Chap2}
-	The kinematic theory of gases treats gases as composed of a large number of individual molecules that for large periods of time flow freely. As these particles move freely through space, they collide with each other. Collisions of these particles are what drive the evolution of the gas towards equilibrium. 
+
+	The kinematic theory of gases treats gases as composed of a large number of individual molecules that, for large periods of time, flow unimpeded. As these particles move freely through space, they collide with each other. Collisions of these particles are what drive the evolution of the gas towards equilibrium.
+	
+	We consider a gas enclosed in a volume. A single molecule of this gas can be described with having position $\vec{x}$ and velocity $\vec{v}$ at a time $t$. For a particular time, we can describe a molecule as being within at a single point, $(\vec{x},\vec{v})$, in 6-dmensional space known as phase space. We define the distribution function of the gas as $f(t,\vec{x},\vec{v})d\vec{x}\,d\vec{v}$ gives the number of particles within the range of $\vec{x} + d\vec{x}$ with velocities $\vec{v} + d\vec{v}$. 
+
+In 1872 Boltzmann \cite{Boltzmann1872} introduced the Boltzmann equation which describes the time evolution of the distribution $f$. In the absence of external forces and we ignore collisions of particles, then the Boltzmann equation takes the form
+\begin{equation}
+\label{eq:colless_boltzmann}
+\dydx{}{t}f(t, \vecx, \vecv) + \vecv \cdot \nabla_x f(t, \vecx, \vecv) = 0\, .
+\end{equation}
+However, when the effects of collisions cannot be neglected, the right hand side must be modified to take this into account. In this case, the Boltzmann equation takes the form of
+\begin{equation}
+\label{eq:boltzmann}
+\dydx{}{t}f(t, \vecx, \vecv) + \vecv \cdot \nabla_x f(t, \vecx, \vecv) = I[f](t,\vecx,\vecv)\, \\ 
+\end{equation}
+Where $I[f]$ is referred to as the collision operator. The explicit form of $I[f]$ depends on the properties of the gas. To describe it explicitly, we make several assumptions. 
+First, the molecules of the gas composed entirely of a single species. Second, we assume hard sphere collisions as described in section \ref{sec:bincol}.  
 	
 \section{Binary Collisions of Particles}
 \label{sec:bincol}
@@ -185,21 +201,9 @@ bisects the angle between asymptotic relative velocities. Using this vector, we 
 \end{equation}
 
 
-\section{The Boltzmann Equation}
+\section{The Collision Operator}
 
-We consider a gas enclosed in a volume. A single molecule of this gas can be described with having position $\vec{x}$ and velocity $\vec{v}$ at a time $t$. For a particular time, we can describe a molecule as being within at a single point, $(\vec{x},\vec{v})$, in 6-dmensional space known as phase space. We define the distribution function of the gas as $f(t,\vec{x},\vec{v})d\vec{x}\,d\vec{v}$ gives the number of particles within the range of $\vec{x} + d\vec{x}$ with velocities $\vec{v} + d\vec{v}$. 
 
-In 1872 Boltzmann \cite{Boltzmann1872} introduced the Boltzmann equation which describes the time evolution of the distribution $f$. In the absence of external forces and we ignore collisions of particles, then the Boltzmann equation takes the form
-\begin{equation}
-\label{eq:colless_boltzmann}
-\dydx{}{t}f(t, \vecx, \vecv) + \vecv \cdot \nabla_x f(t, \vecx, \vecv) = 0\, .
-\end{equation}
-However, when the effects of collisions cannot be neglected, the right hand side must be modified to take this into account. In this case, the Boltzmann equation takes the form of
-\begin{equation}
-\label{eq:boltzmann}
-\dydx{}{t}f(t, \vecx, \vecv) + \vecv \cdot \nabla_x f(t, \vecx, \vecv) = I[f](t,\vecx,\vecv)\, \\ 
-\end{equation}
-Where $I[f]$ is referred to as the collision operator. The explicit form of $I[f]$ depends on the properties of the gas. To describe it explicitly, we make several assumptions. First, the gas composed entirely of a single species of molecule. Second, we assume hard sphere collisions as described in section \ref{sec:bincol}. 
 
 In order to explicitly write the collision operator, we must describe the collisions within the gas. Consider a particle with velocity $\vecv_1$ at point $\vecx$. This particle will collide with $f(t,\vecx, \vecv)d\vecv_1 g \Delta t b \, db \, d\varepsilon$ particles within the ranges of $\vecv_1$ and $\vecv_1 + d\vecv_1$. Integrating this by all all possible angles $(0 <= \varepsilon < 2 \pi)$, over all impact parameters, $(0 \leq b \leq b^*)$, and over all velocities, for all particles within the volume element $\vecx d\vecx$, we get that there are 
 \begin{equation}
@@ -258,7 +262,8 @@ If the gas is free from external influence, then the gas will approach an equili
 f_M(\vec{v},n,\vec{\bar{v}},T) = \frac{1}{\sqrt{2 \pi R T}^3} \exp\left( -\frac{ |\vec{v} - \vec{\bar{v}}|^2}{2RT} \right)
 \end{equation} 
 	
-Note that the exact shape of the Maxwellian distribution depends on the macroscopic moments of the gas distribution, $n$, $\vec{\bar{v}}$, and $T$ given by equations \ref{eq:dens}, \ref{eq:bulk}, \ref{eq:temperature} respectively. This is illustrated in Figure \ref{fig:1d_maxwellian}. The distribution is centered around $\bulkv$. The temperature, $T$, controls the width of the distribution. $n$ determines the area under the curve.
+Note that the exact shape of the Maxwellian distribution depends on the macroscopic moments of the gas distribution, $n$, $\vec{\bar{v}}$, and $T$ given by equations (\ref{eq:dens}), (\ref{eq:bulk}), (\ref{eq:temperature}) respectively. This is illustrated in Figure \ref{fig:1d_maxwellian}. The distribution is centered around $\bulkv$. The temperature, $T$, controls the width of the distribution. $n$ determines the area under the curve. 
+The Maxwellian takes a bell shaped, where $\lim_{\lvert \vec{v} \lvert \rightarrow \infty} f_M(\vec{v},n, \vec{\bar{v}}, T) = 0 $, and in fact drops off rapidly as we move away from $\vec{\bar{v}}$. This will become important later when we discretize $f_M$ (see sec \textbf{reference needed}).
 \begin{figure}[h]
 \centering
 \includegraphics[scale=.5]{1D_Maxwellian}
@@ -275,7 +280,7 @@ I[f_M](t,\vecx,\vecv) = \int_{\R^3} \int_{\R^3} (f_{M1}'f_M' - f_{M1} f_M)  g\, 
 
 Gas dynamic constants can vary greatly in scale. This can cause an accumulation of round-off error using floating point arithmetic when performing a large number of computations. In order to reduce the error that can be introduced by the varying scales, a dimensionless reduction is performed on the constants and equations. The dimensionless reduction aims to reduce the scale of all the variables to roughly of order one to minimize the round-off error. Note that the dimensionless reduction process can never eliminate round-off error since it is inherit to floating point arithmetic. The techniques used for dimensionless reduction vary from problem to problem. This thesis adopts the convention borrowed from Chapter 3 of [][][][].
 
-Let $\hat{t}$, $\hat{x}$, and $\hat{v}$ denote the conventional dimensional variables. In general, all quantities bearing $\hat{\cdot}$ will represent dimensional quantities, i.e. whose numbers have units understood to have physical meaning (e.g.. seconds, meters, meters per second). For example, $\hat{f}(\hat{t},\hat{x},\hat{v})$ will represent the molecular number density distribution function.
+Let $\hat{t}$, $\hat{x}$, and $\hat{v}$ denote the conventional dimensional variables. In general, all quantities bearing $\hat{\cdot}$ will represent dimensional quantities, i.e. whose numbers have units understood to have physical meaning (e.g. seconds, meters, meters per second). For example, $\hat{f}(\hat{t},\hat{x},\hat{v})$ will represent the molecular number density distribution function.
 
 We assume some time scale $\mathbb{T}$, reference temperature $\Tref$, and some length scale $L$, which are selected with a particular application in mind. We define $\Cref = \sqrt{2R\Tref}$. In addition, we define
 \begin{equation}
@@ -565,6 +570,26 @@ large numerical errors.
 
 We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ operations to calculate it, $O(M^6)$ at one velocity node for $O(M^3)$ velocity nodes. However, recall the property stated in section \ref{sec:reform_galerkin} that $A$ only has $O(M^5)$ components bringing down the total cost of computing (\ref{eq:I_dist}) down to $O(M^8)$ operations. However, we wish to reduce this further. It turns out that the Discrete Fourier Transform has properties that allow us to bring down the cost of computing (\ref{eq:I_dist}) from $O(M^8)$ to $O(M^6)$. The DFT and its properties are discussed in the next section.
 
+\section{The Micro-Macro Decomposition}
+The form of the collision integral can be reformulated for the purpose of numerical implementation. During simulations, it was observed that the ability of numerical simulations to conserve mass, momentum, and energy is strongly affected by the form of the discrete collision integral. 
+
+One such reformulation is the micro-macro decomposition [{\bf ??}] which considers the solution has the sum of the target Maxwellian distribution and the deviation from the Maxwellian, i.e.,
+\begin{equation}
+\label{eq:decomp}
+f(t,\vecx,\vecv) = f_M(t, \vecx, \vecv) + \Delta f(t,\vecx,\vecv)\, ,
+\end{equation}
+where $f_M(t,\vecx,\vecv)$ takes the form (\ref{eq:maxwellian}) with the same temperature, bulk velocity, and temperature as $f(t,\vecx,\vecv)$. This form was applied in \cite{AlekseenkoJosyula2012} in order to improve conservation properties of the scheme when the solution is near continuum. The numerical implementation used for the FFT convolution also used this decomposition. We substitute (\ref{eq:decomp}) into (\ref{eq:transfer_eq}) to obtain an alternative form of the collision integral:
+\begin{align}
+\label{eq:I_decomp_continuous}
+I_{\phi_{i;j}}&= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}) f(t,\vec{x},\vec{v}_{1})
+ A(\vec{v},\vec{v}_{1};\phi_{i;j})   d\vec{v}_{1}\, d\vec{v}\, \nonumber \\
+ &=\int_{\R^3}\int_{\R^3} [f_{M}(t,\vec{x},\vec{v}) \Delta f(t,\vec{x},\vec{v}_{1})
+ +\Delta f(t,\vec{x},\vec{v}) f_{M}(t,\vec{x},\vec{v}_{1})\nonumber \\
+ &\hspace*{10mm}{}+ \Delta f(t,\vec{x},\vec{v}) \Delta f(t,\vec{x},\vec{v}_{1})]
+ A(\vec{v},\vec{v}_{1};\phi_{i;j})   d\vec{v}_{1}\, d\vec{v}\, . 
+\end{align}
+where we used that $I[f_M](t,\vecx,\vecv)=0$. It was found that this form of the operator provided much better numerical results. Thus the numerical results in the rest of this work use (\ref{eq:I_decomp_continuous}) for all the calculations. 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CHAPTER FOUR
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -666,7 +691,7 @@ After calculating $\calF[z]_k$ using (\ref{eq:dft_circ_conv}), the sequence $\{z
 
 The convolution theorem seemingly gives no computational gain. Straightforward computation of the DFT and inverse DFT will take $O(N^2)$ complex operations. Computation of (\ref{eq:cirlconv}) also takes $O(N^2)$ operations without needing to perform any complex multiplications if both $\{x_n\}$ and $\{y_n\}$ are real. However, the complexity of calculating (\ref{eq:dft_1d}) can be reduced by an algorithm known as the Fast Fourier Transform (FFT) which can calculate both the forward and inverse DFT in $O(N \log N)$ operations.
 
-
+\section{Circular Convolution as Linear Convolution}
 \subsection{Linear Convolutions and Circular Convolutions}
 {\textbf rewrite} The DFT can be used to calculate circular convolutions quickly. However, while (\ref{eq:I_dist}) has a form similar to the definition of a circular convolution, we note that it is not a circular convolution. In the discussion that follows (\ref{eq:I_dist}), we mention that for an $f_{i;j}$ with $j \leq 0$ or $j > M$, we set $f_{i;j}=0$. If (\ref{eq:I_dist}) was truly a circular convolution, then we must assume that $f_{i;j}=f_{i;j+M}$ for any $j \leq 0$ or $f_{i;j}=f_{i;k-M}$ for any $j > M$. 
 
@@ -694,7 +719,8 @@ such that $ x_n \ = 0$ for $n<0$ and $n\geq L$ and $ y_n \ = 0$ for $n<0$ and $n
 z_l = \sum_{n=\max(0,l-(P-1))}^{\min(L-1,l)} x_n y_{l-n}
 \end{equation}
 
-\subsection{Linear Convolution as Circular Convolution Equivalence}
+\subsection{Linear Convolution as Circular Convolution}
+\label{sec:lin_circ_eq}
 	Due to the similarity of the definition of the linear convolution (\ref{eq:lin_conv}) and the circular convolution (\ref{eq:cirlconv}), there are conditions in which linear convolutions and circular convolutions are equivalent. The linear convolution involves multiplying a sequence by a index-reversed and shifted version of the other, then summing the products, i.e. $x_n y_{l-n}$ where $y_n$ is reversed and shifted. The circular convolution also reverses and shifts, but in particular, the finite sequences of $\tilde{x}_n$ and $\tilde{y}$ are periodic. However, if we extend the sequences $\tilde{x}_n$ and $\tilde{y}_n$ in the appropriate manner, we can eliminate the difference between the linear convolution and circular convolution of sequences. 
 	
 
@@ -729,7 +755,14 @@ where $\calF$ denotes the $N$-point DFT. In particular, with the correct zero pa
 
 We saw that we can find an equivalence between the linear convolution and the circular convolution by zero padding the finite sequences $\{ x_n\}$ and $\{y_n\}$. However, in certain cases, zero-padding may not be possible. In this section we explore what happens when we are unable to zero-pad the sequences.
 
-Suppose $\{x_n\}_{n=0}^{L-1}$ and $\{y_n\}_{n=0}^{P-1}$ For simplicity, let $L \geq P$. If we take an $L$-point DFT of $\{x_n\}$ or $\{y_n\}$ then we can perfectly reconstruct both $\{x_n\}$ and $\{y_n\}$ given $\{ \calF[x]_k \}$ and $\{ \calF[y]_k \}$. Now suppose $z_l$ is the linear convolution of $\{x_n\}$ and $\{y_n\}$. Then we have that 
+Suppose $\{x_n\}_{n=0}^{L-1}$ and $\{y_n\}_{n=0}^{P-1}$ For simplicity, let $L \geq P$. If we take an $L$-point DFT of $\{x_n\}$ or $\{y_n\}$ then we can perfectly reconstruct both $\{x_n\}$ and $\{y_n\}$ given $\{ \calF[x]_k \}$ and $\{ \calF[y]_k \}$. Now suppose $z_l$ is the linear convolution of $\{x_n\}$ and $\{y_n\}$, so $z_l$ is of length $L+P-1$. 
+If we attempt to calculate $\calF[z]_k$ using the convolution theorem, we expect it to be incorrect because an $L$-point DFT would be insufficient. 
+Suppose we attempt to calculate $\calF[z]_k$ by using the convolution theorem, i.e. 
+\begin{equation}
+\label{eq:aliasing}
+\calF[z]_k^* = \calF[x]_k \calF[y]_k \, . 
+\end{equation}
+Then we can expect that in general $\calF^{-1}[\calF[z]^*]_l \not = z_l$. We refer to this as \textit{aliasing error}. This occurs because by trying to calculate the linear convolution using the covolution theorem, we are implicitly using a circular convolution in (\ref{eq:aliasing}). As discussed in section \ref{sec:lin_circ_eq}, taking an $L$-point DFT is insufficient to capture the correct values for $z_l$. 
 
 \section{The One-Dimensional Fast Fourier Transform}
 In this section, technical details about the implementation of the Radix-2 Fast Fourier Transform are given. However, it should be noted that the Fast Fourier Transform has been implemented for many different radixes. 
@@ -928,11 +961,12 @@ $j_w'$, $j_w''$, $k_{u}$ and $l_{u}$ back, equation (\ref{dft_dft}) becomes
 Performing the discrete Fourier transform in the $j_w$ and repeating the argument once more we arrive at the statement of the theorem.
 \end{proof}
 
+
 \section{The Algorithm and its Complexity Copy and Pasted}
 \label{sec:algorithm}
 
 Theorem~\ref{thm3.1} allows us to calculate the collision operator 
-(\ref{I+_dist1}) in $O(s^3 M^6)$ operations using the algorithm outlined below. 
+(\ref{eq:I_dist}) in $O(s^3 M^6)$ operations using the algorithm outlined below. 
 We note that $\calF[A_{i,i',i''}]_{k_{u},k_{v},k_{w},l_{u},l_{w},l_{w}}$ 
 can be precomputed and therefore does not factor into the algorithmic complexity analysis. 
 \begin{enumerate}
@@ -963,12 +997,12 @@ We note that $s=s_{u}s_{v}s_{w}$ is usually kept fixed and the number of cells
 $M^3$ in velocity domain is changing. In this case, the main contribution to 
 complexity growth comes from $M$, the number of velocity cells in one velocity dimension. Thus 
 we can consider the algorithm to be of 
-complexity $O(M^6)$. In our simulations $s_u,s_v,s_w \leq 3$, however higher values 
+complexity $O(M^6)$. In our simulations, we kept $s_u,s_v,s_w \leq 3$, however higher values 
 may be used too, at least theoretically. The results of this analysis are validated 
 within the next chapter.
 
 
-\textbf{needs rewriting}
+\textbf{needs rewriting? Probably can be excluded.}
 In the implementation of the algorithm, we use the tensor product ordering for $f$. However, after taking the inverse FFT of $\calF[I_i]_{i;j_u,j_v,j_w}$, we get differently ordered sequence, $I_{i;j_u,j_v,j_w}'$. This is due to the fact we take the FFT with respect to $j$, the shift in velocity cell. To retrieve back $I_{i;j_u,j_v,j_w}$ from $I_{i;j_u,j_v,j_w}'$, the following equation was used:
 \begin{equation*}
 j_u = (j_u'-j_{u;c} \mod M)\, ,\ j_v = (j_v'-j_{v;c} \mod M)\, ,\ j_w = (j_w'-j_{w;c} \mod M)\, ,
@@ -1004,6 +1038,26 @@ where $j_u{u;c}$ is canonical node, $j_u'$ is the old index in $I_{i;j_u,j_v,j_w
 \end{algorithmic}
 \end{algorithm}
 }
+
+
+\section{Periodic Continuation of $f$ and $A$}
+\label{sec:periodic_cont}
+Theorem \ref{thm3.1} required that we take both a periodic continuation of $f$ and $A$ in order to calculate $\calF[i]$. 
+However, this assumption does not make \textit{physical} sense as it would imply there was infinite energy within the system.
+This means that we must periodically extend $f(t, \vecx, \vecv)$ outside the domain in the $\vecv$ direction and $A(\vecv, \vecv_1; \phi_{i;c})$ in both $\vecv$ and $\vecv_1$. 
+However, this assumption causes overlap when calculating the circular convolutions. Since $f_{j} > 0$, we expect that circular and linear convolutions to give different results. For example, when calculating (\ref{eq:I_dist}), we can no longer set $f_j =0 $ when $j \leq 0$ or $j > M$. 
+We assume that the velocity domain is sufficiently large so that the support of both $f$ and $A$ are limited to half of the domain. This would be equivalent to zero-padding the sequence.
+ The discussion in section \ref{sec:lin_circ_eq} demonstrated that it is possible to zero-pad the sequences in order restore equivalence between the circular and linear convolutions. We can zero-pad (\ref{eq:I_dist}) which requires zero-padding to length $2N-2$ in each dimension. This requires storing $(N-1)^6$ zeroes for $A_{j',j''}$. This causes the memory requirements to grow rapidly, so this approach can be used, but it must be used with caution or memory requirements will be exceeded.
+
+
+However, for most calculations, we take a different approach. The effects of periodic extension and truncation of $f(t,\vecx,\vecv)$ on the collision operator were considered in \cite{PareschiRusso2000}. However, the effects of periodic continuation and truncation of $A(\vecv, \vecv_1; \phi_{i;c})$ are much less understood. We can see from (\ref{eq:A_definition}) that the kernle is growing linearly towards infinty in the direction of $\vecv - \vecv_1$ for at least some points of $\vecv$. A truncation of kernel $A(\vecv, \vecv_1; \phi_{i;c})$ was used in \cite{AlekseenkoJosyula2012a} in which entries of $A(\vecv, \vecv_1; \phi_{i;c})$ were set equal to zero if $\|\vecv - \vecv_1\| < R$ for some $R>0$. Numerical simulations in \cite{AlekseenkoJosyula2012a} confirmed that the effects of truncation are negligible if the support of the solution can be enclosed in a ball of diameter $R$.
+
+In addition, certain properties of $f$ lend themselves to more accurate calculations. 
+Typically, in the boundaries of the discretization of $f$, the values of $f$ are close to zero in the sense that the values are typically a few orders of magnitude smaller than the bulk-velocity since the shape due to nature of the distribution of gasses. In essence, the closer to Maxwellian the distribution is, the more the tails of the distribution diminish. This allows us to take the circular convolution while adding minimal error.
+
+Using this idea, we can still achieve good accuracy while using minimal zero-padding. We sometimes need only to pad by a small number of zeroes (generally $\leq 4$) to lose any effects of aliasing. This is shown in later numerical results.
+
+
 \section{Alternative Formulation Involving $A^+$ Discretization}
 
 \chapter{Numerical Results}
@@ -1049,25 +1103,7 @@ The acceleration is expected to be even larger for higher values of $M$.
 \caption{\label{tab:01} CPU times for evaluating the collision operator directly and using the Fourier transform.}
 \end{table}
 
-\section{The Micro-Macro Decomposition}
-The form of the collision integral can be reformulated for the purpose of numerical implementation. During simulations, it was observed that the ability of numerical simulations to conserve mass, momentum, and energy is strongly affected by the form of the discrete collision integral. 
 
-One such reformulation is the micro-macro decomposition [{\bf ??}] which considers the solution has the sum of the target Maxwellian distribution and the deviation from the Maxwellian, i.e.,
-\begin{equation}
-\label{eq:decomp}
-f(t,\vecx,\vecv) = f_M(t, \vecx, \vecv) + \Delta f(t,\vecx,\vecv)\, ,
-\end{equation}
-where $f_M(t,\vecx,\vecv)$ takes the form (\ref{eq:maxwellian}) with the same temperature, bulk velocity, and temperature as $f(t,\vecx,\vecv)$. This form was applied in \cite{AlekseenkoJosyula2012} in order to improve conservation properties of the scheme when the solution is near continuum. The numerical implementation used for the FFT convolution also used this decomposition. We substitute (\ref{eq:decomp}) into (\ref{eq:transfer_eq}) to obtain an alternative form of the collision integral:
-\begin{align}
-\label{eq:I_decomp_continuous}
-I_{\phi_{i;j}}&= \int_{\R^3}\int_{\R^3} f(t,\vec{x},\vec{v}) f(t,\vec{x},\vec{v}_{1})
- A(\vec{v},\vec{v}_{1};\phi_{i;j})   d\vec{v}_{1}\, d\vec{v}\, \nonumber \\
- &=\int_{\R^3}\int_{\R^3} [f_{M}(t,\vec{x},\vec{v}) \Delta f(t,\vec{x},\vec{v}_{1})
- +\Delta f(t,\vec{x},\vec{v}) f_{M}(t,\vec{x},\vec{v}_{1})\nonumber \\
- &\hspace*{10mm}{}+ \Delta f(t,\vec{x},\vec{v}) \Delta f(t,\vec{x},\vec{v}_{1})]
- A(\vec{v},\vec{v}_{1};\phi_{i;j})   d\vec{v}_{1}\, d\vec{v}\, . 
-\end{align}
-where we used that $I[f_M](t,\vecx,\vecv)=0$. It was found that this form of the operator provided much better numerical results. Thus the numerical results in the rest of this work use (\ref{eq:I_decomp_continuous}) for all the calculations. 
 
 \section{Numerical Results of the Split Form of the Operator}
 As was discussed in section \ref{sec:reform_galerkin}, there is an alternative formulation of (\ref{eq:transfer_eq}) which we write as (\ref{eq:I_split}). This section discusses the numerical issues with conservation that this form had.
@@ -1159,7 +1195,7 @@ we evaluated the collision operator in both split and non-split forms and comput
 momentum, and temperature moments. The solution was taken to be the sum of two Maxwellians 
 in the example above. The numbers of velocity cells were 
 varied from 9 to 27. In both split and non-split 
-formulations of the collision integral, the decomposed form (\ref{dec01}) of the solution was 
+formulations of the collision integral, the decomposed form (\ref{eq:I_decomp_continuous}) of the solution was 
 used. For both forms, evaluation of the collision operator was done directly and using the Fourier transform. 
 The results are summarized in Table~\ref{tab02}. It can be seen that errors in the mass and 
 temperature in the non-split formulation are several orders of magnitude smaller than in 
@@ -1269,11 +1305,18 @@ costs, both in time and memory. Overall, however, the $O(M^6)$ evaluation of
 the collision operator using the Fourier transform appears to be consistent 
 and stable. 
 
+It can be seen in Figure \ref{fig02} that the higher moments suffer more error than the lower moments.
+It can be seen that the fourth moment has modest divergences from the direct evaluation, while the sixth moment diverges greatly in the direct evaluation.
+This author believes that this due to the fact that we have more aliasing towards the ends of the domain. 
+The higher moments will give much more weight to those parts of the domain than earlier moments. 
+Indeed, Figure \ref{fig01} supports this hypothesis as we can see the edges of the domain had gain mass.
+
 \section{Zero-Padding}
 
 As discussed in section \ref{sec:lin_conv_fin_seq}, we saw that it is possible to reduce the amount of error from the calculations if we zero-pad the resulting sequence. These results show how zero-padding affects the error of the method as a function of the number of zeros that are added to the sequence. 
 
-As discussed in section \ref{add section ref}, we assume that the shape of the function helps with the zero-padding. In section \ref{sec:lin_conv_fin_seq}, we showed that if want to completely eliminate any aliasing effect, then we must pad $f$ to length $2M - 1$ completely remove any aliasing effects from taking the inverse DFT to retrieve back $I_j$. However, this is prohibitive since that would mean adding $\mathcal{O}(M^6)$ zeros to $A$ in order to remove any aliasing effects from $\calF[A]$. Since we need to double its length in each dimension, that results in a 64 times increase in the memory storage of $\calF[A]$. 
+In section \ref{sec:lin_conv_fin_seq}, we showed that if want to completely eliminate any aliasing effect, then we must pad $f$ to length $2M - 1$ completely remove any aliasing effects from taking the inverse DFT to retrieve back $I_j$. However, this is prohibitive since that would mean adding $\mathcal{O}(M^6)$ zeros to $A$ in order to remove any aliasing effects from $\calF[A]$. Since we need to double its length in each dimension, that results in a 64 times increase in the memory storage of $\calF[A]$. 
+As discussed in section \ref{sec:periodic_cont}, we assume that the shape of the function helps with the zero-padding and argue that we need only modest zero-padding to eliminate aliasing error.
 However, we can combine modest zero padding with the fact that $f$ approaches zero in the edges of the domain to remove the numerical effects of aliasing rather quickly.
 
 Zero-padding was accomplished by adding $n_{\text{pad}}$ zeros to each side of the sequence of $f$. Note that since $f$ is 3-dimensional, this means that symmetrically padding $f$ with $n_{\text{pad}}$ zeros on each size results in a size increase of $8n_{\text{pad}}^3$ (where the 8 comes from the fact that we are symmetrically padding) in the amount of numbers that must be stored. In addition, to naively perform the calculations, we must also zero-pad the $A$ kernel. This results in a memory increase of $64n_{\text{pad}}^6$. This of course then becomes restrictive as the number zeros increases since we will then run out of memory rather quickly. However, as the table below shows, even a modest increase in the number of zeros results in much lower error compared to the the straight-forward method presented earlier.
@@ -1326,7 +1369,7 @@ However, padding by zeros will have an impact on the performance of the method a
 \caption{\label{tab:timing_padding_m155}  }
 \end{table}
 
-As we can see from the table, the the fourier method still outperforms the direct method in time. However, the speed up drops dramatically as more zeros are added with the $N=21$ case having the speed up get halved by adding one zero. to the calculation, showing a severe cost for the dramatic increase in accuracy. 
+As we can see from the table, the the fourier method still outperforms the direct method in time. However, the speed up drops dramatically as more zeros are added. In the $N=21$, the speed was reduced by half by adding one zero in each dimension, showing a increased time complexity cost for the increase in accuracy. 
 In the $N=21$, the speed up drops by a third on $n_{\text{pad}} = 2$ to 20.97. However, zero-padding gives a degree of flexibility to the method to balance time and accuracy.
 
 

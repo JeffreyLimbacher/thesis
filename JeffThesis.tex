@@ -67,6 +67,7 @@
 \newcommand{\dydx}[2]{\frac{\partial{#1}}{\partial{#2}}}
 \newcommand{\vecx}{\vec{x}}
 \newcommand{\vecv}{\vec{v}}
+\newcommand{\vecxi}{\vec{\xi}}
 \newcommand{\bulkv}{\vec{\bar{v}}} %bulk velocity
 
 
@@ -113,11 +114,11 @@
 % Set the path to graphics.
 \graphicspath{{images/}}
 
-\submitted{August}{2015}
+\submitted{August}{2018}
 
 \author{Jeffrey Limbacher}
 
-\title{Working title}
+\title{Development of Fast Methods for Evaluating the Boltzmann Collision Operator Based on Discontinuous Galerkin Discretizations in the Velocity Variable, Convolution Formulation, and Fast Fourier Transform}
 
 \committee {Alexander Alekseenko , Ph.D.}
 		   {Ali Zakeri , Ph.D.}
@@ -129,6 +130,8 @@
 
 \acknowledgement{tbd}
 
+
+
 \begin{document}
 \doublespacing
 
@@ -138,7 +141,12 @@
 
 \chapter{Introduction}
 \label{Chap1}
+This thesis concerns itself with the evolution of gas flows in low density regimes. This is of particular interest to the engineering community. One example of scuh a regime is gas flows around high-altitude high-velocity objects flying through the upper atmosphere such as spacecraft and airplanes. Under such regimes, the particles impart a large amount of kinetic energy on the object causing a large transfer of heat to the object. Preventing damage to the object under these circumstances is essential. It is often difficult to replicate these conditions within a laboratory setting. This means that there is hope in the development of high fidelity solvers that can simulate the high speed gas flows around these objects to help predict the correct heating patterns. In these gas regimes, the fluid mechanical laws of Navier-Stokes and Fourier break down. In contrast, kinetic theory provide an accurate description by describing particles at the microscopic level.
 
+Kinetic theory describes the non-equilibrium dynamics of a gas or any system comprised of a large number of particles. Kinetic equations have found applications in wide ranging applications such as rarefied gas dynamics \cite{Kremer2010} \cite{Kogan1969}, radiative transfer, and semiconductors modeling. 
+The Bolzmann equation is a kinetic equation that describes gases at the molecular level at regimes where Navier-Stokes and Fourier methods fail. Analytic solutions to the Boltzmann equation have been constructed for simple geometries and special molecular potentials. However, the complexity of the equation, along with the the complexities of boundary conditions and gas-to-gas interactions that occur in engineering and physics applications, suggest that only numerical solutions are possible. However, the complexity of the equation provides a challenge in directly computing the Boltzmann equation. It is composed of a five-fold integral which must be evaluated at all points in space and velocity resulting in $\mathcal{O}(n^{11})$ computational cost where $n$ is the number of discretization points in space and velocity. This thesis primarily concerns with evaluating this integral in velocity space which results in a $\mathcal{O}(n^8)$ cost. However, this is still computationally prohibitive.
+
+In this thesis, we explore how to speed up evaluation of the collision operator within the Boltzmann equation by using a Discontinuous-Galerkin method based on the work of \cite{Majorana2011,AlekseenkoJosyula2012,AlekseenkoJosyula2012a,GambaZhang2014}. This results in a computational complexity of $\mathcal{O}(n^8)$ with a $\mathcal{O}(n^5)$ storage requirement. In \cite{AlekseenkoNguyenWood2015}, the translational invariance was used to introduce a bilinear convolution form of the Galerkin projection of the collision operator. In the case of uniform meshes, this convolution allows us to re-write the collision operator as a convolution of multidimensional sequences. This thesis introduces a new method using the convolution theorem and Fast Fourier Transform to reduce the computational complexity of the convolution to $\mathcal{O}(n^6)$ complexity.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CHAPTER TWO
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -150,12 +158,12 @@
 	
 	We consider a gas enclosed in a volume. A single molecule of this gas can be described with having position $\vec{x}$ and velocity $\vec{v}$ at a time $t$. For a particular time, we can describe a molecule as being within at a single point, $(\vec{x},\vec{v})$, in 6-dmensional space known as phase space. We define the distribution function of the gas as $f(t,\vec{x},\vec{v})d\vec{x}\,d\vec{v}$ gives the number of particles within the range of $\vec{x} + d\vec{x}$ with velocities $\vec{v} + d\vec{v}$. 
 
-In 1872 Boltzmann \cite{Boltzmann1872} introduced the Boltzmann equation which describes the time evolution of the distribution $f$. In the absence of external forces and we ignore collisions of particles, then the Boltzmann equation takes the form
+In 1872 Boltzmann \cite{Boltzmann1872} introduced the Boltzmann equation which describes the time evolution of the distribution $f$. In the absence of external forces and collisions of particles, then the Boltzmann equation takes the form
 \begin{equation}
 \label{eq:colless_boltzmann}
 \dydx{}{t}f(t, \vecx, \vecv) + \vecv \cdot \nabla_x f(t, \vecx, \vecv) = 0\, .
 \end{equation}
-However, when the effects of collisions cannot be neglected, the right hand side must be modified to take this into account. In this case, the Boltzmann equation takes the form of
+However, when the effects of collisions cannot be neglected, the right hand side must be modified. In this case, the Boltzmann equation takes the form of
 \begin{equation}
 \label{eq:boltzmann}
 \dydx{}{t}f(t, \vecx, \vecv) + \vecv \cdot \nabla_x f(t, \vecx, \vecv) = I[f](t,\vecx,\vecv)\, \\ 
@@ -205,7 +213,7 @@ bisects the angle between asymptotic relative velocities. Using this vector, we 
 
 
 
-In order to explicitly write the collision operator, we must describe the collisions within the gas. Consider a particle with velocity $\vecv_1$ at point $\vecx$. This particle will collide with $f(t,\vecx, \vecv)d\vecv_1 g \Delta t b \, db \, d\varepsilon$ particles within the ranges of $\vecv_1$ and $\vecv_1 + d\vecv_1$. Integrating this by all all possible angles $(0 <= \varepsilon < 2 \pi)$, over all impact parameters, $(0 \leq b \leq b^*)$, and over all velocities, for all particles within the volume element $\vecx d\vecx$, we get that there are 
+In order to explicitly write the collision operator, we must describe the collisions within the gas. Consider a particle with velocity $\vecv_1$ at point $\vecx$. This particle will collide with $f(t,\vecx, \vecv)d\vecv_1 g \Delta t b \, db \, d\varepsilon$ particles within the ranges of $\vecv_1$ and $\vecv_1 + d\vecv_1$. Integrating this by all all possible angles $(0 \leq \varepsilon < 2 \pi)$, over all impact parameters, $(0 \leq b \leq b^*)$, and over all velocities, for all particles within the volume element $\vecx d\vecx$, we get that there are 
 \begin{equation}
 \label{eq:depletion}
 dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f(t, \vecx, \vecv_1) f(t, \vecx, \vecv) b |g|\,  db \, d\varepsilon\, d\vecv_1 
@@ -267,7 +275,7 @@ The Maxwellian takes a bell shaped, where $\lim_{\lvert \vec{v} \lvert \rightarr
 \begin{figure}[h]
 \centering
 \includegraphics[scale=.5]{1D_Maxwellian}
-\caption{Stolen picture need better caption}
+\caption{A 1D Maxwellian distribution. }
 \label{fig:1d_maxwellian}
 \end{figure}
 
@@ -479,9 +487,42 @@ A^+(\vecv,\vecv_1;\phi_{i;j}) = \int_{\Sbb^2}\phi_{i;j}(\vec{v}')b_{\alpha}(\the
 $A^+(\vecv,\vecv_1;\phi_{i;j})$ has similar properties to that of $A(\vecv,\vecv_1;\phi_{i;j})$, but
 $A^+(\vecv,\vecv_1;\phi_{i;j})$ has certain properties that are better than that of $A(\vecv,\vecv_1;\phi_{i;j})$ for a Fourier transform. 
 $A(\vecv,\vecv_1;\phi_{i;j})$ is grows linearly to infinity in some direction whereas $A^+(\vecv,\vecv_1;\phi_{i;j})$ does not. It can then be argued that $A^+(\vecv,\vecv_1;\phi_{i;j})$ is better suited for a Fourier transform than $A(\vecv,\vecv_1;\phi_{i;j})$. The algorithms in this paper also have straightforward extensions to the the split formulation of (\ref{eq:transfer_eq}). However, in practice, the split formulation of (\ref{eq:transfer_eq}) had significant errors in conservation.
+The exact mechanism of why the non-split formulation preserves the conservation 
+laws better is still not clear to the author. Some insight 
+can be obtained by noticing that values of the 
+collision kernel  $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ span several orders of magnitude.
+Small values of $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ occur in
+sufficiently many points so that they are important collectively. It is possible that 
+when small and large values are combined during the evaluation of the gain term, the 
+accuracy of the small values is lost or essentially diminished. When the loss term is subtracted from the 
+gain term, cancellation occurs producing large errors. On the contrary, 
+conservation 
+laws are satisfied point-wise in the form (\ref{eq:transfer_eq}), 
+(\ref{eq:A_definition}) up to a small number of algebraic manipulations with the basis functions 
+$\phi_{i;j}(\vec{v})$. Because of these considerations, we chose to 
+use the non-split form of the collision operator in simulations. 
 
 \section{Properties of the Kernel $A(\vecv,\vecv_1;\phi_{i;j})$}
-\label{sec:props_of_a}
+\label{sec:props_of_a} 
+
+
+
+As stated in section \ref{sec:reform_galerkin}, $A(\vecv,\vecv_1;\phi_{i}^j)$ only contains $\mathcal{O}(M^5)$ non-zero components. This section will justify that claim by going over properties of $A(\vecv,\vecv_1;\phi_{i}^j)$. 
+
+\begin{lemma}
+\label{lem0}
+Let  $A(\vecv,\vecv_1;\phi_{i}^j)$ be defined by (\ref{eq:A_definition}) with all gas particles having the same mass with the particle potentials being spherically symmetric. Then  $A(\vecv,\vecv_1;\phi_{i}^j)$ is spherically symmetric with respect to $\vecv$ and $\vecv_1$, that is
+\begin{equation}
+A(\vecv,\vecv_1;\phi_{i}^j) = A(\vecv_1,\vecv;\phi_{i}^j), \, \forall \vecv, \vecv_1 \in \R^3. 
+\end{equation}
+Also,
+\begin{equation}
+A(\vecv,\vecv)=0, \forall \vecv \in \R^3
+\end{equation}
+
+\end{lemma}
+
+The next lemma establishes the shift-invariance property of $A(\vecv,\vecv_1;\phi_{i}^j)$ within the velocity space.
 \begin{lemma}
 \label{lem1} 
 Let operator $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ be defined by (\ref{eq:A_definition}). Then $\forall\xi\in \R^3$
@@ -500,16 +541,26 @@ and $\vec{v}_{1}+\vec{\xi}$ is still $\vec{g}=\vec{v}+\vec{\xi}-(\vec{v}_{1}+\ve
 The post-collision velocities for the pair of particles will be $\vec{v}'+\vec{\xi}$ and $\vec{v}'_{1}+\vec{\xi}$, where $\vec{v}'$ and $\vec{v}'_{1}$ are given by (\ref{eq:vel_relation}). We notice, in particular, that choices of $\theta$ and $\varepsilon$ in 
 (\ref{eq:vel_relation}) are not affected by $\vec{\xi}$. The rest of the statement follows by a direct substitution:
 \begin{align*}
-A(\vec{v}&+\vec{\xi},\vec{v}_{1}+\vec{\xi};\phi_{i;j}(\vec{v}-\vec{\xi})) = |g|^{\alpha} \int_{\Sbb^2} \phi_{i;j}((\vec{v}'+\vec{\xi})-\vec{\xi}) b_{\alpha}(\theta)\, d\sigma\,= |g|^{\alpha} \int_{\Sbb^2} \phi_{i;j}(\vec{v}') b_{\alpha}(\theta)\, d\sigma \\
-&  = A(\vec{v},\vec{v}_{1};\phi_{i;j})\, . 
+A(\vec{v}&+\vec{\xi},\vec{v}_{1}+\vec{\xi};\phi_{i;j}(\vec{v}-\vec{\xi})) \\
+&= |g|^{\alpha} \int_{\Sbb^2} \phi_{i;j}((\vec{v}'+\vec{\xi})-\vec{\xi}) b_{\alpha}(\theta)\, d\sigma\, \\
+&= |g|^{\alpha} \int_{\Sbb^2} \phi_{i;j}(\vec{v}') b_{\alpha}(\theta)\, d\sigma \\
+&= A(\vec{v},\vec{v}_{1};\phi_{i;j})\, . 
 \end{align*}
 \endproof
 We remark that Lemma~{\ref{lem1}} holds for all potentials of molecular 
 interaction used in rarefied gas dynamics. This property was used in 
 \cite{AlekseenkoJosyula2012a} to reduce the storage requirement 
-on uniform partitions. 
+on uniform partitions.
+In the case of uniform partitions with the same basis element on every cell, Information about $A(\vecv,\vecv_1;\phi_{i;j})$ need only be stored for a single cell.
+Other values of $A(\vecv,\vecv_1;\phi_{i;j})$ can be restored using the shift invariance.
+Strictly speaking, one requires an infinite partition of the entire velocity space to recover all points. However, assuming that the support of the solution is well contained within a finite domain, the shift invariance property can be used successfully. 
 
-\section{Rewriting the Collision Operator in the Form of a Convolution (Mostly Copy and Pasted from the Paper, needs rewrite?)}
+
+
+
+
+
+\section{Rewriting the Collision Operator in the Form of a Convolution}
 It was shown in~\cite{AlekseenkoNguyenWood2015} that the Galerkin projection of the collision operator can be reformulated in terms of a convolution. This work is recalled in this section. 
 We select a partition cell $K_c$ and designate this cell as a generating cell. 
 Similarly, the basis functions $\phi_{i;c}(\vec{v})$ on $K_c$ are designated as the generating basis functions. 
@@ -534,7 +585,7 @@ and notice that $I_{\phi_{i;j}}$ can be obtained from (\ref{eq:continuous_convol
 $I_{\phi_{i;j}}=I_i(\vec{\xi}_j)$. In the following, we will refer to (\ref{eq:continuous_convolution}) 
 as the convolution form of the Galerkin projection of the collision integral.
 
-\section{Discretization of the Collision Integral (COpy and pasted again)}
+\section{Discretization of the Collision Integral}
 In order to calculate (\ref{eq:continuous_convolution}), we replace the three-dimensional integrals with the Gauss quadratures associated with then nodal-DG discretization, (\ref{eq:01a}). 
 As is discussed above, we are only interested in 
 computing convolution (\ref{eq:continuous_convolution}) at vectors 
@@ -765,11 +816,53 @@ Suppose we attempt to calculate $\calF[z]_k$ by using the convolution theorem, i
 Then we can expect that in general $\calF^{-1}[\calF[z]^*]_l \not = z_l$. We refer to this as \textit{aliasing error}. This occurs because by trying to calculate the linear convolution using the covolution theorem, we are implicitly using a circular convolution in (\ref{eq:aliasing}). As discussed in section \ref{sec:lin_circ_eq}, taking an $L$-point DFT is insufficient to capture the correct values for $z_l$. 
 
 \section{The One-Dimensional Fast Fourier Transform}
-In this section, technical details about the implementation of the Radix-2 Fast Fourier Transform are given. However, it should be noted that the Fast Fourier Transform has been implemented for many different radixes. 
+The Fast-Fourier Transform (FFT) is an algorithm that reduces the complexity of calculating the DFT. As can be seen from the definition of the DFT, (\ref{eq:dft_1d}), calculating the DFT of an $N$-point sequence takes $\mathcal{O}(N^2)$ operations. However, the FFT reduces the algorithmic complexity of the DFT to $\mathcal{O}(N \log N)$. This is a significant increase. In addition, due to the convolution theorem (\ref{eq:dft_circ_conv}), we can now calculate circular convolutions in $\mathcal{O}(N \log N)$ as opposed to $\mathcal{O}(N^2)$ operations.
 
+This section will discuss the details of the FFT algorithm and how it achieves its lower computational complexity. Let $\{x_n\}_{n=0}^{N-1}$ be a sequence and $\calF[x]_k$ be its DFT. By definition, we have
+\begin{equation}
+\label{eq:dft_2}
+\calF[x]_k = \sum_{n=0}^{n-1} x_n W^{nk}
+\end{equation}
+Suppose $N=N_1 N_2$ with $N_1,$ $N_2 \in \mathbb{N}$. We can redefine the indices $n$ and $k$ with 
+\begin{align}
+\label{eq:m1k1}
+m &= N_1 n_1 + n_1 , & m_1 , k_1 = 0, \dots, N_1-1 \\
+\label{eq:m2k2}
+k &= N_2 k_1 + k_2 , & k_2 , m_2 = 0, \dots, N_2-1 \, .
+\end{align}
+Substitution of (\ref{eq:m1k1}) and (\ref{eq:m2k2}) into (\ref{eq:dft_2}) gives 
+\begin{equation}
+\label{eq:dft_composite}
+\calF[x]_{N_2k_1 + k_2} = \sum_{n_1=0}^{N_1-1} W^{N_2n_1k_1}W^{n_1k_2} \sum_{n_2=0}^{N_2-1} x_{N_1 n_2+ n_1} W^{N_1 n_2k_2} \, .
+\end{equation}
+We define
+\begin{equation*}
+W_1 := e^{-i 2 \pi / N_1} = W^{N_2}\, \quad W_2 = e^{-i 2 \pi / N_2} = W^{N_1}\, ,
+\end{equation*}
+and rewrite (\ref{eq:dft_composite}) as
+\begin{equation}
+\label{eq:first_step}
+\calF[x]_{N_2k_1 + k_2} = \sum_{n_1=0}^{N_1-1} W_1^{n_1k_1}W^{n_1k_2} \sum_{n_2=0}^{N_2-1} x_{N_1n_2+n_1} W_2^{n_2k_2} \, .
+\end{equation}
+This shows that the DFT of size $N_1N_2$ can be viewed as a three step process. First, we calculate $N_1$ DFTs which correspond to the $N_1$ values of $n_1$. We denote these by 
+\begin{equation}
+\calF[x]_{n_1,k_2} = \sum_{n_2=0}^{N_2-1} x_{N_1n_2+n_1} W_2^{n_2k_2} \, .
+\end{equation}
+Second, $\calF[x]_{n_1,k_2}$ is multiplied against the \textit{twiddle factors} $W^{n_1k_2}$. Third, $\calF[x]_k$ is then obtained by calculating $N_2$ DFTs of the $N_1$ DFTs on the $N_2$ input sequences of $\calF[x]_{n_1,k_2}W^{n_1k_2}$, with
+\begin{equation}
+\label{eq:third_step}
+\calF{x}_{N_2k_1+k_2} = \sum_{n_1=0}^{N_1-1}\calF[x]_{n_1,k_2}W^{n_1 k_2}W_1^{n_1k_1} \, .
+\end{equation}
 
+If we were to calculate the DFT an $N=N_1N_2$ sequence directly, then we would require $N_1^2N_2^2$ multiplications. However, using the algorithm corresponding to (\ref{eq:first_step}) and (\ref{eq:third_step}), then computations are broken down into $N_1$ DFTs of $N_2$ terms and $N_2$ DFTs of $N_1$ terms plus $N_1N_2$ multiplications for the twiddle factors. Thus the number of multiplications for calculating the DFT of the $N_1N_2$ points reduces to
+\begin{equation*}
+N_1N_2^2 + N_2N_1^2 + N_1N_2 = N_1N_2(N_1+N_2+1)
+\end{equation*}
+number of multiplications which is less than the original $N_1^2N_2^2$ multiplications.
 
+While this does not result in the claimed $\mathcal{O}(N \log N)$ multiplications, the algorithm can be used recursively when $N$ is highly composite. We can decompose the original $N$-point DFT into DFTs of length $N_1$ and $N_2$ which can then be further decomposed such that each can be computed using the FFT algorithm. This feature motivates the application of the FFT to DFT lengths which are the power of an integer, and in most cases $N$ is chosen to be a power of 2 \cite{Nussbaumer1982}.
 
+We can now consider the DFT of an $N$-point sequence $\{x_n\}_{n=0}^{N-1}$ with $N=2^t$. In this case, we can do the first stage of the FFT using $N_1 = 2$ and $N_2 = 2^{t-1}$. This results in splitting the original input sequence $x_n$ into two $(N/2)$-point sequences, $x_{2n}$ and $x_{2n+1}$ which correspond to the even and odd indices of the original $x_n$ respectively.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CHAPTER FIVE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1002,7 +1095,6 @@ may be used too, at least theoretically. The results of this analysis are valida
 within the next chapter.
 
 
-\textbf{needs rewriting? Probably can be excluded.}
 In the implementation of the algorithm, we use the tensor product ordering for $f$. However, after taking the inverse FFT of $\calF[I_i]_{i;j_u,j_v,j_w}$, we get differently ordered sequence, $I_{i;j_u,j_v,j_w}'$. This is due to the fact we take the FFT with respect to $j$, the shift in velocity cell. To retrieve back $I_{i;j_u,j_v,j_w}$ from $I_{i;j_u,j_v,j_w}'$, the following equation was used:
 \begin{equation*}
 j_u = (j_u'-j_{u;c} \mod M)\, ,\ j_v = (j_v'-j_{v;c} \mod M)\, ,\ j_w = (j_w'-j_{w;c} \mod M)\, ,
@@ -1051,6 +1143,7 @@ We assume that the velocity domain is sufficiently large so that the support of 
 
 
 However, for most calculations, we take a different approach. The effects of periodic extension and truncation of $f(t,\vecx,\vecv)$ on the collision operator were considered in \cite{PareschiRusso2000}. However, the effects of periodic continuation and truncation of $A(\vecv, \vecv_1; \phi_{i;c})$ are much less understood. We can see from (\ref{eq:A_definition}) that the kernle is growing linearly towards infinty in the direction of $\vecv - \vecv_1$ for at least some points of $\vecv$. A truncation of kernel $A(\vecv, \vecv_1; \phi_{i;c})$ was used in \cite{AlekseenkoJosyula2012a} in which entries of $A(\vecv, \vecv_1; \phi_{i;c})$ were set equal to zero if $\|\vecv - \vecv_1\| < R$ for some $R>0$. Numerical simulations in \cite{AlekseenkoJosyula2012a} confirmed that the effects of truncation are negligible if the support of the solution can be enclosed in a ball of diameter $R$.
+Numerical simulations will demonstrate that the direct convolution in (\ref{eq:I_dist})  can be treated as a circular convolution so long as the support of the solution is sufficiently small.
 
 In addition, certain properties of $f$ lend themselves to more accurate calculations. 
 Typically, in the boundaries of the discretization of $f$, the values of $f$ are close to zero in the sense that the values are typically a few orders of magnitude smaller than the bulk-velocity since the shape due to nature of the distribution of gasses. In essence, the closer to Maxwellian the distribution is, the more the tails of the distribution diminish. This allows us to take the circular convolution while adding minimal error.
@@ -1058,7 +1151,7 @@ Typically, in the boundaries of the discretization of $f$, the values of $f$ are
 Using this idea, we can still achieve good accuracy while using minimal zero-padding. We sometimes need only to pad by a small number of zeroes (generally $\leq 4$) to lose any effects of aliasing. This is shown in later numerical results.
 
 
-\section{Alternative Formulation Involving $A^+$ Discretization}
+% \section{Alternative Formulation Involving $A^+$ Discretization}
 
 \chapter{Numerical Results}
 
@@ -1077,7 +1170,7 @@ The number of cells in the velocity domain were varied from 9 to 27. $s=1$ in ea
 The computational complexity was modeled using $t=O(M^\alpha)$ where $\alpha$ is a constant. 
 The estimated values of $\alpha$ were calculated as $\hat{\alpha}=\ln(M_{1}/M_{2})/\ln(t_{1}/t_{2})$. 
 
-\textbf{Copy and Pasted Paragraph} Note that in the case of the Fourier evaluation, the observed orders are significantly 
+Note that in the case of the Fourier evaluation, the observed orders are significantly 
 higher than the projected value of 6. Still, the orders are significantly lower than the 
 orders of the direct evaluation. Deviations from the theoretical estimate of 
 $\alpha=6$ may be due to the costs of the memory transfer operations and due to the choice of 
@@ -1108,7 +1201,7 @@ The acceleration is expected to be even larger for higher values of $M$.
 \section{Numerical Results of the Split Form of the Operator}
 As was discussed in section \ref{sec:reform_galerkin}, there is an alternative formulation of (\ref{eq:transfer_eq}) which we write as (\ref{eq:I_split}). This section discusses the numerical issues with conservation that this form had.
 
-\textbf{Begin copy and paste} In Figure~\ref{fig01} results of the evaluation of the collision integral 
+In Figure~\ref{fig01} results of the evaluation of the collision integral 
 at a single spatial point are presented for both split and non-split 
 formulations. The value of the solution $f(t,\vec{v})$ in these computations 
 is given by the sum of two Maxwellian distributions with dimensionless 
@@ -1235,9 +1328,9 @@ conservation laws.
 Because of the poor conservation properties and because of the 
 susceptibility to aliasing errors we do not recommend the 
 split form (\ref{eq:I_split}) for numerical implementation. 
-\textbf{end copy and paste}
 
-\section{0d Homogeneuous Relaxation COPY AND PASTED}
+
+\section{0d Homogeneuous Relaxation}
 
 In this section we present results of solution of the problem of 
 spatially homogeneous relaxation using Fourier evaluation of the 
@@ -1331,7 +1424,7 @@ Table \ref{tab:padding_m155} shows how zero padding affected the accuracy of the
   \multicolumn{2}{c|}{$N = 15$} &
   \multicolumn{2}{c}{$N = 21$} \\
     \hline 
-    $n_{\text{pad}}$ & $L_{max}$  & $L_1$ & $L_{max}$  & $L_1$ & $L_{max}$  & $L_1$\\
+    $n_{\text{pad}}$ & $L_{\max}$  & $L_1$ & $L_{\max}$  & $L_1$ & $L_{\max}$  & $L_1$\\
     \hline
 0 & 4.93E-05 & 3.74E-04 & 6.08E-05 & 4.66E-04 & 8.51E-05 & 5.39E-04\\
 1 & 5.19E-07 & 1.15E-06 & 2.61E-07 & 1.33E-06 & 1.18E-06 & 8.79E-06\\
@@ -1340,7 +1433,7 @@ Table \ref{tab:padding_m155} shows how zero padding affected the accuracy of the
 4 & 5.19E-07 & 1.14E-06 & 2.61E-07 & 2.93E-07 & 8.73E-08 & 9.58E-08\\
     \hline
   \end{tabular}
-\caption{\label{tab:padding_m155}  formulations.}
+\caption{\label{tab:padding_m155} The $L_{\max}$ and $L_1$ errors as we increase $n_{\text{pad}}$. }
 \end{table}
 
 The table shows that the zero-padding the method results in more accuracy in the method. Remarkably, very little zero-padding must be done for the method to converge in accuracy. For both $N=9$ and $N=15$, the method converges in accuracy after symmetrically padding by two zeros. $N=21$ converged after $n_{\text{pad}} = 3$. 
@@ -1366,12 +1459,166 @@ However, padding by zeros will have an impact on the performance of the method a
   
     \hline
   \end{tabular}
-\caption{\label{tab:timing_padding_m155}  }
+\caption{\label{tab:timing_padding_m155}  How performance of the method decreases as we increase $n_{\text{pad}}$.}
 \end{table}
 
 As we can see from the table, the the fourier method still outperforms the direct method in time. However, the speed up drops dramatically as more zeros are added. In the $N=21$, the speed was reduced by half by adding one zero in each dimension, showing a increased time complexity cost for the increase in accuracy. 
 In the $N=21$, the speed up drops by a third on $n_{\text{pad}} = 2$ to 20.97. However, zero-padding gives a degree of flexibility to the method to balance time and accuracy.
 
+\section{The Model Kinetic Equations and the Rel-ES Method}
+
+
+\subsection{The BGK Model}
+\label{eq:coll_bgk_sec}
+One of the difficulties with dealing with the Boltzmann equation is that it depends on the product of two distribution functions \cite{Kremer2010}, where
+\begin{equation}
+I[f] = \int(f_1' f' - f_1 f) g\, b \, db\, d\varepsilon\, d\vecv\, .
+\end{equation}
+We drop the integral limits for simplicity. We aim to simplify the structure of the collision term while maintaining the same basic properties. One such method was formulated by Bhatnagar, Gross, and Krook which is known as the BGK model \cite{BGK54}. From Strutchup \cite{Struchtrup2005}, we start by assuming that the post collision terms are close to Maxwellian, that is $f_1' \approx f_{M_1}'$ and $f' \approx f'_{M}$. We rewrite (\ref{eq:coll_bgk_sec}) as
+\begin{equation}
+\label{eq:bgk_step1}
+\int  f_{M_1}' f'_{M} - f f_1 g\, b \, db\, d\varepsilon\, d\vecv\, .
+\end{equation}
+$\ln f_M$ is a linear combination of the collision invariants, so we have that $f_{M_1}' f'_{M}=f_{M_1} f_{M}$. We can then rewrite (\ref{eq:step1}) as 
+\begin{equation}
+\label{eq:bgk_step2}
+f_M \int f_{M_1} g\, b \, db\, d\varepsilon\, d\vecv\, - f \int f_1 g\, b \, db\, d\varepsilon\, d\vecv\, .
+\end{equation}
+Lastly, we assume that the difference between the two integrals may be neglected. This leads to the BGK collision term
+\begin{equation}
+\label{eq:bgk}
+\Psi_{\text{bgk}} = -\nu(f-f_M)\, 
+\end{equation}
+where
+\begin{equation}
+\nu = \int f_1 g\, b \, db\, d\varepsilon\, d\vecv\, .
+\end{equation}
+We refer to (\ref{eq:bgk}) as the BGK collision operator. If $\nu$ is known, then the BGK collision operator can be computed fast. However, since $\nu$ is not always known during execution time, it is sometimes easier to calculate $\nu$ as
+\begin{equation}
+\nu = \frac{P}{\mu}
+\end{equation}
+where $P$ is pressure and $\mu$ is the dynamic viscosity.
+
+An important property of the BGK collision integral is that it conserves the first three moments, that is
+\begin{equation}
+\label{eq:bgk_conservative}
+\begin{split}
+	\int_{\mathbb{R}^3}  \Psi_{\text{bgk}}(t,\vec{x},\vec{v}) d\vec{v} = 0\, , & \\
+	\int_{\mathbb{R}^3} v_i \Psi_{\text{bgk}}(t,\vec{x},\vec{v}) d\vec{v} = 0\, , & \quad i=1,2,3  \\
+	\int_{\mathbb{R}^3} C^2 \Psi_{\text{bgk}}(t,\vec{x},\vec{v}) d\vec{v} = 0 \, .&
+\end{split}
+\end{equation}
+
+\subsection{The ES-BGK Model}
+Calculation of the Prandtl number from the BGK model leads to a Prandtl number of 1 \cite{Struchtrup2005}. In order to recitfy this, Holway \cite{H66} proposed the ellipsoidal statistical BGK model, known as the ES-BGK model. In the ES-BGK model, the Maxwellian is replaced by an anisotropic Gaussian.
+
+First define $\vec{c} = \vecv - \bar{\vecv}$. Next, we define the stress tensor, $\Theta$, a $3 \times 3$ matrix such that
+\begin{equation}
+\Theta_{ij} = \frac{1}{n} \int_{\R^3} c_i c_j f d\vecv \, .
+\end{equation}
+We also define $\T = (1-\alpha)RTI-\alpha \Theta$ where $T$ is the temperature and $I$ is the $3 \times 3$ identity matrix. $\alpha$ is an adjustment factor used to adjust the Prandtl number of the equation,
+\begin{equation}
+Pr = \frac{1}{1-\alpha} \, .
+\end{equation}
+$\alpha$ must also be chosen such that $\T$ is symmetric positive definite (SPD). Zheng \cite{ZhengY2004} showed that $\alpha \in [-1/2,1)$ was sufficient to ensure SPD. We define the ESBGK collision operator as 
+\begin{equation}
+\label{eq:esbgk}
+\Psi_{\text{ES}} = - \bar{\nu}(f-f_{\text{ES}})
+\end{equation}
+where
+\begin{equation}
+f_{\text{ES}}(\vecv) = \frac{n}{(\pi^3 \det(2\T))^{1/2}} \exp(-\frac{\vec{c}^T \T^{-1} \vec{c}}{2}) \, .
+\end{equation}
+
+Next, we prove an important property of the ES-BGK for the Rel-ES model.
+
+\begin{theorem}
+Let $\T$ be SPD, then we have
+\begin{equation}
+\frac{1}{n} \int_{\R^3} \vec{c}\,\vec{c}^T f_{\text{ES}} \,  d\vec{c} = \frac{1}{n}\int_{\R^3} \vec{c}\,\vec{c}^T \frac{n}{(\pi^3 \det(2\T))^{1/2}} \exp(-\frac{\vec{c}^T \T^{-1} \vec{c}}{2}) = \T \, .
+\end{equation}
+\end{theorem}
+\begin{proof}
+We ignore the constants for now and drop them from the integral, so we are left with
+\begin{equation}
+\label{eq:no_consts}
+{\cal J}= \int_{\R^3} \vec{c} \, \vec{c}^T \exp(-\frac{\vec{c}^T \T^{-1} \vec{c}}{2}) \, .
+\end{equation}
+Since $\T$ is SPD, we have that $\T = Q^T \Lambda Q$ for some orthogonal matrix $Q$ and diagonal matrix $\Lambda$. We perform change of variables $\vec{w} = Q\vec{c}$ on (\ref{eq:no_consts}). Since $Q$ is orthogonal, we have that $d\vec{w} = \det Q\, d \vec{c} =d\vec{c}$. Multiplying (\ref{eq:no_consts}) by $Q$ on the left and $Q^T$ on the right, (\ref{eq:no_consts}) becomes
+\begin{equation}
+\label{eq:change_of_var}
+\int_{\R^3} \vec{w}\,\vec{w}^T \exp(-\frac{\vec{w}^T \Lambda^{-1} \vec{w}}{2}) d\vec{w}\, .
+\end{equation}
+We can see that (\ref{eq:change_of_var}) is 9 equations. Focusing on one equation in (\ref{eq:change_of_var}), we get
+\begin{equation}
+\label{eq:entries}
+\int_{\R^3} w_i w_j \exp((-\lambda_1^{-1} w_1^2 - \lambda_2^{-1} w_2^2 - \lambda_3^{-1} w_3^2)/2) dw_1 dw_2 dw_3, \quad i,j=1,2,3.
+\end{equation}
+When $i \not = j$ we get that the above integral is zero since the function is an odd function centered around zero. Without loss of generality, fix $i=1$, $j=2$. We get 
+\begin{equation*}
+\int_{-\infty}^{\infty} w_1 e^{-\lambda_1^{-1}w_1^2/2} dw_1 \int_{-\infty}^{\infty} w_2 e^{-\lambda_2^{-1}w_2^2/2} dw_2 \int_{-\infty}^{\infty} e^{-\lambda_3^{-1}w_3^2/2} dw_3 .
+\end{equation*}
+We see that $\int_{-\infty}^{\infty} w_1 e^{-\lambda_iw_1^2/2} dw_1 = 0$ since it is an odd integral. 
+
+If $i=j$ (again, without loss of generality, set $i=j=1$) in (\ref{eq:entries}), then we have that
+\begin{align}
+&\int_{-\infty}^{\infty} w_1^2 e^{-\lambda_1^{-1}w_1^2} dw_1 \int_{-\infty}^{\infty} e^{-\lambda_2^{-1}w_2^2} dw_2 \int_{-\infty}^{\infty} e^{-\lambda_3^{-1}w_3^2} dw_3 \nonumber \\
+= &\left(\frac{2{\pi}}{\lambda_1^{-3}} \right)^{1/2} \left(\frac{2{\pi}}{{\lambda_2^{-1}}} \right)^{1/2} \left(\frac{2{\pi}}{{\lambda_3^{-1}}} \right)^{1/2} \nonumber\\
+= & (2 \pi)^{3/2} \sqrt{\lambda_1 \lambda_2 \lambda_3} \lambda_1 \nonumber\\
+= & (2 \pi)^{3/2} (\det \T)^{1/2} \lambda_1 \, ,
+\end{align}
+where we used that $\lambda_1 \lambda_2 \lambda_3 = \det \Lambda = \det T$. We now have that (\ref{eq:change_of_var}) can be written as
+\begin{equation}
+(2 \pi)^{3/2} (\det \T)^{1/2} \Lambda \, .
+\end{equation}
+Multiplying on the left by $Q^T$ on the left and $Q$ on the right to recover (\ref{eq:no_consts}), we get
+\begin{align}
+\cal{J} = & (2 \pi)^{3/2} (\det \T)^{1/2} Q^T \Lambda Q \nonumber\\
+= & (2 \pi)^{3/2} (\det \T)^{1/2} \T \, .
+\end{align}
+We can now reintroduce the constants into (\ref{eq:no_consts}),
+\begin{align*}
+\frac{1}{n} \frac{n}{(\pi^3 \det(2\T))^{1/2}} \cal{J} &= \frac{1}{(\pi^3 \det(2\T))^{1/2}} \cal{J}\\
+&= \frac{1}{(\pi^3 \det(2\T))^{1/2}} (2 \pi)^{3/2} (\det \T)^{1/2} \T \\
+&= \T
+\end{align*}
+\end{proof}
+
+\subsection{Rel-ES}
+
+\subsection{Experimental Results: 0d Homogeneous Relaxation}
+
+In this section we present results of solution of the problem of 
+spatially homogeneous relaxation using Fourier evaluation of the 
+collision operator. Two cases of initial data were considered. In 
+both cases, the initial data is a sum of two Maxwellian densities. 
+In the first case, the 
+dimensionless densities, bulk velocities, and temperatures of the 
+Maxwellians are $n_1=1.0007$, $n_2=2.9992$, 
+$\bar{\vec{u}}_{1}=(1.2247,0,0)$, $\bar{\vec{u}}_{2}=(0.4082,0,0)$,
+$T_{1}=0.2$, $T_{2}=0.7333$. These parameters correspond to upstream 
+and downstream conditions of the Mach 3 normal shock wave.  
+In the second case, we use the parameters of the example of the previous  
+section: $n_{1}=1.6094$, $n_{2}=2.8628$, $\bar{\vec{u}}_{1}=(0.7750,0,0)$, $\bar{\vec{u}}_{2}=(0.4357,0,0)$, $T_{1}=0.3$, and $T_{2}=0.464$. These 
+parameters correspond to upstream and downstream conditions of a Mach 1.55 
+shock wave. 
+
+For evaluation of the shockwave, parameters $M=15$, $s=5$ were used to evaluate the shockwave. 
+
+\begin{center}
+\begin{figure}[h]
+\centering
+  \begin{tabular}{@{}cc@{}}
+  \includegraphics[height=.25\textheight]{images/reles_m155_5s15n_mom2.png}&
+  \includegraphics[height=.25\textheight]{images/reles_m155_5s15n_mom3.png}\\      
+  \includegraphics[height=.25\textheight]{images/reles_m155_5s15n_mom4.png}&
+  \includegraphics[height=.25\textheight]{images/reles_m155_5s15n_mom6.png}\\
+  \end{tabular}
+\caption{\label{fig03} Relaxation of moments $f_{\varphi_{i,p}}$, $i=1,2$, $p=2,3,4,6$ 
+in a mix of Maxwellian streams corresponding to a shock wave with 
+Mach number 1.55 obtained by solving the Boltzmann equation using Fourier and direct evaluations of the collision integral.}
+\end{figure}
+\end{center}
 
 
 \clearpage

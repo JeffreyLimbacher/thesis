@@ -276,7 +276,7 @@ jeffw@csun.edu}
 
 \newcommand{\@degree}{Master~of~Science}
 
-\newcommand{\@department}{Computer~Science}
+\newcommand{\@department}{Applied~Mathematics}
 
 \newcommand{\degree}[2]{
   \renewcommand{\@degree}{#1}
@@ -454,7 +454,7 @@ jeffw@csun.edu}
 \centering
 \begin{spacing}{2.0}
 
-  \textbf{\MakeUppercase{\@title}}
+  \textbf{{\@title}}
 
 \end{spacing}
 
@@ -573,7 +573,7 @@ MASTERS PRESENTATION
 
 \vspace{0.5in}
 
-\MakeUppercase{\@title}
+{\@title}
 
 By
 
@@ -641,7 +641,7 @@ By
 \centering
 \begin{spacing}{2.0}
 
-  \MakeUppercase{\@title}
+  {\@title}
   
 \end{spacing}
 
@@ -829,19 +829,19 @@ By
 }
 
 \newcommand{\mplistoftables}{
-  \iflot
+
     \addcontentsline{toc}{chapter}{List of Tables}
     \listoftables
     \newpage
-  \fi
+
 }
 
 \newcommand{\mplistoffigures}{
-  \iflof
+
     \addcontentsline{toc}{chapter}{List of Figures}
     \listoffigures
     \newpage
-  \fi
+
 }
 
 \newcommand{\mplofillustrations}{}
@@ -871,7 +871,7 @@ By
     \begin{center}
       ABSTRACT
 
-      \MakeUppercase{\@title}
+      {\@title}
 
       By
 

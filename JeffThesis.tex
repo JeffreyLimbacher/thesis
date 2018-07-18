@@ -57,6 +57,10 @@
 \newcommand{\manMs}{$\mathcal{M} $ }
 \newcommand{\Tref}{T_{\infty}}
 \newcommand{\Cref}{C_{\infty}}
+\newcommand{\bu}[0]{\mathbf{u}}
+\newcommand{\bc}[0]{\mathbf{c}}
+\newcommand{\bw}[0]{\mathbf{w}}
+\newcommand{\bulku}[0]{\overline{\bu}}
 % Math mode friendly shortcuts
 % % %
 \def\T{\mathbb{T}}
@@ -141,14 +145,14 @@
 
 \chapter{Introduction}
 \label{Chap1}
-This thesis concerns itself with the evolution of gas flows in low density regimes. This is of particular interest to the engineering community. One example of scuh a regime is gas flows around high-altitude high-velocity objects flying through the upper atmosphere such as spacecraft and airplanes. Under such regimes, the particles impart a large amount of kinetic energy on the object causing a large transfer of heat to the object. Preventing damage to the object under these circumstances is essential. It is often difficult to replicate these conditions within a laboratory setting. This means that there is hope in the development of high fidelity solvers that can simulate the high speed gas flows around these objects to help predict the correct heating patterns. In these gas regimes, the fluid mechanical laws of Navier-Stokes and Fourier break down. In contrast, kinetic theory provide an accurate description by describing particles at the microscopic level.
+This thesis concerns itself with the evolution of gas flows in low density regimes. This is of particular interest to the engineering community. One example of such a regime is gas flows around high-altitude high-velocity objects flying through the upper atmosphere such as spacecraft and airplanes. Under such regimes, the particles impart a large amount of kinetic energy on the object causing a large transfer of heat to the object. Preventing damage to the object under these circumstances is essential. It is often difficult to replicate these conditions within a laboratory setting. This means that there is hope in the development of high fidelity solvers that can simulate the high speed gas flows around these objects to help predict the correct heating patterns. In these gas regimes, the fluid mechanical laws of Navier-Stokes and Fourier break down. In contrast, kinetic theory provide an accurate description by describing particles at the microscopic level.
 
 Kinetic theory describes the non-equilibrium dynamics of a gas or any system comprised of a large number of particles. Kinetic equations have found applications in wide ranging applications such as rarefied gas dynamics \cite{Kremer2010} \cite{Kogan1969}, radiative transfer, and semiconductors modeling. 
-The Bolzmann equation is a kinetic equation that describes gases at the molecular level at regimes where Navier-Stokes and Fourier methods fail. Analytic solutions to the Boltzmann equation have been constructed for simple geometries and special molecular potentials. However, the complexity of the equation, along with the the complexities of boundary conditions and gas-to-gas interactions that occur in engineering and physics applications, suggest that only numerical solutions are possible. However, the complexity of the equation provides a challenge in directly computing the Boltzmann equation. It is composed of a five-fold integral which must be evaluated at all points in time, space, and velocity resulting in $\mathcal{O}(n^{12})$ computational cost where $n$ is the number of discretization points in space and velocity. This thesis primarily concerns with evaluating this integral in velocity space which results in a naive $\mathcal{O}(n^9)$ cost. However, this is still computationally prohibitive.
+The Bolzmann equation is a kinetic equation that describes gases at the molecular level at regimes where Navier-Stokes and Fourier methods fail. Analytic solutions to the Boltzmann equation have been constructed for simple geometries and special molecular potentials. However, the complexity of the equation, along with the the complexities of boundary conditions and gas-to-gas interactions that occur in engineering and physics applications, suggest that only numerical solutions are possible. However, the complexity of the equation provides a challenge in directly computing the Boltzmann equation. It is composed of a five-fold integral which must be evaluated at all points in time, space, and velocity resulting in $\mathcal{O}(n^{12})$ computational cost where $n$ is the number of discretization points in space and velocity. This thesis primarily concerns with evaluating this integral in velocity space which results in a naive cost of $\mathcal{O}(n^9)$. However, this is still computationally prohibitive.
 
 In this thesis, we explore how to speed up evaluation of the collision operator within the Boltzmann equation by using a Discontinuous-Galerkin method based on the work of \cite{Majorana2011,AlekseenkoJosyula2012,AlekseenkoJosyula2012a}. The DG method is advantagous for its ability to capture arbitrary surfaces and conserve mass, momentum, and temperature. However, the drawback of this method is its complexity. DG discretization results in a computational complexity of $\mathcal{O}(n^8)$ with a $\mathcal{O}(n^5)$ storage requirement. In \cite{AlekseenkoNguyenWood2015}, the translational invariance was used to introduce a bilinear convolution form of the Galerkin projection of the collision operator. In the case of uniform meshes, this convolution allows us to re-write the collision operator as a convolution of multidimensional sequences. This thesis introduces a new method using the convolution theorem and Fast Fourier Transform to reduce the computational complexity of the convolution to $\mathcal{O}(n^6)$ computational complexity but with a $\mathcal{O}(n^6)$ storage requirement.
 
-In addition, another method is introduced which builds upon the ES-BGK method of Holway \cite{H66}, which I refer to as the Rel-ES method. The method can converges but onyl when using significantly more points than the ES-BGK method. 
+In addition, another method is introduced which builds upon the ES-BGK method of Holway \cite{H66}, which I refer to as the Rel-ES method. The method can converges but requires more points than the ES-BGK method. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CHAPTER TWO
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -156,7 +160,7 @@ In addition, another method is introduced which builds upon the ES-BGK method of
 \chapter{The Boltzmann Equation}
 \label{Chap2}
 
-	The kinematic theory of gases treats gases as composed of a large number of individual molecules that, for large periods of time, flow unimpeded. As these particles move freely through space, they collide with each other. Collisions of these particles are what drive the evolution of the gas towards equilibrium.
+	The kinetic theory of gases treats gases as composed of a large number of individual molecules that, for large periods of time, flow unimpeded. As these particles move freely through space, they collide with each other. Collisions of these particles are what drive the evolution of the gas towards equilibrium.
 	
 	We consider a gas enclosed in a volume. A single molecule of this gas can be described with having position $\vec{x}$ and velocity $\vec{v}$ at a time $t$. For a particular time, we can describe a molecule as being within at a single point, $(\vec{x},\vec{v})$, in 6-dmensional space known as phase space. We define the distribution function of the gas as $f(t,\vec{x},\vec{v})d\vec{x}\,d\vec{v}$ gives the number of particles within the range of $\vec{x} + d\vec{x}$ with velocities $\vec{v} + d\vec{v}$. 
 
@@ -286,6 +290,7 @@ When the gas is in equilibrium, the difference between the number of particles t
 I[f_M](t,\vecx,\vecv) = \int_{\R^3} \int_{\R^3} (f_{M1}'f_M' - f_{M1} f_M)  g\, b\, db\, d\varepsilon\, d\vecv_1\ = 0
 \end{equation*}
 
+
 \section{Dimensionless Reduction}
 
 Gas dynamic constants can vary greatly in scale. This can cause an accumulation of round-off error using floating point arithmetic when performing a large number of computations. In order to reduce the error that can be introduced by the varying scales, a dimensionless reduction is performed on the constants and equations. The dimensionless reduction aims to reduce the scale of all the variables to roughly of order one to minimize the round-off error. Note that the dimensionless reduction process can never eliminate round-off error since it is inherit to floating point arithmetic. The techniques used for dimensionless reduction vary from problem to problem. This thesis adopts the convention borrowed from Chapter 3 of [][][][].
@@ -379,6 +384,7 @@ f_{M}(t,x,u) :=  \frac{n}{(\pi T)^{3/2}} \exp\Bigl(-\frac{(u-\bar{u})^2}{T} \Big
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Discontinuous Galerkin Discretization in the Velocity Variable}
+\label{chap:dg}
 
 Discontinuous Galerkin methods is a method of discretizing equations. The following section describes the DG formulation found in~\cite{AlekseenkoJosyula2012},~\cite{AlekseenkoNguyenWood2015}.
 
@@ -648,7 +654,7 @@ where we used that $I[f_M](t,\vecx,\vecv)=0$. It was found that this form of the
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{The Discrete Fourier Transform}
-
+\label{chap:dft}
 The goal is to compute (\ref{eq:I_dist}) faster than $O(M^8)$. We note that (\ref{eq:I_dist}) is similar to a discrete convolution form (which will be defined later). The Discrete Fourier Transform (DFT) can be used to speed up the computations of convolutions using the \textit{Convolution Theorem}. In particular, it is used to speed up circular convolutions. In order to apply the DFT to our problem, we must first assume a periodic extension of the discrete form of $f$. This section discusses the background of the Discrete Fourier Transform, convolution theorem, and periodic continuation needed to quickly compute (\ref{eq:I_dist}) 
 
 \section{The One-Dimensional Discrete Fourier Transform and its Properties}
@@ -864,13 +870,24 @@ number of multiplications which is less than the original $N_1^2N_2^2$ multiplic
 
 While this does not result in the claimed $\mathcal{O}(N \log N)$ multiplications, the algorithm can be used recursively when $N$ is highly composite. We can decompose the original $N$-point DFT into DFTs of length $N_1$ and $N_2$ which can then be further decomposed such that each can be computed using the FFT algorithm. This feature motivates the application of the FFT to DFT lengths which are the power of an integer, and in most cases $N$ is chosen to be a power of 2 \cite{Nussbaumer1982}.
 
-We can now consider the DFT of an $N$-point sequence $\{x_n\}_{n=0}^{N-1}$ with $N=2^t$. In this case, we can do the first stage of the FFT using $N_1 = 2$ and $N_2 = 2^{t-1}$. This results in splitting the original input sequence $x_n$ into two $(N/2)$-point sequences, $x_{2n}$ and $x_{2n+1}$ which correspond to the even and odd indices of the original $x_n$ respectively.
+\subsection{Radix-2 FFT Algorithm}
+We can now consider the DFT of an $N$-point sequence $\{x_n\}_{n=0}^{N-1}$ with $N=2^t$. In this case, we can do the first stage of the FFT using $N_1 = 2$ and $N_2 = 2^{t-1}$. This results in splitting the original input sequence $x_n$ into two $(N/2)$-point sequences, $x_{2n}$ and $x_{2n+1}$ which correspond to the even and odd indices of the original $x_n$ respectively. Now, $\calF[x]_k$ becomes
+\begin{equation}
+\calF[x]_k = \sum_{n=0}^{N/2-1} x_{2n}W^{2nk} + W^k \sum_{n=0}^{N/2-1}x_{2n+1}W^{2nk}
+\end{equation}
+and, since $W^{N/2}=-1$, we have
+\begin{equation}
+\calF[x]_{k+N/2} = \sum_{n=0}^{N/2-1} x_{2n}W^{2nk} - W^k \sum_{n=0}^{N/2-1}x_{2n+1}W^{2nk}\, , \quad k=0,\dots,N/2-1\, .
+\end{equation}
+With this approach, can calculate two DFTs of length N/2. We can then calculate the both DFTs of length $N/2$ using DFTs of length $N/4$. Continuing down, we will calculate the DFT of length $N=2^t$ in $t=\log_2 N$ stages. Each step requires a total of $N$ additions and $N/2$ multiplications which results in a final computational complexity of $\mathcal{O}(N\log_2 N)$. 
+
+The lower computational complexity of the FFT algorithm in computing the DFT versus the naive DFT is what allows circular convolutions to be calculated in $\mathcal{O}(N \log N)$ steps with use of the FFT and the convolution theorem. The next chapter will go into detail on how to convert the convolution seen in (\ref{eq:I_dist}) to a circular convolution so that we can apply the convolution theorem and the FFT to retrieve a reduction in the computational complexity in calculating (\ref{eq:I_dist}).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% CHAPTER FIVE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Discretization of the Collision Integral and Fast Evaluation of Discrete Convolution}
-
+\label{chap:fast_eval}
 
 \section{Formulas for Computing the DFT of the Collision Integral Copy and Pasted}
 To derive the formula for computing the collision operator we rewrite (\ref{eq:I_dist}) as
@@ -910,11 +927,12 @@ where
 Once again, for purposes of calculating the one-dimensional discrete Fourier transform along dimension $j_u$, we need only consider the transform of $\hat{I}_{j_u,j_v,j_v',j_v'',j_w,j_w',j_w''}$. 
 By similar argument as before, we fix and drop indices $j_v$, $j_v'$, $j_v''$, $j_w$, $j_w'$, and $j_w''$ in the latter formula and write 
 \begin{align}
-\hat{I}_{j_u} &= \sum_{j_u''=0}^{M-1} \sum_{j_u'=0}^{M-1} f_{j'_{u}-j_{u}} f_{j''_{u}-j_{u},} A_{j'_{u},j''_u} \label{I_onedim_u} \\
+\label{I_onedim_u}
+\hat{I}_{j_u} &= \sum_{j_u''=0}^{M-1} \sum_{j_u'=0}^{M-1} f_{j'_{u}-j_{u}} f_{j''_{u}-j_{u},} A_{j'_{u},j''_u}  \\
 \calF[\hat{I}]_{k_u} &= \sum_{j_u=0}^{M-1} \sum_{j_u''=0}^{M-1} \sum_{j_u'=0}^{M-1} W^{k_u j_u} f_{j'_{u}-j_{u}} f_{j''_{u}-j_{u},} A_{j'_{u},j''_u}\, . \label{FI_onedim_u}
 \end{align}
 We note that evaluating $\calF[\hat{I}]_{k_u}$ directly would require $O(M^3)$ operations.
-However, taking into consideration the discussion in the last section, expression in the right side of (\ref{I_onedim_u}) can be considered as a circular convolution, having a form similar to (\ref{cirlconv}). This motivates us to explore properties of the DFT and rewrite (\ref{FI_onedim_u}) in a form suitable for numerical computation. This is accomplished in the following lemma.
+However, taking into consideration the discussion in the last section, expression in the right side of (\ref{I_onedim_u}) can be considered as a circular convolution, having a form similar to (\ref{eq:cirlconv}). This motivates us to explore properties of the DFT and rewrite (\ref{FI_onedim_u}) in a form suitable for numerical computation. This is accomplished in the following lemma.
 
 \begin{lemma}
 \label{lemma_dft}
@@ -1467,10 +1485,11 @@ However, padding by zeros will have an impact on the performance of the method a
 As we can see from the table, the the fourier method still outperforms the direct method in time. However, the speed up drops dramatically as more zeros are added. In the $N=21$, the speed was reduced by half by adding one zero in each dimension, showing a increased time complexity cost for the increase in accuracy. 
 In the $N=21$, the speed up drops by a third on $n_{\text{pad}} = 2$ to 20.97. However, zero-padding gives a degree of flexibility to the method to balance time and accuracy.
 
-\section{The Model Kinetic Equations and the Rel-ES Method}
+\chapter{The Model Kinetic Equations and the Rel-ES Method}
+\label{chap:kin}
+The model kinetic equations are approximations to the original Boltzmann collision operator that attempt to retain many of the same properties \cite{Struchtrup2005}. The best known model equations are the Bhatnagar-Gross-Krook (BGK model) and the Ellipsoidal-Statistical-BGK (ES-BGK model). We introduce these two models below and then introduce a new model equation after addressing a flaw with the ES-BGK and BGK models.
 
-
-\subsection{The BGK Model}
+\section{The BGK Model}
 \label{eq:coll_bgk_sec}
 One of the difficulties with dealing with the Boltzmann equation is that it depends on the product of two distribution functions \cite{Kremer2010}, where
 \begin{equation}
@@ -1481,7 +1500,7 @@ We drop the integral limits for simplicity. We aim to simplify the structure of 
 \label{eq:bgk_step1}
 \int  f_{M_1}' f'_{M} - f f_1 g\, b \, db\, d\varepsilon\, d\vecv\, .
 \end{equation}
-$\ln f_M$ is a linear combination of the collision invariants, so we have that $f_{M_1}' f'_{M}=f_{M_1} f_{M}$. We can then rewrite (\ref{eq:step1}) as 
+$\ln f_M$ is a linear combination of the collision invariants, so we have that $f_{M_1}' f'_{M}=f_{M_1} f_{M}$. We can then rewrite (\ref{eq:bgk_step1}) as 
 \begin{equation}
 \label{eq:bgk_step2}
 f_M \int f_{M_1} g\, b \, db\, d\varepsilon\, d\vecv\, - f \int f_1 g\, b \, db\, d\varepsilon\, d\vecv\, .
@@ -1511,7 +1530,7 @@ An important property of the BGK collision integral is that it conserves the fir
 \end{split}
 \end{equation}
 
-\subsection{The ES-BGK Model}
+\section{The ES-BGK Model}
 Calculation of the Prandtl number from the BGK model leads to a Prandtl number of 1 \cite{Struchtrup2005}. In order to recitfy this, Holway \cite{H66} proposed the ellipsoidal statistical BGK model, known as the ES-BGK model. In the ES-BGK model, the Maxwellian is replaced by an anisotropic Gaussian.
 
 First define $\vec{c} = \vecv - \bar{\vecv}$. Next, we define the stress tensor, $\Theta$, a $3 \times 3$ matrix such that
@@ -1537,6 +1556,7 @@ Next, we prove an important property of the ES-BGK for the Rel-ES model.
 \begin{theorem}
 Let $\T$ be SPD, then we have
 \begin{equation}
+\label{eq:es_ident}
 \frac{1}{n} \int_{\R^3} \vec{c}\,\vec{c}^T f_{\text{ES}} \,  d\vec{c} = \frac{1}{n}\int_{\R^3} \vec{c}\,\vec{c}^T \frac{n}{(\pi^3 \det(2\T))^{1/2}} \exp(-\frac{\vec{c}^T \T^{-1} \vec{c}}{2}) = \T \, .
 \end{equation}
 \end{theorem}
@@ -1586,13 +1606,34 @@ We can now reintroduce the constants into (\ref{eq:no_consts}),
 \end{align*}
 \end{proof}
 
-\subsection{Relaxation Rates}
+\section{Rel-ES}
+The model equations are attractive due to their simplicity and low computational complexity. However, they are only an approximation to the true Boltzmann equation. Differences between the full Boltzmann equation can the model equations can be seen in the case of spatially homogeneous relaxation \cite{AlekseenkoEuler2015}. In particular, the model equations force all moments of the Boltzmann equation to relax at the same rate, in particular, the collision frequency $\nu$. Moments of solutions to the full Boltzmann equation relax with different rates \cite{Cercignani1969, StruchtrupHenning1997}. In \cite{AlekseenkoEuler2015}, kinetic model equations were proposed that used a velocity dependent collision frequency. Our method uses a similar approach to enforce the moments of the stress tensor.
 
-The model equations are attractive due to their simplicity and low computational complexity. However, they are only an approximation to the true Boltzmann equation. Differences between the full Boltzmann equation can the model equations can be seen in the case of spatially homogeneous relaxation \cite{AlekseenkoEuler2015}. In particular, the model equations force all moments of the Boltzmann equation to relax at the same rate, in particular, the collision frequency $\nu$. Moments of solutions to the full Boltzmann equation relax with different rates \cite{Cercignani1969, StruchtrupHenning1997}
+To account for this, we have different relaxation rates for each element of $\T$. The relexation rates are determined with the following formula
+\begin{equation}
+\nu_{ij} = -\frac{I_{ij}}{\T_{ij}-f_{ij}^M}
+\end{equation}
+where $I_{ij} = \frac{1}{n}\int_{\R^3} (v_i-\bar{v}_i)(v_j-\bar{v}_j)Q(\vecv)d\vec{v}$ and $Q(\vecv)$ is the collision operator.
 
-\subsection{Rel-ES}
 
-\subsection{Experimental Results: 0d Homogeneous Relaxation}
+The Rel-ES model goes as follows. We assume we have a model of the form
+\begin{equation}
+\label{eq:reles_model}
+v_{ES}(f_{ES} - f)
+\end{equation}
+Now assume that the rates $\nu_{ij}$ are known. Then one can impose the correct rates by requiring that
+\begin{align*}
+-\nu_{ij}(\T_{ij} - f^M_{ij}) &= \nu_{ES} \frac{1}{n}\int_{\R^3} (v_i - \bar{v}_i)(v_j-\bar{v}_j)(f_0 - f) d\vecv \\
+&= \nu_{ES}(\hat{{\T}}_{ij}-\T_{ij})
+\end{align*}
+Solving for $\hat{T}_{ij}$, we get
+\begin{equation*}
+\hat{\T}_{ij}=\T_{ij} + \frac{\nu_{ij}}{\nu_{ES}}(f^M_{ij}-\T_{ij})
+\end{equation*}
+
+
+
+\section{Experimental Results: 0d Homogeneous Relaxation}
 
 In this section we present results of solution of the problem of 
 spatially homogeneous relaxation using Fourier evaluation of the 
@@ -1609,7 +1650,7 @@ section: $n_{1}=1.6094$, $n_{2}=2.8628$, $\bar{\vec{u}}_{1}=(0.7750,0,0)$, $\bar
 parameters correspond to upstream and downstream conditions of a Mach 1.55 
 shock wave. 
 
-Parameters $M=15$, $s=5$ were used to evaluate the shockwave. We can see that the Rel-ES method performs well in matching the benchmkark solution. There are small deviations in the moments.
+Figure \ref{fig:rel} shows the results of a spatially homogenous relaxation using the Rel-ES method. Parameters $M=15$, $s=5$ were used to evaluate the shockwave. We can see that the Rel-ES method performs well in matching the benchmkark solution. There are small deviations in the moments. However, this is a large number of points required to obtain convergence. 
 
 \begin{center}
 \begin{figure}[h]
@@ -1620,11 +1661,17 @@ Parameters $M=15$, $s=5$ were used to evaluate the shockwave. We can see that th
   \includegraphics[height=.25\textheight]{images/reles_m155_5s15n_mom4.png}&
   \includegraphics[height=.25\textheight]{images/reles_m155_5s15n_mom6.png}\\
   \end{tabular}
-\caption{\label{fig03} Relaxation of moments $f_{\varphi_{i,p}}$, $i=1,2$, $p=2,3,4,6$ 
+\caption{\label{fig:rel} Relaxation of moments $f_{\varphi_{i,p}}$, $i=1,2$, $p=2,3,4,6$ 
 in a mix of Maxwellian streams corresponding to a shock wave with 
 Mach number 1.55 obtained by solving the Boltzmann equation using Fourier and direct evaluations of the collision integral.}
 \end{figure}
 \end{center}
+
+\chapter{Hierarchically Semi-Structured Matrices}
+
+\chapter{Conclusion}
+This thesis concerned itself with the fast evaluation of the Boltzmann collision integral, which was introduced in chapter \ref{Chap2}. We also introduced the discrete DG discretization in the velocity variable for the Boltzmann equation. This resulted in a convolution form of the collision integral. After discretization of the convolution form, we were left with a convolution that could not be evaluated by applying traditional DFT evaluation methods. In chapter \ref{chap:dft}, we introduced the DFT. We showed how convolutions can be quickly evaluated by using the DFT in Chapter \ref{chap:fast_eval} and presented numerical results. In Chapter \ref{chap:kin}, we introduced the model kinetic equations and introduced a method building on the ES-BGK method which I refer to as the Rel-ES method.
+
 
 
 \clearpage

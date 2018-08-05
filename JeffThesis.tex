@@ -1676,6 +1676,10 @@ Mach number 1.55 obtained by solving the Boltzmann equation using Fourier and di
 
 \chapter{Hierarchically Semi-Structured Matrices}
 
+The discrete form of the collision kernel $A(\vecv, \vecv_1;\phi_{i;j})$ defined by (\ref{eq:A_definition}) naturally is stored as a $N^3 \times N^3$ matrix. Although it is $N^3 \times N^3$, many components are expected to be zero so that we only expect $\mathcal{O}(N^5)$ non-zero components of the discrete $A$ kernel. This property is exploited in \cite{AlekseenkoJosyula2012} to bring down the total number of operations to calculate (\ref{eq:I_dist}) down to $\mathcal{O}(N^8)$ operations. However, if the number of elements of $A$ can be reduced further, than it should lead to a computational speed up in the calculation of (\ref{eq:I_dist}).
+
+Hierarchical Semi-Structured (HSS) matrix compression is a form of matrix compression that is appropriate for some dense forms of matrices. Under certain assumptions \cite{vandebril2010matrix, bebendorf2008hierarchical}, it is possible to compress matrices such that only $\mathcal{O}(N \log N)$ storage and $\mathcal{O}(N \log N)$ operations needed for matrix-vector multiplication. HSS forms were successfully applied to matrices arising in integral equations of elasticity. It was found through empirical investigation that the kernel $A(\vecv,\vecv_1;\phi_{i;k})$ decreases to infinity in a manner similar to the elasticity 
+
 \chapter{Conclusion}
 This thesis concerned itself with the fast evaluation of the Boltzmann collision integral, which was introduced in Chapter \ref{Chap2}. 
 We also introduced the discrete DG discretization in the velocity variable for the Boltzmann equation. 

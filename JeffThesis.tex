@@ -1677,9 +1677,14 @@ Mach number 1.55 obtained by solving the Boltzmann equation using Fourier and di
 \chapter{Hierarchically Semi-Structured Matrices}
 
 \chapter{Conclusion}
-This thesis concerned itself with the fast evaluation of the Boltzmann collision integral, which was introduced in chapter \ref{Chap2}. We also introduced the discrete DG discretization in the velocity variable for the Boltzmann equation. This resulted in a convolution form of the collision integral. After discretization of the convolution form, we were left with a convolution that could not be evaluated by applying traditional DFT evaluation methods. In chapter \ref{chap:dft}, we introduced the DFT and showed how convolutions can be quickly evaluated by using the DFT. In Chapter \ref{chap:fast_eval} we showed how the DFT can be applied to our problem by assuming that the solution is periodic and compactly supported in the velocity domain. We presented numerical results. In Chapter \ref{chap:kin}, we introduced the model kinetic equations and introduced a method building on the ES-BGK method which I refer to as the Rel-ES method.
+This thesis concerned itself with the fast evaluation of the Boltzmann collision integral, which was introduced in Chapter \ref{Chap2}. 
+We also introduced the discrete DG discretization in the velocity variable for the Boltzmann equation. 
+This resulted in a convolution form of the collision integral. After discretization of the convolution form, we were left with a convolution that could not be evaluated by applying traditional DFT evaluation methods. 
+In Chapter \ref{chap:dft}, we introduced the DFT and showed how convolutions can be quickly evaluated by using the DFT. In Chapter \ref{chap:fast_eval} we showed how the DFT can be applied to our problem by assuming that the solution is periodic and compactly supported in the velocity domain. 
+This method can be extended to any other method that uses locally supported basis functions on a uniform mesh with any molecular potential, allowing the results to be further generalized to other methods despite this thesis's focus on the DG method.
+We presented numerical results. 
 
-The new method, while subject to some drawbacks, obtains a significant decrease in the number of operations required to calculate the Boltzmann collision integral. This method can be extended to any other method that uses locally supported basis functions on a uniform mesh with any molecular potential, allowing the results to be further generalized to other methods despite this thesis's focus on the DG method.
+In Chapter \ref{chap:kin}, we introduced the model kinetic equations and introduced a method building on the ES-BGK method which is referred to as the Rel-ES method.The new method, while subject to some drawbacks, obtains a significant decrease in the number of operations required to calculate the Boltzmann collision integral. 
 
 There is still much work to be done to decrease the computational cost of the Boltzmann equation. DG Wavelet representations provide promising savings in terms of number of discretization points required to capture the solution. If this method can be extended to non-uniform (e.g. adaptive) grids then we can obtain an additional speed up in calculating the collision operator. There is hope we can extend the results from \cite{GambaHaakHauckHu2017} to the DG method.
 

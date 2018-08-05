@@ -128,13 +128,11 @@
 		   {Ali Zakeri , Ph.D.}
            {Vladislav Panferov , Ph.D.}
 
-\abstract{Gas flows around high-speed high altitude aircraft and within rocket thrusters contains regions where the particle velocities deviates significantly from the Maxwellian distribution. The gas in these regions is said to be in non-continuum and is best described by kinetic equations. The most physically accurate model is given by the Boltzmann equation. Due to its high computational cost, there is great interest in reducing the computational costs associated with the evaluation of the collision integral. This thesis focuses on reducing the computational costs associated with the collision integral. The Discontinuous Galerkin (DG) method is used to discretize the collision integral. The DG method is advantageous for its ability to capture arbitrary surfaces and conserve mass, momentum, and temperature. The DG discretization of the Boltzmann equation is introduced. Discretization leads to a weighted convolution form which costs $\mathcal{O}(N^8)$ operations to calculate directly. A discussion of convolutions and their properties is also introduced. A method is introduced based on the Discrete Fourier Transform (DFT) to reduce the calculation of the convolution form down to $\mathcal{O}(N^6)$. Empirical results are shown. A brief discussion of a new approach based on model kinetic equations is also given.}
+\abstract{Gas flows around high-speed high altitude aircraft and within rocket thrusters contain regions where the particle velocities deviates significantly from the Maxwellian distribution. The gas in these regions is said to be in non-continuum and is best described by kinetic equations. The most physically accurate model is given by the Boltzmann equation. Due to its high computational cost, there is great interest in reducing the computational costs associated with the evaluation of the collision integral. This thesis focuses on reducing the computational costs associated with the collision integral. The Discontinuous Galerkin (DG) method is used to discretize the equation. Discretization leads to a weighted convolution form which costs $\mathcal{O}(N^8)$ operations to calculate directly. A discussion of convolutions, their properties, and fast evaluation of convolutions is discussed. A method is introduced based on the Discrete Fourier Transform (DFT) to reduce the calculation of the convolution form down to $\mathcal{O}(N^6)$. Empirical results are shown demonstrating that it is conservative and error is minimal. A discussion of two different formulations of the collision integrals are discussed and numerical results are given. A brief discussion of a new approach based on model kinetic equations is also given.}
 
 %\copyrightyear{2015}
 
-\acknowledgement{My deepest gratitude goes to my advisor, Dr. Alekseenko, for his support throughout my master's program. I cherish the experience of working with Dr. Alekseenko. He has given given me amazing opportunities. Under his guidance, I have fulfilled a goal of completing an end-to-end research project. He has always been supportive of my decisions. There is no other person whose advice weighs more heavily in my mind than Dr. Alekseenko's. I would like to thank the CSUN Math department, which has a superb focus on its students. 
-
-I would like to thank my family for their support throughout my time at CSUN. They have supported my decision to pursue a Master's degree without hesitation. Lastly, thanks to my girlfriend, Pauline, who has been a constant source of happiness for me.}
+\acknowledgement{My deepest gratitude goes to my advisor, Dr. Alekseenko. Working with him has been an amazing experience. Dr. Alekseenko has given me amazing opportunities, guidance, and support. I would like to thank the CSUN Math department, which has a superb focus on its students. I would like to thank my friends and family for their support throughout my time at CSUN. They have supported my decision to pursue a Master's degree without hesitation. Lastly, thanks to my girlfriend, Pauline, who has been a constant source of happiness and motivation for me.}
 
 
 
@@ -147,10 +145,13 @@ I would like to thank my family for their support throughout my time at CSUN. Th
 
 \chapter{Introduction}
 \label{Chap1}
-This thesis concerns itself with the evolution of gas flows in low density regimes. This is of particular interest to the engineering community. One example of such a regime is gas flows around high-altitude high-velocity objects flying through the upper atmosphere such as spacecraft and airplanes. Under such regimes, the particles impart a large amount of kinetic energy on the object causing a large transfer of heat to the object. Preventing damage to the object under these circumstances is essential. It is often difficult to replicate these conditions within a laboratory setting. This means that there is hope in the development of high fidelity solvers that can simulate the high speed gas flows around these objects to help predict the correct heating patterns. In these gas regimes, the fluid mechanical laws of Navier-Stokes and Fourier break down. In contrast, kinetic theory provide an accurate description by describing particles at the microscopic level.
+This thesis concerns itself with the evolution of gas flows in low density regimes. This is of particular interest to the engineering community. One example of such a regime is gas flows around high-altitude high-velocity objects flying through the upper atmosphere such as spacecraft and aircraft. Under such regimes, the particles impart a large amount of kinetic energy on the object causing a large transfer of heat to the object. Preventing damage to the object under these circumstances is essential. It is often difficult to replicate these conditions within a laboratory setting. Consequently,  there is hope in the development of high fidelity solvers that can simulate the high speed gas flows around these objects to help predict the correct heating patterns. In these gas regimes, the fluid mechanical laws of Navier-Stokes and Fourier break down. In contrast, kinetic theory provide an accurate description by describing particles at the microscopic level.
 
 Kinetic theory describes the non-equilibrium dynamics of a gas or any system comprised of a large number of particles. Kinetic equations have found applications in wide ranging applications such as rarefied gas dynamics \cite{Kremer2010} \cite{Kogan1969}, radiative transfer, and semiconductors modeling. 
-The Bolzmann equation is a kinetic equation that describes gases at the molecular level at regimes where Navier-Stokes and Fourier methods fail. Analytic solutions to the Boltzmann equation have been constructed for simple geometries and special molecular potentials. However, the complexity of the equation, along with the the complexities of boundary conditions and gas-to-gas interactions that occur in engineering and physics applications, suggest that only numerical solutions are possible. However, the complexity of the equation provides a challenge in directly computing the Boltzmann equation. It is composed of a five-fold integral which must be evaluated at all points in time, space, and velocity resulting in $\mathcal{O}(n^{11})$ computational cost where $n$ is the number of discretization points in space and velocity. This thesis primarily concerns with evaluating this integral in velocity space which results in a naive cost of $\mathcal{O}(n^8)$. However, this is still computationally prohibitive.
+The Boltzmann equation is a kinetic equation that describes gases at the molecular level at regimes where Navier-Stokes and Fourier methods fail. 
+Analytic solutions to the Boltzmann equation have been constructed for simple geometries and special molecular potentials. However, the complexity of the equation, along with the the complexities of boundary conditions and gas-to-gas interactions that occur in engineering and physics applications, suggest that only numerical solutions are possible. 
+However, the complexity of the equation provides a challenge in directly computing a solution of the equation. 
+It is composed of a five-fold integral which must be evaluated at all points in time, space, and velocity resulting in $\mathcal{O}(n^{11})$ computational cost where $n$ is the number of discretization points in space and velocity. This thesis primarily concerns with evaluating this integral in velocity space which results in a naive cost of $\mathcal{O}(n^8)$. However, this is still computationally prohibitive.
 
 In this thesis, we explore how to speed up evaluation of the collision operator within the Boltzmann equation by using a Discontinuous-Galerkin method based on the work of \cite{Majorana2011,AlekseenkoJosyula2012,AlekseenkoJosyula2012a}. The DG method is advantagous for its ability to capture arbitrary surfaces and conserve mass, momentum, and temperature. However, the drawback of this method is its complexity. DG discretization results in a computational complexity of $\mathcal{O}(n^8)$ with a $\mathcal{O}(n^5)$ storage requirement. In \cite{AlekseenkoNguyenWood2015}, the translational invariance was used to introduce a bilinear convolution form of the Galerkin projection of the collision operator. In the case of uniform meshes, this convolution allows us to re-write the collision operator as a convolution of multidimensional sequences. This thesis introduces a new method using the convolution theorem and Fast Fourier Transform to reduce the computational complexity of the convolution to $\mathcal{O}(n^6)$ computational complexity but with a $\mathcal{O}(n^6)$ storage requirement.
 
@@ -164,7 +165,7 @@ In addition, another method is introduced which builds upon the ES-BGK method of
 
 	The kinetic theory of gases treats gases as composed of a large number of individual molecules that, for large periods of time, flow unimpeded. As these particles move freely through space, they collide with each other. Collisions of these particles are what drive the evolution of the gas towards equilibrium.
 	
-	We consider a gas enclosed in a volume. A single molecule of this gas can be described with having position $\vec{x}$ and velocity $\vec{v}$ at a time $t$. For a particular time, we can describe a molecule as being within at a single point, $(\vec{x},\vec{v})$, in 6-dmensional space known as phase space. We define the distribution function of the gas as $f(t,\vec{x},\vec{v})d\vec{x}\,d\vec{v}$ gives the number of particles within the range of $\vec{x} + d\vec{x}$ with velocities $\vec{v} + d\vec{v}$. 
+	We consider a gas enclosed in a volume. A single molecule of this gas can be described with having position $\vec{x}$ and velocity $\vec{v}$ at a time $t$. For a particular time, we can describe a molecule as being within at a single point, $(\vec{x},\vec{v})$, in 6-dmensional space known as phase space. We describe the gas using a velocity distribution function denoted by $f(t,\vecx,\vecv)$. The distribution is defined such that $f(t,\vec{x},\vec{v})d\vec{x}\,d\vec{v}$ gives the number of particles within the range of $\vec{x} + d\vec{x}$ with velocities $\vec{v} + d\vec{v}$. 
 
 In 1872 Boltzmann \cite{Boltzmann1872} introduced the Boltzmann equation which describes the time evolution of the distribution $f$. In the absence of external forces and collisions of particles, then the Boltzmann equation takes the form
 \begin{equation}
@@ -176,8 +177,7 @@ However, when the effects of collisions cannot be neglected, the right hand side
 \label{eq:boltzmann}
 \dydx{}{t}f(t, \vecx, \vecv) + \vecv \cdot \nabla_x f(t, \vecx, \vecv) = I[f](t,\vecx,\vecv)\, \\ 
 \end{equation}
-Where $I[f]$ is referred to as the collision operator. The explicit form of $I[f]$ depends on the properties of the gas. To describe it explicitly, we make several assumptions. 
-First, the molecules of the gas composed entirely of a single species. Second, we assume hard sphere collisions as described in section \ref{sec:bincol}.  
+Where $I[f]$ is referred to as the collision operator. The explicit form of $I[f]$ depends on the properties of the gas. To describe it explicitly, we assume that the molecules of the gas composed entirely of a single species. In the next section, we derive the collision operator when particles are assumed to have hard sphere potentials. However, later on the thesis, a more general form of the collision operator is assumed. The extension to the general form from hard spheres is intuitive.
 	
 \section{Binary Collisions of Particles}
 \label{sec:bincol}
@@ -188,12 +188,12 @@ First, the molecules of the gas composed entirely of a single species. Second, w
 	\caption{Kremer (2010, p. 27), Fig 1.6}
 	\label{fig:binary_collision}
 \end{figure}
-	In Figure \ref{fig:binary_collision}, we model a particle at the point $O$. The reference frame is taken with respect to this particle. A second particle is approaching the particle at poisition $O$ symbolized by the black dot. It follows the dotted line and collides with the particle and is deflected at an angle of $\theta$ and leaves the frame.
+	In Figure \ref{fig:binary_collision}, we model a particle at the point $O$. The reference frame is taken with respect to this particle. A second particle is approaching the particle at position $O$ symbolized by the black dot. It follows the dotted line and collides with the particle and is deflected at an angle of $\theta$ and leaves the frame.
 	 Denote the pre- and post-collisional asymptotic velocities by $\vec{v}$, $\vec{v_1}$ and $\vec{v}'$, $\vec{v}_1'$ respectively. Define the relative pre- and post-collisional velocities, respectively, by 
 \begin{equation*}
-	\vec{g} = v_1 - v\, , \quad \vec{g}' = \vec{v}'-\vec{v}_1' \, .
+	\vec{g} = v_1 - v\, , \quad \vec{g}' = \vec{v}_1'-\vec{v}' \, .
 \end{equation*}
-$b$ denotes the offset of the centers of the molcules orthogonal to $\vec{g}$. $\varepsilon$ denotes the azimuthal angle between the two particles. 
+$b$ denotes the offset of the centers of the molecules orthogonal to $\vec{g}$. $\varepsilon$ denotes the azimuthal angle between the two particles. 
 
 By conservation of momentum, we have that 
 \begin{equation}
@@ -221,17 +221,17 @@ bisects the angle between asymptotic relative velocities. Using this vector, we 
 
 
 
-In order to explicitly write the collision operator, we must describe the collisions within the gas. Consider a particle with velocity $\vecv_1$ at point $\vecx$. This particle will collide with $f(t,\vecx, \vecv)d\vecv_1 g \Delta t b \, db \, d\varepsilon$ particles within the ranges of $\vecv_1$ and $\vecv_1 + d\vecv_1$. Integrating this by all all possible angles $(0 \leq \varepsilon < 2 \pi)$, over all impact parameters, $(0 \leq b \leq b^*)$, and over all velocities, for all particles within the volume element $\vecx d\vecx$, we get that there are 
+In order to explicitly write the collision operator, we must describe the collisions within the gas. Consider a particle with velocity $\vecv_1$ at point $\vecx$. This particle will collide with $f(t,\vecx, \vecv)d\vecv_1 g \Delta t b \, db \, d\varepsilon$ particles within the ranges of $\vecv_1$ and $\vecv_1 + d\vecv_1$. Integrating this by all all possible azimuthal angles $(0 \leq \varepsilon < 2 \pi)$, over all impact parameters, $(0 \leq b \leq b^*)$, and over all velocities, for all particles within the volume element $\vecx d\vecx$, we get that there are 
 \begin{equation}
 \label{eq:depletion}
-dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f(t, \vecx, \vecv_1) f(t, \vecx, \vecv) b |g|\,  db \, d\varepsilon\, d\vecv_1 
+dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f(t, \vecx, \vecv_1) f(t, \vecx, \vecv) b |g|\, d\varepsilon\,  db \,  d\vecv_1 
 \end{equation}
 total collisions within the volume element that annihilate points with velocity $\vecv$. Likewise, there are collisions that create points with velocity $\vecv$. Using the results of the lasts section, points with velocity $\vecv'$ and $\vecv_1'$, impact parameter $b'=b$, and azimuthal angle $\varepsilon' = \pi + \varepsilon$ will result in particles with post-collisional velocity of $\vecv$ and $\vecv_1$. The number of such collisions is
 \begin{equation}
 \label{eq:restitution}
 \begin{split}
-&dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f(t, \vecx, \vecv_1') f(t, \vecx, \vecv') b' |g'|\,  db \, d\varepsilon'\, d\vecv_1 \,  \\
-=&dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f(t, \vecx, \vecv_1') f(t, \vecx, \vecv') b |g|\,  db \, d\varepsilon\, d\vecv_1 \, .
+&dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f(t, \vecx, \vecv_1') f(t, \vecx, \vecv') b' |g'| \, d\varepsilon'\,  db\, d\vecv_1 \,  \\
+=&dt \int_{\R^3} \int_0^{b^*} \int_0^{2\pi} f(t, \vecx, \vecv_1') f(t, \vecx, \vecv') b |g|\,   d\varepsilon\, db \, d\vecv_1 \, .
 \end{split}
 \end{equation}
 
@@ -248,7 +248,7 @@ From here, we can substitute (\ref{eq:explicit_I}) into (\ref{eq:boltzmann}) to 
 \begin{equation}
 \dydx{}{t}f(t, \vecx, \vecv) + \vecv \cdot \nabla_x f(t, \vecx, \vecv) = \int_{\R^3} \int_{\R^3} (f_1' f' - f_1 f) |g|\, b\, db\, d\varepsilon\, d\vecv_1\, .
 \end{equation}
-The Boltzmann equation is a non-linear integro-differential equation. The right hand side is a five dimensional integral that must be evaluated at each point in 6-dimensional space.
+The Boltzmann equation is a non-linear integro-differential equation. The right hand side is a five dimensional integral that must be evaluated in time and at each point in 6-dimensional space.
 
 \section{Moments of the Distribution Function}
 
@@ -279,7 +279,7 @@ f_M(\vec{v},n,\vec{\bar{v}},T) = \frac{1}{\sqrt{2 \pi R T}^3} \exp\left( -\frac{
 \end{equation} 
 	
 Note that the exact shape of the Maxwellian distribution depends on the macroscopic moments of the gas distribution, $n$, $\vec{\bar{v}}$, and $T$ given by equations (\ref{eq:dens}), (\ref{eq:bulk}), (\ref{eq:temperature}) respectively. This is illustrated in Figure \ref{fig:1d_maxwellian}. The distribution is centered around $\bulkv$. The temperature, $T$, controls the width of the distribution. $n$ determines the area under the curve. 
-The Maxwellian takes a bell shaped, where $\lim_{\lvert \vec{v} \lvert \rightarrow \infty} f_M(\vec{v},n, \vec{\bar{v}}, T) = 0 $, and in fact drops off rapidly as we move away from $\vec{\bar{v}}$. This will become important later when we discretize $f_M$ (see sec \textbf{reference needed}).
+The Maxwellian takes a bell shaped, where $\lim_{\lvert \vec{v} \lvert \rightarrow \infty} f_M(\vec{v},n, \vec{\bar{v}}, T) = 0 $, and in fact drops off rapidly as we move away from $\vec{\bar{v}}$. This will become important later when we discretize $f_M$ (see section \ref{sec:periodic_cont}).
 \begin{figure}[h]
 \centering
 \includegraphics[scale=.5]{1D_Maxwellian}
@@ -316,7 +316,7 @@ f(t,x,v) = \frac{L^3 \Cref^3}{N} \hat{f}(t\mathbb{T},xL, v\Cref) = \hat{f}(\hat{
 \end{equation}
 where $N$ is total number of molecules in the gas volume $L^3$. 
 
-With these definitions, then the relationship between the dimensionless macroparameters and the dimensional pacroparameters are now as follows. We define
+With these definitions, then the relationship between the dimensionless macroparameters and the dimensional macroparameters are now as follows. We define
 \begin{equation}
 \begin{split}
 \label{eq:dimless_macro}
@@ -326,7 +326,7 @@ n(t,x)T(t,x)&:=\frac{2}{3} \int_{\R^3} (v - \bar{u})^2 f(t,x,v) dv\, ,
 \end{split}
 \end{equation}
 
-From the above definitions, we get the relationships of the dimensionless and dimensional macroparameters. First note that in the discussion of follows, we have $d\hat{v} = C_{\infty}^3 dv$. Then,
+From the above definitions, we get the relationships of the dimensionless and dimensional macroparameters. First note that in the discussion that follows, we have $d\hat{v} = C_{\infty}^3 dv$. Then,
 \begin{equation}
 \begin{split}
 n(t,x) &= \int_{\R^3} f(t,x,v)  dv\, \\
@@ -396,7 +396,8 @@ We denote the points in the velocity space as $\vec{v} = (u,v,w)$. The velocity 
 We partition $K$ into $N$ smaller rectangular parallelpipeds $K_j = [u_L^j, u_R^j] \times [v_L^j, v_R^j] \times [w_L^j, w_R^j]$. Each $K_j$ will contain a set of basis function, $\phi_j^i$, $i=1,\dots, s$ as described. We introduce nodes of Gauss quadratures of order $s_u$, $s_v$, and $s_w$ on each of the intervals $[u_L^j,u_R^j]$, $[v_L^j,v_R^j]$, and $[w_L^j,w_R^j]$. The nodes are denoted as
 $\kappa^{u}_{p;j}$, $\dots$, $p=1,s_{u}$,
 $\kappa^{v}_{q;j}$, $\dots$, $q=1,s_{v}$, and 
-$\kappa^{w}_{r;j}$, $\dots$, $r=1,s_{w}$. From the nodes, the one-dimensional Lagrange basis functions are defined:
+$\kappa^{w}_{r;j}$, $\dots$, $r=1,s_{w}$. 
+ From the nodes, the one-dimensional Lagrange basis functions are defined:
 \begin{equation}
 \label{eq:01}
 \phi^{u}_{l;j}(u)=\prod_{{p=1,s_{u}} \atop {p\neq l}} \frac{\kappa^{u}_{p;j}-u}{\kappa^{u}_{p;j}-\kappa^{u}_{l;j}}\, ,\quad 
@@ -423,8 +424,7 @@ The following identities hold for basis functions $\phi_{i;j}(\vec{v})$:
 \int_{K_{j}} \vec{v}\phi_{p;j}(\vec{v})\phi_{q;j}(\vec{v})\, d\vec{v} 
 = \frac{\omega_{p}\Delta\vec{v}^{j}}{8}\vec{v}_{p;j}\delta_{pq},
 \end{equation}
-where indices $l$, $n$, and $m$ of one dimensional basis functions correspond to 
-the three-dimensional basis functions 
+where $\Delta \vecv^j = (u^j_R-u^j_L)(v^j_R-v^j_L)(w^j_R-w^j_L),\, \omega_p := \omega^{s_u}_l\omega^{s_v}_m\omega^{s_w}_n$, and $\omega^{s_u}_l$, $\omega^{s_v}_m$, and $\omega^{s_w}_n$ are the weights of Gauss quadrature of order $s_u$, $s_v$, and $s_w$, respectively and indices $l$, $m$, and $n$ of one-dimensional basis functions correspond to the three-dimensional basis function 
 $\phi_{p;j}(\vec{v})=
 \phi^{u}_{l;j}(u)\phi^{v}_{m;j}(v)\phi^{w}_{n;j}(w)$, 
 and the vector $\vec{v}_{p;j}=(\kappa^{u}_{l;j},\kappa^{v}_{m;j},\kappa^{w}_{n;j})$. 
@@ -595,6 +595,7 @@ and notice that $I_{\phi_{i;j}}$ can be obtained from (\ref{eq:continuous_convol
 $I_{\phi_{i;j}}=I_i(\vec{\xi}_j)$. In the following, we will refer to (\ref{eq:continuous_convolution}) 
 as the convolution form of the Galerkin projection of the collision integral.
 
+
 \section{Discretization of the Collision Integral}
 In order to calculate (\ref{eq:continuous_convolution}), we replace the three-dimensional integrals with the Gauss quadratures associated with then nodal-DG discretization, (\ref{eq:01a}). 
 As is discussed above, we are only interested in 
@@ -631,10 +632,12 @@ large numerical errors.
 
 We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ operations to calculate it, $O(M^6)$ at one velocity node for $O(M^3)$ velocity nodes. However, recall the property stated in section \ref{sec:reform_galerkin} that $A$ only has $O(M^5)$ components bringing down the total cost of computing (\ref{eq:I_dist}) down to $O(M^8)$ operations. However, we wish to reduce this further. It turns out that the Discrete Fourier Transform has properties that allow us to bring down the cost of computing (\ref{eq:I_dist}) from $O(M^8)$ to $O(M^6)$. The DFT and its properties are discussed in the next section.
 
+By discretizing (\ref{eq:continuous_convolution}) to arrive to (\ref{eq:I_dist}), we have turned a convolution of functions into a convolution of sequences. However, it is not a convolution in the traditional sense, but instead a \textit{weighted} convolution. In the literature, this form has been difficult to speed up since traditional evaluation of convolutions (see Chapter \ref{chap:dft} for fast evaluation of convolutions in general) do not apply to the weighted convolution form. In \cite{PareschiPerthame1996}, this form proved the bottleneck in the method. In \cite{GambaHaakHauckHu2017}, a speed up was possible by assuming variable hard sphere potentials on the molecules. However, we take a different approach and directly apply the traditional method by making key assumptions.
+
 \section{The Micro-Macro Decomposition}
 The form of the collision integral can be reformulated for the purpose of numerical implementation. During simulations, it was observed that the ability of numerical simulations to conserve mass, momentum, and energy is strongly affected by the form of the discrete collision integral. 
 
-One such reformulation is the micro-macro decomposition [{\bf ??}] which considers the solution has the sum of the target Maxwellian distribution and the deviation from the Maxwellian, i.e.,
+One such reformulation is the micro-macro decomposition \cite{FilbetMouhotPareschi2006} which considers the solution has the sum of the target Maxwellian distribution and the deviation from the Maxwellian, i.e.,
 \begin{equation}
 \label{eq:decomp}
 f(t,\vecx,\vecv) = f_M(t, \vecx, \vecv) + \Delta f(t,\vecx,\vecv)\, ,
@@ -674,7 +677,7 @@ W=\e^{-\imath 2\pi/N}\, .
 
 \subsection{Properties of the DFT}
 
-Many properties of the DFT are a natural consequence of its defintion. In this subsection, we review the properties of the DFT that will be important for applying the DFT to \ref{eq:I_dist}. First, the DFT is invertible.
+Many properties of the DFT are a natural consequence of its definition. In this subsection, we review the properties of the DFT that will be important for applying the DFT to \ref{eq:I_dist}. First, the DFT is invertible.
 
 \begin{definition}
 Let $\{\calF [x]_k\}_{k=0}^{N-1}$ be a sequence of $N$ complex numbers such that it is the DFT of the complex valued sequence $\{x_l\}_{l=0}^{N-1}$. Then the inverse DFT is defined as
@@ -754,9 +757,9 @@ The convolution theorem seemingly gives no computational gain. Straightforward c
 
 \section{Circular Convolution as Linear Convolution}
 \subsection{Linear Convolutions and Circular Convolutions}
-{\textbf rewrite} The DFT can be used to calculate circular convolutions quickly. However, while (\ref{eq:I_dist}) has a form similar to the definition of a circular convolution, we note that it is not a circular convolution. In the discussion that follows (\ref{eq:I_dist}), we mention that for an $f_{i;j}$ with $j \leq 0$ or $j > M$, we set $f_{i;j}=0$. If (\ref{eq:I_dist}) was truly a circular convolution, then we must assume that $f_{i;j}=f_{i;j+M}$ for any $j \leq 0$ or $f_{i;j}=f_{i;k-M}$ for any $j > M$. 
+The DFT can be used to calculate circular convolutions quickly. However, while (\ref{eq:I_dist}) has a form similar to the definition of a circular convolution, we note that it is not a circular convolution. In the discussion that follows (\ref{eq:I_dist}), we mention that for an $f_{i;j}$ with $j \leq 0$ or $j > M$, we set $f_{i;j}=0$. If (\ref{eq:I_dist}) was truly a circular convolution, then we must assume that $f_{i;j}=f_{i;j+M}$ for any $j \leq 0$ or $f_{i;j}=f_{i;k-M}$ for any $j > M$. 
 
-Formally, (\ref{eq:I_dist}) is a linear convolution. However, this section will show that there are deep connections between linear convolutions and circular convolutions. Indeed, there are conditions where they can be considered equivalent. This allows us to treat (\ref{eq:I_dist}) as circular convolution and use the convolution theorem of the DFT and the speed up provided by the Fast Fourier Transform algorithm to calculate (\ref{eq:I_dist}) quickly. The discussion here is inspired by Oppenheim, Shafter and Buck Digital signal processing (add citation).
+Formally, (\ref{eq:I_dist}) is a linear convolution. However, this section will show that there are deep connections between linear convolutions and circular convolutions. Indeed, there are conditions where they can be considered equivalent. This allows us to treat (\ref{eq:I_dist}) as circular convolution and use the convolution theorem of the DFT and the speed up provided by the Fast Fourier Transform algorithm to calculate (\ref{eq:I_dist}) quickly. The discussion here is inspired by Chapter 8 of \cite{Oppenheimer1999}.
 
 \subsection{Linear Convolution of Two Finite-Length sequences}
 \label{sec:lin_conv_fin_seq}
@@ -813,7 +816,7 @@ To see this, note that for $l=0$, we have that $N$-point convolution becomes  $\
 \end{align*}
 where $\calF$ denotes the $N$-point DFT. In particular, with the correct zero padding, we can apply the DFT to (\ref{eq:I_dist}) with no error.
 \subsection{Circular Convolution as Linear Convolution with Aliasing.}
-
+\label{sec:lin_as_circ}
 We saw that we can find an equivalence between the linear convolution and the circular convolution by zero padding the finite sequences $\{ x_n\}$ and $\{y_n\}$. However, in certain cases, zero-padding may not be possible. In this section we explore what happens when we are unable to zero-pad the sequences.
 
 Suppose $\{x_n\}_{n=0}^{L-1}$ and $\{y_n\}_{n=0}^{P-1}$ For simplicity, let $L \geq P$. If we take an $L$-point DFT of $\{x_n\}$ or $\{y_n\}$ then we can perfectly reconstruct both $\{x_n\}$ and $\{y_n\}$ given $\{ \calF[x]_k \}$ and $\{ \calF[y]_k \}$. Now suppose $z_l$ is the linear convolution of $\{x_n\}$ and $\{y_n\}$, so $z_l$ is of length $L+P-1$. 
@@ -891,7 +894,9 @@ The lower computational complexity of the FFT algorithm in computing the DFT ver
 \chapter{Discretization of the Collision Integral and Fast Evaluation of Discrete Convolution}
 \label{chap:fast_eval}
 
-\section{Formulas for Computing the DFT of the Collision Integral Copy and Pasted}
+This section introduces a new algorithm for computing (\ref{eq:I_dist}) in $\mathcal{O}(N\log N)$ operations. In order to accomplish this, we must assume periodicity and compact support of $f$ and $A$ within the velocity domain. This allows us to write (\ref{eq:I_dist}) as a circular convolution.  We then use a straight forward application of the DFT to achieve a reduction in the number of operations. As discussed in section \ref{sec:lin_as_circ}, this may result in aliasing error. However, it is shown Chapter \ref{chap:numerical_results} that this error is negligible and accuracy is retained while demonstrating a significant speed up over direct evaluation.
+
+\section{Formulas for Computing the DFT of the Collision Integral}
 To derive the formula for computing the collision operator we rewrite (\ref{eq:I_dist}) as
 \begin{equation}
 \label{I+_distq1}
@@ -1077,7 +1082,7 @@ Performing the discrete Fourier transform in the $j_w$ and repeating the argumen
 \end{proof}
 
 
-\section{The Algorithm and its Complexity Copy and Pasted}
+\section{The Algorithm and its Complexity}
 \label{sec:algorithm}
 
 Theorem~\ref{thm3.1} allows us to calculate the collision operator 
@@ -1176,7 +1181,7 @@ Using this idea, we can still achieve good accuracy while using minimal zero-pad
 % \section{Alternative Formulation Involving $A^+$ Discretization}
 
 \chapter{Numerical Results}
-
+\label{chap:numerical_results}
 This chapter will cover the numerical results of computing the collision operator using the nodal-DG velocity discretizations and convolution using the DFT. 
 
 \section{Reduction in Computational Complexity}

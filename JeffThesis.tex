@@ -473,10 +473,10 @@ The kernel $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ is independent of time and can be
 In \cite{AlekseenkoJosyula2012a} properties of a kernel closely related to $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ 
 are considered.
 In particular, due to the local support of $\phi_{i;j}(\vec{v})$, it is anticipated that 
-kernel  $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ will have only $O(M^{5})$ non-zero components for each $\phi_{i;j}(\vec{v})$, 
+kernel  $A(\vec{v},\vec{v}_{1};\phi_{i;j})$ will have only $\mathcal{O}(M^{5})$ non-zero components for each $\phi_{i;j}(\vec{v})$, 
 where $M$ is the number of discrete velocity points in each velocity dimension. As a result, evaluation of  
-(\ref{eq:transfer_eq}) will require $O(M^{8})$ operations for each spatial point. This number of evaluations 
-is very high. However, as we will show later, it can be reduced to $O(M^6)$ operations using symmetries of
+(\ref{eq:transfer_eq}) will require $\mathcal{O}(M^{8})$ operations for each spatial point. This number of evaluations 
+is very high. However, as we will show later, it can be reduced to $\mathcal{O}(M^6)$ operations using symmetries of
 $A(\vec{v},\vec{v}_{1};\phi_{i;j})$, the convolution form of (\ref{eq:transfer_eq}) and the Fourier 
 transform. 
 
@@ -632,7 +632,7 @@ were substituted with zeros. In cases when the support of the solution
 was well contained within the computational domain, this assumption did not lead to 
 large numerical errors. 
 
-We note that in order to calculate (\ref{eq:I_dist}), it would require $O(M^9)$ operations to calculate it, $O(M^6)$ at one velocity node for $O(M^3)$ velocity nodes. However, recall the property stated in Section~\ref{sec:reform_galerkin} that $A$ only has $O(M^5)$ components bringing down the total cost of computing (\ref{eq:I_dist}) down to $O(M^8)$ operations. However, we wish to reduce this further. It turns out that the Discrete Fourier Transform has properties that allow us to bring down the cost of computing (\ref{eq:I_dist}) from $O(M^8)$ to $O(M^6)$. The DFT and its properties are discussed in the next section.
+We note that in order to calculate (\ref{eq:I_dist}), it would require $\mathcal{O}(M^9)$ operations to calculate it, $\mathcal{O}(M^6)$ at one velocity node for $\mathcal{O}(M^3)$ velocity nodes. However, recall the property stated in Section~\ref{sec:reform_galerkin} that $A$ only has $\mathcal{O}(M^5)$ components bringing down the total cost of computing (\ref{eq:I_dist}) down to $\mathcal{O}(M^8)$ operations. However, we wish to reduce this further. It turns out that the Discrete Fourier Transform has properties that allow us to bring down the cost of computing (\ref{eq:I_dist}) from $\mathcal{O}(M^8)$ to $\mathcal{O}(M^6)$. The DFT and its properties are discussed in the next section.
 
 By discretizing (\ref{eq:continuous_convolution}) to arrive to (\ref{eq:I_dist}), we have turned a convolution of functions into a convolution of sequences. However, it is not a convolution in the traditional sense, but instead a \textit{weighted} convolution. In the literature, this form has been difficult to speed up since traditional evaluation of convolutions (see Chapter~\ref{chap:dft} for fast evaluation of convolutions in general) do not apply to the weighted convolution form. In \cite{PareschiPerthame1996}, this form proved the bottleneck in the method. In \cite{GambaHaakHauckHu2017}, a speed up was possible by assuming variable hard sphere potentials on the molecules. However, we take a different approach and directly apply the traditional method by making key assumptions.
 
@@ -662,7 +662,7 @@ where we used that $I[f_M](t,\vecx,\vecv)=0$. It was found that this form of the
 
 \chapter{The Discrete Fourier Transform}
 \label{chap:dft}
-The goal is to compute (\ref{eq:I_dist}) faster than $O(M^8)$. We note that (\ref{eq:I_dist}) is similar to a discrete convolution form (which will be defined later). The Discrete Fourier Transform (DFT) can be used to speed up the computations of convolutions using the \textit{Convolution Theorem}. In particular, it is used to speed up circular convolutions. In order to apply the DFT to our problem, we must first assume a periodic extension of the discrete form of $f$. This section discusses the background of the Discrete Fourier Transform, convolution theorem, and periodic continuation needed to quickly compute (\ref{eq:I_dist}) 
+The goal is to compute (\ref{eq:I_dist}) faster than $\mathcal{O}(M^8)$. We note that (\ref{eq:I_dist}) is similar to a discrete convolution form (which will be defined later). The Discrete Fourier Transform (DFT) can be used to speed up the computations of convolutions using the \textit{Convolution Theorem}. In order to apply the DFT to our problem, we must first assume a periodic extension of the discrete form of $f$. This section discusses the background of the Discrete Fourier Transform, convolution theorem, and periodic continuation needed to quickly compute (\ref{eq:I_dist}).
 
 \section{The One-Dimensional Discrete Fourier Transform and its Properties}
 
@@ -676,6 +676,29 @@ Let $\{x_n\}_{n=0}^{N-1}$ be a sequence of $N$ complex numbers. The DFT is defin
 W=\e^{-\imath 2\pi/N}\, .
 \end{equation}
 \end{definition}
+
+In calculations below we will use the following definition of the 
+multidimensional DFT. Let 
+$x_{k_1, \dots, k_d}$ be a sequence indexed by $k_1, \dots, k_d$ with equal 
+lengths $N$ in each dimension. The DFT $\calF[x]_{k_1,\ldots,k_d}$ of 
+$x_{n_1, \dots, n_d}$ is defined as 
+\begin{equation}
+\label{mdft_def}
+\calF[x]_{k_1,\ldots,k_d} = \sum_{n_1=0}^{N-1} \left( W^{ k_1 n_1} 
+\sum_{n_2=0}^{N-1} \left( W^{k_2 n_2} \dots 
+\sum_{n_d=0}^{N-1} W^{k_d n_d } x_{n_1, \ldots, n_d}
+\right) \right)\, .
+\end{equation}
+Also, it is useful to define the inverse of the transform, 
+\begin{equation*}
+%\label{mdft_inv}
+x_{l_1,\ldots,l_d} = \frac{1}{N} \sum_{k_1=0}^{N-1} \left( W^{ -l_1 k_1} 
+\frac{1}{N} \sum_{k_2=0}^{N-1} \left( W^{- l_2 k_{2}} \dots 
+\frac{1}{N} \sum_{k_d=0}^{N-1} W^{-l_d k_d } \hat{x}_{k_1,\ldots,k_d} 
+\right) \right)\, .
+\end{equation*}
+Similarly to one dimensional case, fast discrete Fourier transforms can be defined to 
+evaluate the transform and its inverse in $\mathcal{O}(N^d\log N)$ operations. 
 
 \subsection{Properties of the DFT}
 
@@ -697,11 +720,7 @@ We can see that definition of the inverse will give back the original sequence. 
  &= \frac{1}{N} \sum_{j=0}^{N-1}  x_j (\sum_{k=0}^{N-1} W^{(j-l)k}) \\
  &= N \frac{1}{N} x_l = x_l
 \end{align*}
-where the last step used that if $l \not = j$ then $\sum_{k=0}^{N-1} W^{(j-l)k} = 0$ and for $l=j$ we have that $\sum_{k=0}^{N-1} W^{(j-l)k} = \sum_{k=0}^{N-1} 1 = N$. Thus the definition given above returns the original sequence. To see this:
-\begin{align*}
-\calF[z]_k &= \sum_{l=0}^{N-1} W^{kn} \sum_{n=0}^{N-1} x_{n}y_{l-n} \\
-&= \sum_{n=0}^{N-1} x_{n} ( \sum_{l=0}^{N-1} W^{kn}y_{l-n})
-\end{align*}
+where the last step used that if $l \not = j$ then $\sum_{k=0}^{N-1} W^{(j-l)k} = 0$ and for $l=j$ we have that $\sum_{k=0}^{N-1} W^{(j-l)k} = \sum_{k=0}^{N-1} 1 = N$. Thus the definition given above returns the original sequence.
 
 The DFT is linear. That is, if we have two complex sequences $\{x_n\}_{n=0}^{N-1}$ and $\{y_n\}_{n=0}^{N-1}$, then 
 \begin{equation}
@@ -755,7 +774,7 @@ where we used the shift property (\ref{eq:shift_prop}) of the DFT, e.g. $\sum_{l
 After calculating $\calF[z]_k$ using (\ref{eq:dft_circ_conv}), the sequence $\{z_n\}_{n=0}^{N-1}$ can be retrieved via application of the inverse DFT, (\ref{eq:idft_1d}), e.g. $\calF^{-1}[\calF[z]]_n = z_n$. 
 
 
-The convolution theorem seemingly gives no computational gain. Straightforward computation of the DFT and inverse DFT will take $O(N^2)$ complex operations. Computation of (\ref{eq:cirlconv}) also takes $O(N^2)$ operations without needing to perform any complex multiplications if both $\{x_n\}$ and $\{y_n\}$ are real. However, the complexity of calculating (\ref{eq:dft_1d}) can be reduced by an algorithm known as the Fast Fourier Transform (FFT) which can calculate both the forward and inverse DFT in $O(N \log N)$ operations.
+The convolution theorem seemingly gives no computational gain. Straightforward computation of the DFT and inverse DFT will take $\mathcal{O}(N^2)$ complex operations. Computation of (\ref{eq:cirlconv}) also takes $\mathcal{O}(N^2)$ operations without needing to perform any complex multiplications if both $\{x_n\}$ and $\{y_n\}$ are real. However, the complexity of calculating (\ref{eq:dft_1d}) can be reduced by an algorithm known as the Fast Fourier Transform (FFT) which can calculate both the forward and inverse DFT in $\mathcal{O}(N \log N)$ operations.
 
 \section{Circular Convolution as Linear Convolution}
 \subsection{Linear Convolutions and Circular Convolutions}
@@ -765,7 +784,7 @@ Formally, (\ref{eq:I_dist}) is a linear convolution. However, this section will 
 
 \subsection{Linear Convolution of Two Finite-Length sequences}
 \label{sec:lin_conv_fin_seq}
-For the sake of ease of notation for later discussions, we introduce a linear convolution for infinite sequences. 
+For ease of notation for later discussions, we introduce a linear convolution for infinite sequences. 
 \begin{definition}
 Let $\{x_n\}_{n=-\infty}^{\infty}$, $\{y_n\}_{n=-\infty}^{\infty} \subset \mathbb{C}$ be sequences of (possibly complex) numbers. Then a linear convolution is defined as 
 \begin{equation}
@@ -828,7 +847,7 @@ Suppose we attempt to calculate $\calF[z]_k$ by using the convolution theorem, i
 \label{eq:aliasing}
 \calF[z]_k^* = \calF[x]_k \calF[y]_k \, . 
 \end{equation}
-Then we can expect that in general $\calF^{-1}[\calF[z]^*]_l \not = z_l$. We refer to this as \textit{aliasing error}. This occurs because by trying to calculate the linear convolution using the covolution theorem, we are implicitly using a circular convolution in (\ref{eq:aliasing}). As discussed in Section~\ref{sec:lin_circ_eq}, taking an $L$-point DFT is insufficient to capture the correct values for $z_l$. 
+Then we can expect that in general $\calF^{-1}[\calF[z]^*]_l \not = z_l$. We refer to this as \textit{aliasing error}. By trying to calculate the linear convolution using the covolution theorem, we are implicitly using a circular convolution in (\ref{eq:aliasing}). As discussed in Section~\ref{sec:lin_circ_eq}, taking an $L$-point DFT is insufficient to capture the correct values for $z_l$. 
 
 \section{The One-Dimensional Fast Fourier Transform}
 The Fast-Fourier Transform (FFT) is an algorithm that reduces the complexity of calculating the DFT. As can be seen from the definition of the DFT, (\ref{eq:dft_1d}), calculating the DFT of an $N$-point sequence takes $\mathcal{O}(N^2)$ operations. However, the FFT reduces the algorithmic complexity of the DFT to $\mathcal{O}(N \log N)$. This is a significant increase. In addition, due to the convolution theorem (\ref{eq:dft_circ_conv}), we can now calculate circular convolutions in $\mathcal{O}(N \log N)$ as opposed to $\mathcal{O}(N^2)$ operations.
@@ -940,7 +959,7 @@ By similar argument as before, we fix and drop indices $j_v$, $j_v'$, $j_v''$, $
 \hat{I}_{j_u} &= \sum_{j_u''=0}^{M-1} \sum_{j_u'=0}^{M-1} f_{j'_{u}-j_{u}} f_{j''_{u}-j_{u},} A_{j'_{u},j''_u}  \\
 \calF[\hat{I}]_{k_u} &= \sum_{j_u=0}^{M-1} \sum_{j_u''=0}^{M-1} \sum_{j_u'=0}^{M-1} W^{k_u j_u} f_{j'_{u}-j_{u}} f_{j''_{u}-j_{u},} A_{j'_{u},j''_u}\, . \label{FI_onedim_u}
 \end{align}
-We note that evaluating $\calF[\hat{I}]_{k_u}$ directly would require $O(M^3)$ operations.
+We note that evaluating $\calF[\hat{I}]_{k_u}$ directly would require $\mathcal{O}(M^3)$ operations.
 However, taking into consideration the discussion in the last section, expression in the right side of (\ref{I_onedim_u}) can be considered as a circular convolution, having a form similar to (\ref{eq:cirlconv}). This motivates us to explore properties of the DFT and rewrite (\ref{FI_onedim_u}) in a form suitable for numerical computation. This is accomplished in the following lemma.
 
 \begin{lemma}
@@ -1035,9 +1054,9 @@ The terms in the parentheses in (\ref{grouped}) are just the definitions of the 
 \end{align*}
 \end{proof}
 
-Lemma~\ref{lemma_dft} allows us to compute (\ref{FI_onedim_u}) in $O(M^2)$ operations. Indeed, it takes 
-$O(M \log M)$ operations to compute $\calF^{-1}[f]_{k_{u}}$ using a fast Fourier transform and it takes 
-$O(M^2)$ operations to compute discrete convolution in the frequency space (\ref{onedfconv}). To extend this result to $\calF[I]_{k_{u},k_{v},k_{w}}$, it is sufficient to repeat the approach for indices $j_{v}$ and $j_{w}$ focusing on one dimension at a time. The following theorem summarizes the result. 
+Lemma~\ref{lemma_dft} allows us to compute (\ref{FI_onedim_u}) in $\mathcal{O}(M^2)$ operations. Indeed, it takes 
+$\mathcal{O}(M \log M)$ operations to compute $\calF^{-1}[f]_{k_{u}}$ using a fast Fourier transform and it takes 
+$\mathcal{O}(M^2)$ operations to compute discrete convolution in the frequency space (\ref{onedfconv}). To extend this result to $\calF[I]_{k_{u},k_{v},k_{w}}$, it is sufficient to repeat the approach for indices $j_{v}$ and $j_{w}$ focusing on one dimension at a time. The following theorem summarizes the result. 
 
 \begin{theorem}
 \label{thm3.1}
@@ -1088,38 +1107,38 @@ Performing the discrete Fourier transform in the $j_w$ and repeating the argumen
 \label{sec:algorithm}
 
 Theorem~\ref{thm3.1} allows us to calculate the collision operator 
-(\ref{eq:I_dist}) in $O(s^3 M^6)$ operations using the algorithm outlined below. 
+(\ref{eq:I_dist}) in $\mathcal{O}(s^9 M^6)$ operations using the algorithm outlined below. 
 We note that $\calF[A_{i,i',i''}]_{k_{u},k_{v},k_{w},l_{u},l_{w},l_{w}}$ 
 can be precomputed and therefore does not factor into the algorithmic complexity analysis. 
 \begin{enumerate}
-	\item The first step of the algorithm is to evaluate $\calF^{-1}[f_i]_{k_u,k_v,k_w}$. Evaluation of the inverse Fourier transform requires $O(M^3 \log M)$ operations for each value of index $i$ by utilizing three-dimensional FFT. This must be repeated for each $i$, resulting in the total of $O(s^3 M^3 \log M)$ operations where $s^3$ is the number of velocity nodes in each velocity cell.
+	\item The first step of the algorithm is to evaluate $\calF^{-1}[f_i]_{k_u,k_v,k_w}$. Evaluation of the inverse Fourier transform requires $\mathcal{O}(M^3 \log M)$ operations for each value of index $i$ by utilizing three-dimensional FFT. This must be repeated for each $i$, resulting in the total of $\mathcal{O}(s^9 M^3 \log M)$ operations where $s^3$ is the number of velocity nodes in each velocity cell.
     \item Next we directly compute the convolution
-	\begin{equation*}
-		\calF [I_{i,i',i''}]_{k_{u},k_{v},k_{w}} = M^3 \sum_{l_{u},l_{v},l_{w}=0}^{M-1} \calF^{-1}[f_{i'}]_{k_{u}-l_{u},k_{v}-l_{v},k_{w}-l_{w}} \calF^{-1}[f_{i''}]_{l_{u},l_{v},l_{w}} \calF[A_{i,i',i''}]_{k_{u}-l_{u},k_{v}-l_{v},k_{w}-l_{w},l_{u},l_{w},l_{w}}\, 
-	\end{equation*}
+	\begin{align*}
+		\calF [I_{i,i',i''}]_{k_{u},k_{v},k_{w}} &= \\ M^3 \sum_{l_{u},l_{v},l_{w}=0}^{M-1}& \calF^{-1}[f_{i'}]_{k_{u}-l_{u},k_{v}-l_{v},k_{w}-l_{w}} \calF^{-1}[f_{i''}]_{l_{u},l_{v},l_{w}} \calF[A_{i,i',i''}]_{k_{u}-l_{u},k_{v}-l_{v},k_{w}-l_{w},l_{u},l_{w},l_{w}}\, 
+	\end{align*}
 	using periodicity of both $\calF^{-1}[f_{i}]_{l_{u},l_{v},l_{w}}$ 
 	and $\calF[A_{i,i',i''}]_{k_{u},k_{v},k_{w},l_{u},l_{w},l_{w}}$. 
 	
     For fixed values of indices $i$, $i'$, $i''$ and $k_u$, $k_v$, $k_w$, calculating 
-    $\calF [I_{i,i',i''}]_{k_{u},k_{v},k_{w}}$ requires $O(M^3)$ arithmetic operations. 
-    There are $M^3$ combinations of $k_u,k_v,k_w$ and $s^3$ combinations of indices  $i$, $i'$, and $i''$, therefore complexity of this step is $O(s^3 M^6)$.
+    $\calF [I_{i,i',i''}]_{k_{u},k_{v},k_{w}}$ requires $\mathcal{O}(M^3)$ arithmetic operations. 
+    There are $M^3$ combinations of $k_u,k_v,k_w$ and $s^9$ combinations of indices  $i$, $i'$, and $i''$, therefore complexity of this step is $\mathcal{O}(s^9 M^6)$.
 
     \item Linearity of the Fourier transform allows us to sum $\calF[I_{i,i',i''}]_{k_u,k_v,k_w}$ along $i'$, $i''$ to calculate $\calF[I_i]_{k_u,k_v,k_w}$. 
     \begin{align*}
     \calF[I_{i}]_{k_{u},k_{v},k_{w}}
 = \sum_{i',i''=1}^s \calF[I_{i,i',i''}]_{k_{u},k_{v},k_{w}}\, . 
     \end{align*}
-    This step requires adding $s^2$ sequences of length $M^3$ for every value of $i$, resulting in a complexity of $O(s^3 M^3)$ operations. 
+    This step requires adding $s^6$ sequences of length $M^3$ for every value of $i$, resulting in a complexity of $\mathcal{O}(s^9 M^3)$ operations. 
     \item We recover $\calF^{-1}[\calF[I_{i}]]_{j_u,j_v,j_w}=I_{i;j_u,j_v,j_w}'$.
-    This requires calculating the three-dimensional inverse DFT for every $i$ which gives a complexity of $O(s M^3 \log M)$.
+    This requires calculating the three-dimensional inverse DFT for every $i$ which gives a complexity of $\mathcal{O}(s M^3 \log M)$.
 \end{enumerate}
 
-Overall, the algorithm has the numerical complexity of $O(s^3 M^6)$ dominated by step 2. 
+Overall, the algorithm has the numerical complexity of $\mathcal{O}(s^9 M^6)$ dominated by step 2. 
 We note that $s=s_{u}s_{v}s_{w}$ is usually kept fixed and the number of cells 
 $M^3$ in velocity domain is changing. In this case, the main contribution to 
 complexity growth comes from $M$, the number of velocity cells in one velocity dimension. Thus 
 we can consider the algorithm to be of 
-complexity $O(M^6)$. In our simulations, we kept $s_u,s_v,s_w \leq 3$, however higher values 
+complexity $\mathcal{O}(M^6)$. In our simulations, we kept $s_u,s_v,s_w \leq 3$, however higher values 
 may be used too, at least theoretically. The results of this analysis are validated 
 within the next chapter.
 
@@ -1128,7 +1147,7 @@ In the implementation of the algorithm, we use the tensor product ordering for $
 \begin{equation*}
 j_u = (j_u'-j_{u;c} \mod M)\, ,\ j_v = (j_v'-j_{v;c} \mod M)\, ,\ j_w = (j_w'-j_{w;c} \mod M)\, ,
 \end{equation*}
-where $j_u{u;c}$ is canonical node, $j_u'$ is the old index in $I_{i;j_u,j_v,j_w}$, and the $\mod$ operation always returns the positive remainder. To be explicit, the algorithm below
+where $j_{u;c}$ is canonical node, $j_u'$ is the old index in $I_{i;j_u,j_v,j_w}$, and the mod operation always returns the positive remainder. The final algorithm is given below.
 
 {\singlespacing
 \begin{algorithm}[H]
@@ -1164,20 +1183,20 @@ where $j_u{u;c}$ is canonical node, $j_u'$ is the old index in $I_{i;j_u,j_v,j_w
 \section{Periodic Continuation of $f$ and $A$}
 \label{sec:periodic_cont}
 Theorem~\ref{thm3.1} required that we take both a periodic continuation of $f$ and $A$ in order to calculate $\calF[i]$. 
-However, this assumption does not make \textit{physical} sense as it would imply there was infinite energy within the system.
+However, this assumption does not make physical sense as it would imply there was infinite energy within the system.
 This means that we must periodically extend $f(t, \vecx, \vecv)$ outside the domain in the $\vecv$ direction and $A(\vecv, \vecv_1; \phi_{i;c})$ in both $\vecv$ and $\vecv_1$. 
 However, this assumption causes overlap when calculating the circular convolutions. Since $f_{j} > 0$, we expect that circular and linear convolutions to give different results. For example, when calculating (\ref{eq:I_dist}), we can no longer set $f_j =0 $ when $j \leq 0$ or $j > M$. 
 We assume that the velocity domain is sufficiently large so that the support of both $f$ and $A$ are limited to half of the domain. This would be equivalent to zero-padding the sequence.
- The discussion in Section~\ref{sec:lin_circ_eq} demonstrated that it is possible to zero-pad the sequences in order restore equivalence between the circular and linear convolutions. We can zero-pad (\ref{eq:I_dist}) which requires zero-padding to length $2N-2$ in each dimension. This requires storing $(N-1)^6$ zeroes for $A_{j',j''}$. This causes the memory requirements to grow rapidly, so this approach can be used, but it must be used with caution or memory requirements will be exceeded.
+ The discussion in Section~\ref{sec:lin_circ_eq} demonstrated that it is possible to zero-pad the sequences in order restore equivalence between the circular and linear convolutions. We can zero-pad (\ref{eq:I_dist}) which requires zero-padding to length $2M-2$ in each dimension. This requires storing $(M-1)^6$ zeroes for $A_{j',j''}$. This causes the memory requirements to grow rapidly, so this approach can be used, but it must be used with caution or memory requirements will be exceeded.
 
 
-However, for most calculations, we take a different approach. The effects of periodic extension and truncation of $f(t,\vecx,\vecv)$ on the collision operator were considered in \cite{PareschiRusso2000}. However, the effects of periodic continuation and truncation of $A(\vecv, \vecv_1; \phi_{i;c})$ are much less understood. We can see from (\ref{eq:A_definition}) that the kernle is growing linearly towards infinty in the direction of $\vecv - \vecv_1$ for at least some points of $\vecv$. A truncation of kernel $A(\vecv, \vecv_1; \phi_{i;c})$ was used in \cite{AlekseenkoJosyula2012a} in which entries of $A(\vecv, \vecv_1; \phi_{i;c})$ were set equal to zero if $\|\vecv - \vecv_1\| < R$ for some $R>0$. Numerical simulations in \cite{AlekseenkoJosyula2012a} confirmed that the effects of truncation are negligible if the support of the solution can be enclosed in a ball of diameter $R$.
+However, for most calculations, we take a different approach. The effects of periodic extension and truncation of $f(t,\vecx,\vecv)$ on the collision operator were considered in \cite{PareschiRusso2000}. However, the effects of periodic continuation and truncation of $A(\vecv, \vecv_1; \phi_{i;c})$ are much less understood. We can see from (\ref{eq:A_definition}) that the kernel is growing linearly towards infinty in the direction of $\vecv - \vecv_1$ for at least some points of $\vecv$. A truncation of kernel $A(\vecv, \vecv_1; \phi_{i;c})$ was used in \cite{AlekseenkoJosyula2012a} in which entries of $A(\vecv, \vecv_1; \phi_{i;c})$ were set equal to zero if $\|\vecv - \vecv_1\| < R$ for some $R>0$. Numerical simulations in \cite{AlekseenkoJosyula2012a} confirmed that the effects of truncation are negligible if the support of the solution can be enclosed in a ball of diameter $R$.
 Numerical simulations will demonstrate that the direct convolution in (\ref{eq:I_dist})  can be treated as a circular convolution so long as the support of the solution is sufficiently small.
 
 In addition, certain properties of $f$ lend themselves to more accurate calculations. 
 Typically, in the boundaries of the discretization of $f$, the values of $f$ are close to zero in the sense that the values are typically a few orders of magnitude smaller than the bulk-velocity since the shape due to nature of the distribution of gasses. In essence, the closer to Maxwellian the distribution is, the more the tails of the distribution diminish. This allows us to take the circular convolution while adding minimal error.
 
-Using this idea, we can still achieve good accuracy while using minimal zero-padding. We sometimes need only to pad by a small number of zeroes (generally $\leq 4$) to lose any effects of aliasing. This is shown in later numerical results.
+Using this idea, we can still achieve good accuracy while using minimal zero-padding. We need only to pad by a small number of zeroes (generally $\leq 4$) to lose any effects of aliasing. This is shown in later numerical results.
 
 
 % \section{Alternative Formulation Involving $A^+$ Discretization}
@@ -1189,14 +1208,14 @@ This chapter will cover the numerical results of computing the collision operato
 \section{Reduction in Computational Complexity}
 
 This section will cover estimating the numerical complexity of the method. 
-The analysis in Section~\ref{sec:algorithm} suggested that the algorithm had a total number of operations of $O(M^6)$ where $M$ is the number of velocity cells in one velocity dimension. 
-As discussed in \cite{AlekseenkoJosyula2012a}, the direction evaluation of convolution (\ref{eq:I_dist}) requires $O(M^8)$ operations. Thus we expect the FFT evaluation of (\ref{eq:I_dist}) to take much less time than the method discussed in \cite{AlekseenkoJosyula2012a}.
+The analysis in Section~\ref{sec:algorithm} suggested that the algorithm had a total number of operations of $\mathcal{O}(M^6)$ where $M$ is the number of velocity cells in one velocity dimension. 
+As discussed in \cite{AlekseenkoJosyula2012a}, the direction evaluation of convolution (\ref{eq:I_dist}) requires $\mathcal{O}(M^8)$ operations. Thus we expect the FFT evaluation of (\ref{eq:I_dist}) to take much less time than the method discussed in \cite{AlekseenkoJosyula2012a}.
 
 The results in Table~\ref{tab:01} display the CPU times for evaluating the collision operator at one spatial point using both the FFT and direct evaluations. 
 The computations were done on a Intel Core i7-3770 3.4 GHz processor. 
 The code was compiled using the Intel Fortran Compilers along with Intel Math Kernal Library.
 The number of cells in the velocity domain were varied from 9 to 27. $s=1$ in each run. 
-The computational complexity was modeled using $t=O(M^\alpha)$ where $\alpha$ is a constant. 
+The computational complexity was modeled using $t=\mathcal{O}(M^\alpha)$ where $\alpha$ is a constant. 
 The estimated values of $\alpha$ were calculated as $\hat{\alpha}=\ln(M_{1}/M_{2})/\ln(t_{1}/t_{2})$. 
 
 Note that in the case of the Fourier evaluation, the observed orders are significantly 
@@ -1339,7 +1358,7 @@ violations of conservation laws. At the same time, increasing
 the number of velocity cells may not remedy the problem 
 due to the expected accumulation of roundoff 
 errors. Indeed, evaluation of the gain term in (\ref{eq:I_split}) requires 
-$O(M^8)$ arithmetic operations. 
+$\mathcal{O}(M^8)$ arithmetic operations. 
 It is possible that combination of large and small values in the finite 
 precision arithmetic results in loss of low order digits and a significant 
 accumulation of roundoff. When the gain and loss terms are combined, 
@@ -1423,7 +1442,7 @@ are in excellent agreement for both presented solutions. However, there are
 differences in the higher moments. It appears that the differences are caused 
 by a small amount of the aliasing error in the solutions. This can be reduced 
 by padding the solution and the kernel with zeros at the expense of higher numerical 
-costs, both in time and memory. Overall, however, the $O(M^6)$ evaluation of 
+costs, both in time and memory. Overall, however, the $\mathcal{O}(M^6)$ evaluation of 
 the collision operator using the Fourier transform appears to be consistent 
 and stable. 
 
